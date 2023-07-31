@@ -26,6 +26,13 @@ behaviour. Details are in the comments in the file.
 You will need to install cocotb, you can find the install guide here:
 https://docs.cocotb.org/en/stable/install.html
 
+Additionally you'll need the dependcies listed in 'python-requirements.txt'
+which can be installed with pip:
+
+> pip install --user -r python-requirements.txt
+
+(These requirements are needed for both the client and server)
+
 Verilator is used as the simulator. Pre-built binary packages are often out of
 date and a recent (v5 onwards) version of verilator is required so it is
 recommened you build the latest stable tag (v5.012 at time of writing) from
@@ -39,13 +46,23 @@ for it at all.
 
 # Running the simulation
 
-The simulation is driven through a Makefile. It defines a few variables and then
-includes a makefile from cocotb which actually runs everything. Simply run
-'make' to run the testbench.
+A client/server model is used where the server runs the simulation and the
+cocotb testbench and the client provides stimulus. For every new piece of
+stimulus sent from the client the server responds with the latest coverage
+following the stimulus being used.
+
+The client is a stand-alone python program. Note that the client and server do
+not have to run in the same python environment.
+
+The simulation server is driven through a Makefile. It defines a few variables
+and then includes a makefile from cocotb which actually runs everything. Simply
+run 'make' to build the testbench and start the server. When the 'running
+basic_test' message is seen run the client in a new shell on the same machine
+('./generate_stimulus.py')
 
 If everything works after a short while you will see a report from cocotb
-indicating a test pass. Before that information you will see a dump of the
-coverage information. This final few lines should look like this:
+indicating a test pass from the server. Before that information you will see a
+dump of the coverage information. This final few lines should look like this:
 
 15 1 0
 15 2 0
@@ -90,31 +107,30 @@ The aim here is to find stimulus to cover all of the coverage bins. Doing this
 manually is a fairly trivial task but we are interested in AI technqiues to
 achieve it.
 
-The provided testbench has a very basic coverage directed stimulus generation
-mechanism which doesn't employ AI. It generates values with a single stride. It
-waits til it's seen a coverage bin indicating that single stride has been seen
-and then moves on to generating values with another stride until we've seen all
-single strides from 1 to 15.
+The provided 'generate_stimulus.py'has a very basic coverage directed stimulus
+generation mechanism which doesn't employ AI. It generates values with a single
+stride. It waits til it's seen a coverage bin indicating that single stride has
+been seen and then moves on to generating values with another stride until we've
+seen all single strides from 1 to 15.
 
 # Notes
 
 Verilog scheduling semantics are complex and it's easy to sample and drive
 values at the wrong point producing race conditions and undefined/strange
-behaviour. The testbench has been constructed to deal with this provided you
-work within the inner loop of `determine_next_value` and only looking at the
-observed coverage from the coverage monitor and updating the 'new_value' member
-of the StimulusProducer to control the stimulus.
+behaviour. The testbench server has been constructed to deal with this so
+ideally avoid modifying it.
 
-Modifications outside of this are certainly reasonable (and may be required!)
-but care must be taken when you're dealing with the DUT directly (that is
-reading or writing any of the signals available under the 'dut' value that
-`basic_test` gets as an argument). You may want to discuss what you want to do
-first so we can look at possible race conditions and how to deal with them.
+If modifications are required care must be taken when you're dealing with the
+DUT directly (that is reading or writing any of the signals available under the
+'dut' value that `basic_test` gets as an argument).  You may want to discuss
+what you want to do first so we can look at possible race conditions and how to
+deal with them.
 
-Coverage is available from the coverage monitor by reading the bins directly but
-for ML purposes a `get_coverage_vector` method is provided. This takes the
-structured coverage and flattens it into a single list of integers. Not useful
-for human analysis but useful for driving a training/evaluation process.
+Coverage is provided via a 'CoverageDatabase' object defined in
+'shared_types.py'. You can read the bins directly but for ML purposes a
+`get_coverage_vector` method is provided. This takes the structured coverage and
+flattens it into a single list of integers. Not useful for human analysis but
+useful for driving a training/evaluation process.
 
 A `get_coverage_bool_vector` is also provided. This just turns the integers from
 `get_coverage_vector` into either 0 or 1 depending on whether the coverage bin
