@@ -66,7 +66,7 @@ class CLIAgent(BaseAgent):
         self.stimuli = list(map(int, self.stimuli[1:-1].split(',')))
 
     def end_simulation(self, coverage_database):
-        return self.i >= len(self.stimuli)
+        return self.i > len(self.stimuli)
 
     def reset(self):
         self.i = 0
