@@ -35,9 +35,7 @@ def main():
 
     with closing(StimulusSender("tcp://localhost:5555")) as stimulus_sender:
         while True:
-            print("Sender:", stimulus.value)
             coverage = stimulus_sender.send_stimulus(stimulus)
-            print("Sender: agent.i:", agent.i)
             if agent.end_simulation(coverage):
                 break
             stimulus.value = agent.generate_next_value(coverage)
