@@ -5,6 +5,8 @@ import pickle
 from contextlib import closing
 
 from shared_types import *
+from agents_for_stride_detector import *
+
 
 class StimulusSender:
     def __init__(self, zmq_addr):
@@ -25,22 +27,22 @@ class StimulusSender:
         if self.socket:
             self.socket.close()
 
+
 def main():
-    current_stride = 1
-    stimulus = Stimulus(value = 0, finish = False)
+    agent = CLIAgent()
+    coverage = None
+    stimulus = Stimulus(value=agent.generate_next_value(coverage), finish=False)
 
     with closing(StimulusSender("tcp://localhost:5555")) as stimulus_sender:
-        while current_stride <= STRIDE_MAX:
+        while not agent.end_simulation(coverage):
             coverage = stimulus_sender.send_stimulus(stimulus)
 
-            if coverage.stride_1_seen[current_stride] > 16:
-                current_stride += 1
-
-            stimulus.value += current_stride
+            stimulus.value = agent.generate_next_value(coverage)
 
         stimulus.value = None
         stimulus.finish = True
         stimulus_sender.send_stimulus(stimulus)
+
 
 if __name__ == "__main__":
     main()
