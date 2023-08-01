@@ -33,7 +33,7 @@ def main():
     coverage = None
     stimulus = Stimulus(value=agent.generate_next_value(coverage), finish=False)
 
-    with closing(StimulusSender("tcp://128.232.69.28:5555")) as stimulus_sender:
+    with closing(StimulusSender("tcp://localhost:5555")) as stimulus_sender:
         while not agent.end_simulation(coverage):
             coverage = stimulus_sender.send_stimulus(stimulus)
 
