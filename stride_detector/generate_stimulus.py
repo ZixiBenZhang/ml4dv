@@ -37,7 +37,7 @@ def main():
         while not agent.end_simulation(coverage):
             print("Sender:", stimulus.value)
             coverage = stimulus_sender.send_stimulus(stimulus)
-            print("Sender: coverage is None:", coverage is None)
+            print("Sender: agent.i:", agent.i)
 
             stimulus.value = agent.generate_next_value(coverage)
 
