@@ -76,6 +76,7 @@ class CoverageMonitor:
     def sample_coverage(self):
         if self.signals['valid'].value:
             self.last_values.append(int(self.signals['value'].value))
+            print(self.last_values[-1])
 
             if len(self.last_values) > 16:
                 self.last_values = self.last_values[-16:]
