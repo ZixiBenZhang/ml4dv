@@ -228,7 +228,7 @@ async def basic_test(dut):
     cocotb.start_soon(Clock(dut.clk_i, 10, units="ns").start())
     await do_reset(dut)
 
-    with closing(SimulationController(dut, coverage_monitor, "tcp://*:22")) as simulation_controller:
+    with closing(SimulationController(dut, coverage_monitor, "tcp://*:5555")) as simulation_controller:
         simulation_controller.run_controller()
 
         # Wait for end of simulation to be signalled. Give the design a few more
