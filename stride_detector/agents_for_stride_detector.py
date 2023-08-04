@@ -1,4 +1,4 @@
-from agents import *
+from agents_for_dv import *
 from stimuli_extractor import *
 
 
@@ -201,7 +201,7 @@ class Llama2Agent4SD(LLMAgent4SD):
 
     def reset(self):
         self.state = 'INIT'
-        self.stimuli_buffer = []
+        self.stimuli_buffer.clear()
         self.stimulus_cnt = 0
         self.conversations = [[]]
 

@@ -1,7 +1,10 @@
 import random
 from abc import abstractmethod
+from pprint import pprint
+
 from shared_types import CoverageDatabase
 from typing import Union
+from stimuli_extractor import *
 
 
 def get_coverage_plan(coverage_database: CoverageDatabase):
@@ -28,15 +31,15 @@ def get_coverage_plan(coverage_database: CoverageDatabase):
 class BaseAgent:
     @abstractmethod
     def reset(self):
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def end_simulation(self, coverage_database: Union[None, CoverageDatabase]):
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def generate_next_value(self, coverage_database: Union[None, CoverageDatabase]):
-        pass
+        raise NotImplementedError
 
 
 class RandomAgent(BaseAgent):
@@ -76,6 +79,38 @@ class CLIAgent(BaseAgent):
         return self.stimuli[self.i - 1]
 
 
+class CLIStringDialogAgent(BaseAgent):
+    def __init__(self):
+        super().__init__()
+        self.extractor = DumbExtractor()
+        self.i = 0
+        self.stimuli = []
+        self.done = False
+
+    def end_simulation(self, coverage_database):
+        if self.i >= len(self.stimuli):
+            pprint(get_coverage_plan(coverage_database))
+            response = input('Please enter stimuli list:\n')
+            if response == '--exit':
+                self.done = True
+            responses = response
+            while not response == '--end':
+                response = input('vvv Please enter LLM response vvv\n')
+                responses += response
+            self.stimuli += self.extractor(responses)
+        return self.done
+
+    def reset(self):
+        self.i = 0
+        self.stimuli.clear()
+
+    def generate_next_value(self, coverage_database):
+
+
+        self.i += 1
+        return self.stimuli[self.i - 1]
+
+
 class LLMAgent(BaseAgent):
     def __init__(self):
         super().__init__()
@@ -105,23 +140,23 @@ class LLMAgent(BaseAgent):
 
     @abstractmethod
     def _load_dut_code(self) -> str:
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def _load_bins_description(self) -> str:
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def _generate_init_question(self) -> str:
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def _generate_coverage_difference_prompts(self) -> dict:
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def _generate_iter_question(self) -> str:
-        pass
+        raise NotImplementedError
 
     def reset(self):
         self.state = 'INIT'
@@ -154,7 +189,7 @@ class LLMAgent(BaseAgent):
 
     @abstractmethod
     def _query_to_LLM(self, prompt) -> str:
-        pass
+        raise NotImplementedError
 
     def generate_next_value(self, coverage_database: Union[None, CoverageDatabase]):
         if len(self.stimuli_buffer):
@@ -171,7 +206,7 @@ class LLMAgent(BaseAgent):
 
         response = self._query_to_LLM(prompt)
 
-        stimuli = self.extractor.extract(response)
+        stimuli = self.extractor(response)
         self.stimuli_buffer.extend(stimuli)
 
         return self._get_next_value_from_buffer()
