@@ -102,7 +102,7 @@ class CLIStringDialogAgent(BaseAgent):
 
     def end_simulation(self, coverage_database):
         if self.i >= len(self.stimuli):
-            pprint(get_coverage_plan(coverage_database))
+            coverage_database.output_coverage()
             self._request_input()
         return self.done
 
