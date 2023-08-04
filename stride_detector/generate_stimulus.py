@@ -29,7 +29,7 @@ class StimulusSender:
 
 
 def main():
-    agent = CLIAgent()
+    agent = CLIStringDialogAgent()
     coverage = None
     stimulus = Stimulus(value=agent.generate_next_value(coverage), finish=False)
 
