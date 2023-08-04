@@ -88,15 +88,15 @@ class CLIStringDialogAgent(BaseAgent):
         self.done = False
 
     def _request_input(self):
-        response = input('Please enter stimuli list:\n')
+        response = input('vvv Please enter LLM response vvv\n')
         if response == '--exit':
             self.done = True
             return
         responses = response
         while not response == '--end':
-            response = input('vvv Please enter LLM response vvv\n')
+            response = input()
             responses += response
-        self.stimuli += self.extractor(responses)
+        self.stimuli.extend(self.extractor(responses))
         self.done = False
         return
 
