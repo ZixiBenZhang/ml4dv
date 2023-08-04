@@ -85,28 +85,25 @@ class CLIStringDialogAgent(BaseAgent):
         self.extractor = DumbExtractor()
         self.i = 0
         self.stimuli = []
-        self.done = False
 
     def end_simulation(self, coverage_database):
         if self.i >= len(self.stimuli):
             pprint(get_coverage_plan(coverage_database))
             response = input('Please enter stimuli list:\n')
             if response == '--exit':
-                self.done = True
+                return True
             responses = response
             while not response == '--end':
                 response = input('vvv Please enter LLM response vvv\n')
                 responses += response
             self.stimuli += self.extractor(responses)
-        return self.done
+        return False
 
     def reset(self):
         self.i = 0
         self.stimuli.clear()
 
     def generate_next_value(self, coverage_database):
-
-
         self.i += 1
         return self.stimuli[self.i - 1]
 
