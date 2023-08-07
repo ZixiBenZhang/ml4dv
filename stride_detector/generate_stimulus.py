@@ -41,16 +41,19 @@ class StimulusSender:
 def main():
     prompt_generator = FixedPromptGenerator4SD1()
     stimulus_generator = Llama2()
+    print('Llama2 successfully built')
     extractor = DumbExtractor()
     agent = LLMAgent(prompt_generator, stimulus_generator, extractor)
+    print('Agent successfully built')
 
     stimulus = Stimulus(value=0, finish=False)
     coverage = None
 
     with closing(StimulusSender("tcp://128.232.65.218:5555")) as stimulus_sender:
         while agent.end_simulation(coverage):
+            print(f'Sending stimulus from dialog #{agent.dialog_index}')
             coverage = stimulus_sender.send_stimulus(stimulus)
-
+            print('Generating next stimulus')
             stimulus.value = agent.generate_next_value(coverage)
 
         stimulus.value = None
