@@ -153,6 +153,7 @@ class LLMAgent(BaseAgent):
         # {role: coverage, content: [coverage_plan]}
         self.log: List[List[Dict[str, Union[str, dict]]]] = [[]]
         self.logged_index = 0
+        self.dialog_index = 0
         self.log[-1].append({'role': 'info',
                              'content': {'Prompter': type(self.prompt_generator).__name__,
                                          'Generator': str(self.stimulus_generator),
@@ -208,6 +209,9 @@ class LLMAgent(BaseAgent):
                     f.write(f'Coverage plan: {coverage_plan}\n\n')
 
                 else:
+                    f.write(f'Index: {self.dialog_index}\n')
+                    if rec['role'] == 'assistant':
+                        self.dialog_index += 1
                     f.write(f'Role: {rec["role"]}\n')
                     f.write(f'Content: {rec["content"]}\n\n')
 
@@ -217,7 +221,12 @@ class LLMAgent(BaseAgent):
         if len(self.stimuli_buffer):
             return self._get_next_value_from_buffer()
 
-        self.log[-1].append({'role': 'coverage', 'content': get_coverage_plan(coverage_database)})
+        coverage = get_coverage_plan(coverage_database)
+        self.log[-1].append({'role': 'coverage', 'content': coverage})
+
+        coverage_plan = {k: v for (k, v) in coverage.items() if v > 0}
+        print(f"Dialog #{self.dialog_index} done, hits: {coverage_plan}")
+
         self.save_log()
 
         prompt = ""
