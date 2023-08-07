@@ -2,19 +2,14 @@ from dataclasses import dataclass
 from typing import Optional
 from pprint import pprint
 
-from tabulate import tabulate as tbl
-import numpy as np
-
 NUM_STRIDES = 32
 STRIDE_MIN = -16
 STRIDE_MAX = 15
-
 
 @dataclass
 class Stimulus:
     value: Optional[int]
     finish: bool
-
 
 class CoverageDatabase:
     stride_1_seen: list[int]
@@ -22,20 +17,17 @@ class CoverageDatabase:
     misc_bins: dict[str, int]
 
     def output_coverage(self):
-        print("****************** One Stride Bins *************")
-        cover_single = np.ndarray(shape=(0, 2))
+        print ("****************** One Stride Bins *************")
         for i in range(STRIDE_MIN, STRIDE_MAX + 1):
             if i < 0:
                 stride_offset = NUM_STRIDES + i
             else:
                 stride_offset = i
 
-            # print (i, self.stride_1_seen[stride_offset])
-            cover_single = np.append(cover_single, [[i, self.stride_1_seen[stride_offset]]], 0)
-        print(tbl(np.transpose(cover_single)))
+            print (i, self.stride_1_seen[stride_offset])
 
-        print("****************** Two Stride Bins *************")
-        cover_double = np.ndarray(shape=(0, 3))
+        print ("****************** Two Stride Bins *************")
+
         for i in range(STRIDE_MIN, STRIDE_MAX + 1):
             if i < 0:
                 stride_offset_1 = NUM_STRIDES + i
@@ -53,11 +45,7 @@ class CoverageDatabase:
                 else:
                     stride_offset_2 = j
 
-                # print (i, j, self.stride_2_seen[stride_offset_1][stride_offset_2])
-                cover_double = np.append(cover_double,
-                                         [[i, j, self.stride_2_seen[stride_offset_1][stride_offset_2]]], 0)
-        for i in range(0, len(cover_double), 16):
-            print(tbl(np.transpose(cover_double[i:min(len(cover_double), i + 16)])))
+                print (i, j, self.stride_2_seen[stride_offset_1][stride_offset_2])
 
         pprint(self.misc_bins)
 
@@ -70,7 +58,7 @@ class CoverageDatabase:
         # single strides).
         for i, bins in enumerate(self.stride_2_seen):
             for j, bin_val in enumerate(bins):
-                if i != j:
+                if (i != j):
                     coverage_vector.append(bin_val)
 
         coverage_vector += self.stride_1_seen

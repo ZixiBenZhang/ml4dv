@@ -1,9 +1,6 @@
-from pprint import pprint
-
 import fire as fire
-import numpy
-import numpy as np
 from llama import Llama
+import openai
 
 
 def main(ckpt_dir='llama-2-7b-chat/', max_seq_len=4096, max_gen_len=None):
@@ -52,5 +49,9 @@ def main(ckpt_dir='llama-2-7b-chat/', max_seq_len=4096, max_gen_len=None):
         conversations[-1].append({"role": "assistant", "content": results[-1]['generation']['content']})
 
 
+def testGPT():
+    openai.Model.list()
+
+
 if __name__ == '__main__':
-    fire.Fire(main)
+    fire.Fire(testGPT())

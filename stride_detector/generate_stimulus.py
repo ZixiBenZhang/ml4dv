@@ -3,9 +3,19 @@
 import zmq
 import pickle
 from contextlib import closing
+import sys
+import os
+
+directory = os.path.dirname(os.path.abspath("__file__"))
+sys.path.insert(0, os.path.dirname(directory))
+# print(sys.path)
 
 from shared_types import *
-from agents_for_stride_detector import *
+from agents_for_dv import *
+from prompt_generators.prompt_generator_fixed import *
+from prompt_generators.prompt_generator_template import *
+from models.llm_llama2 import *
+from models.llm_chatgpt import *
 
 
 class StimulusSender:
@@ -29,15 +39,18 @@ class StimulusSender:
 
 
 def main():
-    agent = CLIStringDialogAgent()
+    prompt_generator = FixedPromptGenerator4SD1()
+    stimulus_generator = Llama2()
+    extractor = DumbExtractor()
+    agent = LLMAgent(prompt_generator, stimulus_generator, extractor)
+
+    stimulus = Stimulus(value=0, finish=False)
     coverage = None
-    stimulus = Stimulus(value=agent.generate_next_value(coverage), finish=False)
 
     with closing(StimulusSender("tcp://128.232.65.218:5555")) as stimulus_sender:
-        while True:
+        while agent.end_simulation(coverage):
             coverage = stimulus_sender.send_stimulus(stimulus)
-            if agent.end_simulation(coverage):
-                break
+
             stimulus.value = agent.generate_next_value(coverage)
 
         stimulus.value = None

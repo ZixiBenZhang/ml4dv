@@ -79,7 +79,6 @@ class CoverageMonitor:
 
             if len(self.last_values) > 16:
                 self.last_values = self.last_values[-16:]
-            # print(self.last_values[-1])
 
         if self.signals['stride_1_valid'].value:
             if self.signals['stride_2_valid'].value:

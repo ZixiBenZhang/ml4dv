@@ -1,34 +1,21 @@
 import random
-from abc import abstractmethod
-from pprint import pprint
+from datetime import datetime
 
-from shared_types import CoverageDatabase
-from typing import Union
+from coverage_database_helper import *
+from models.llm_base import BaseLLM
+from prompt_generators.prompt_generator_base import BasePromptGenerator
 from stimuli_extractor import *
 
 
-def get_coverage_plan(coverage_database: CoverageDatabase):
-    coverage_plan = {}
-
-    for i, bin_val in enumerate(coverage_database.stride_1_seen):
-        if i >= 16:
-            i -= 32
-        coverage_plan[f'single_{i}'] = bin_val
-
-    for i, bins in enumerate(coverage_database.stride_2_seen):
-        for j, bin_val in enumerate(bins):
-            if i != j:
-                if i >= 16:
-                    i -= 32
-                if j >= 16:
-                    j -= 32
-                coverage_plan[f'double_{i}_{j}'] = bin_val
-
-    coverage_plan = {**coverage_plan, **coverage_database.misc_bins}
-    return coverage_plan
-
-
 class BaseAgent:
+    def __init__(self, log_path=''):
+        if log_path == '':
+            t = datetime.now()
+            t = t.strftime('%Y%m%d_%H%M%S')
+            self.log_path = f'./logs/{t}.txt'
+        else:
+            self.log_path = log_path
+
     @abstractmethod
     def reset(self):
         raise NotImplementedError
@@ -40,6 +27,33 @@ class BaseAgent:
     @abstractmethod
     def generate_next_value(self, coverage_database: Union[None, CoverageDatabase]):
         raise NotImplementedError
+
+
+class DumbAgent4SD(BaseAgent):
+    def __init__(self):
+        super().__init__()
+        self.current_stride = 1
+        self.new_value = None
+        self.NUM_STRIDES = 32
+        self.STRIDE_MIN = -16
+        self.STRIDE_MAX = 15
+
+    def reset(self):
+        self.new_value = None
+        self.current_stride = 1
+
+    def end_simulation(self, coverage_database: Union[None, CoverageDatabase]):
+        return not self.current_stride <= self.STRIDE_MAX
+
+    def generate_next_value(self, coverage_database: Union[None, CoverageDatabase]):
+        if self.new_value is None:
+            self.new_value = 1
+            return self.new_value
+
+        if coverage_database.stride_1_seen[self.current_stride] > 16:
+            self.current_stride += 1
+
+        return self.new_value + self.current_stride
 
 
 class RandomAgent(BaseAgent):
@@ -80,9 +94,9 @@ class CLIAgent(BaseAgent):
 
 
 class CLIStringDialogAgent(BaseAgent):
-    def __init__(self):
+    def __init__(self, stimulus_extractor: BaseExtractor = DumbExtractor()):
         super().__init__()
-        self.extractor = DumbExtractor()
+        self.extractor = stimulus_extractor
         self.i = 0
         self.stimuli = []
         self.done = False
@@ -93,7 +107,7 @@ class CLIStringDialogAgent(BaseAgent):
             self.done = True
             return
         responses = response
-        while not response == '--end':
+        while response != '--end':
             response = input()
             responses += response
         print("\n>>> Here's your prompt <<<")
@@ -114,106 +128,110 @@ class CLIStringDialogAgent(BaseAgent):
         self.stimuli.clear()
 
     def generate_next_value(self, coverage_database):
-        if self.i >= len(self.stimuli):
-            self._request_input()
         self.i += 1
         return self.stimuli[self.i - 1] if len(self.stimuli) else 0
 
 
 class LLMAgent(BaseAgent):
-    def __init__(self):
-        super().__init__()
-        self.generator = None
-        self.extractor = None
+    def __init__(self,
+                 prompt_generator: BasePromptGenerator,
+                 stimulus_generator: BaseLLM,
+                 stimulus_extractor: BaseExtractor,
+                 log_path=''):
+        super().__init__(log_path)
+        self.prompt_generator = prompt_generator
+        self.stimulus_generator = stimulus_generator
+        self.extractor = stimulus_extractor
+
         self.state = 'INIT'  # states: INIT, ITER, DONE
         self.stimuli_buffer = []
         self.stimulus_cnt = 0
-        self.missed_bins = []
 
-        # Initial Template: introduction + summaries + question
-        dut_code = self._load_dut_code()
-        bins_description = self._load_bins_description()
-        introduction_dut = \
-            f"I have a device under test (DUT). Here's the SystemVerilog code of the DUT:\n\n{dut_code}\n"
-        introduction_testbench = \
-            f"I also have a testbench that tests the DUT. Here's a description of the bins (i.e. test cases)" \
-            f" that the testbench cares about:\n\n{bins_description}\n"
-        init_question = self._generate_init_question()
-        self.initial_prompt = introduction_dut + introduction_testbench + init_question
-
-        # Iterative Template: result summary + difference + question
-        self.result_summary = "The values you provided failed to satisfy all the bins. " \
-                              "Here are the unreached bins:\n\n"
-        self.coverage_difference_prompts = self._generate_coverage_difference_prompts()
-        self.iter_question = self._generate_iter_question()
-
-    @abstractmethod
-    def _load_dut_code(self) -> str:
-        raise NotImplementedError
-
-    @abstractmethod
-    def _load_bins_description(self) -> str:
-        raise NotImplementedError
-
-    @abstractmethod
-    def _generate_init_question(self) -> str:
-        raise NotImplementedError
-
-    @abstractmethod
-    def _generate_coverage_difference_prompts(self) -> dict:
-        raise NotImplementedError
-
-    @abstractmethod
-    def _generate_iter_question(self) -> str:
-        raise NotImplementedError
+        # elements:
+        # {role: info, content: [agent_info]},
+        # {role: ..., content: ...},
+        # {role: coverage, content: [coverage_plan]}
+        self.log: List[List[Dict[str, Union[str, dict]]]] = [[]]
+        self.logged_index = 0
+        self.log[-1].append({'role': 'info',
+                             'content': {'Prompter': type(self.prompt_generator).__name__,
+                                         'Generator': str(self.stimulus_generator),
+                                         'Extractor': type(self.extractor).__name__}})
+        if self.stimulus_generator.system_prompt != "":
+            self.log[-1].append({'role': 'system', 'content': self.stimulus_generator.system_prompt})
 
     def reset(self):
+        self.save_log()
+        self.log.append([])
+        self.logged_index = 0
+
         self.state = 'INIT'
         self.stimuli_buffer = []
         self.stimulus_cnt = 0
 
+        self.prompt_generator.reset()
+        self.stimulus_generator.reset()
+        self.extractor.reset()
+
     def end_simulation(self, coverage_database: Union[None, CoverageDatabase]):
         if coverage_database is None:
             return False
-        if self.stimulus_cnt >= 10000:
+        if self.stimulus_cnt >= 100000:
             return True
         coverage_plan = get_coverage_plan(coverage_database)
-        self.missed_bins = list(map(lambda p: p[0], filter(lambda p: p[1] == 0, coverage_plan.items())))
-        if len(self.missed_bins) == 0:
+        missed_bins = list(map(lambda p: p[0], filter(lambda p: p[1] == 0, coverage_plan.items())))
+        if len(missed_bins) == 0:
             self.state = 'DONE'
             return True
 
     def _get_next_value_from_buffer(self):
         stimulus = self.stimuli_buffer[0]
-        self.stimuli_buffer = self.stimuli_buffer[1:]
+        self.stimuli_buffer.pop(0)
         self.stimulus_cnt += 1
         return stimulus
 
-    def _generate_iterative_prompt(self):
-        # missed_bins should have been updated by end_simulation
-        coverage_difference = ""
-        for bin_name in self.missed_bins:
-            coverage_difference += self.coverage_difference_prompts[bin_name()]
-        return self.result_summary + coverage_difference + '\n' + self.iter_question
+    def save_log(self):
+        with open(self.log_path, 'a') as f:
+            while self.logged_index < len(self.log[-1]):
+                rec = self.log[-1][self.logged_index]
 
-    @abstractmethod
-    def _query_to_LLM(self, prompt) -> str:
-        raise NotImplementedError
+                if rec['role'] == 'info':
+                    agent_info: Dict[str, str] = rec['content']
+                    for k, v in agent_info:
+                        f.write(f'{k}: {v}\n')
+                    f.write('\n')
+
+                elif rec['role'] == 'coverage':
+                    coverage: Dict[str, int] = rec['content']
+                    coverage_plan = {k: v for (k, v) in coverage.items() if v > 0}
+                    f.write(f'Coverage rate: {len(coverage_plan)} / {len(coverage)}\n')
+                    f.write(f'Coverage plan: {coverage_plan}\n\n')
+
+                else:
+                    f.write(f'Role: {rec["role"]}\n')
+                    f.write(f'Content: {rec["content"]}\n\n')
+
+                self.logged_index += 1
 
     def generate_next_value(self, coverage_database: Union[None, CoverageDatabase]):
         if len(self.stimuli_buffer):
             return self._get_next_value_from_buffer()
 
+        self.log[-1].append({'role': 'coverage', 'content': get_coverage_plan(coverage_database)})
+        self.save_log()
+
         prompt = ""
         if self.state == 'INIT':
-            prompt = self.initial_prompt
+            prompt = self.prompt_generator.generate_initial_prompt()
             self.state = 'ITER'
         elif self.state == 'ITER':
-            prompt = self._generate_iterative_prompt()
+            prompt = self.prompt_generator.generate_iterative_prompt(coverage_database)
         elif self.state == 'DONE':  # should never happen
             prompt = "Thank you."
+        self.log[-1].append({'role': 'user', 'content': prompt})
 
-        response = self._query_to_LLM(prompt)
+        response = self.stimulus_generator(prompt)
+        self.log[-1].append({'role': 'assistant', 'content': response})
 
         stimuli = self.extractor(response)
         self.stimuli_buffer.extend(stimuli)
