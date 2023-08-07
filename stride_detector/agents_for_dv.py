@@ -208,7 +208,7 @@ class LLMAgent(BaseAgent):
 
                 if rec['role'] == 'info':
                     agent_info: Dict[str, str] = rec['content']
-                    for k, v in agent_info:
+                    for k, v in agent_info.items():
                         f.write(f'{k}: {v}\n')
                     f.write('\n')
 
