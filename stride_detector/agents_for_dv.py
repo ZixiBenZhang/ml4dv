@@ -237,9 +237,6 @@ class LLMAgent(BaseAgent):
                 self.logged_index += 1
 
     def generate_next_value(self, coverage_database: Union[None, CoverageDatabase]):
-        if len(self.stimuli_buffer):
-            return self._get_next_value_from_buffer()
-
         if self.state != 'INIT':  # not first stimulus
             coverage = get_coverage_plan(coverage_database)
             self.log[-1].append({'role': 'coverage', 'content': coverage})
@@ -249,20 +246,21 @@ class LLMAgent(BaseAgent):
 
             self.save_log()
 
-        prompt = ""
-        if self.state == 'INIT':
-            prompt = self.prompt_generator.generate_initial_prompt()
-            self.state = 'ITER'
-        elif self.state == 'ITER':
-            prompt = self.prompt_generator.generate_iterative_prompt(coverage_database)
-        elif self.state == 'DONE':  # should never happen
-            prompt = "Thank you."
-        self.log[-1].append({'role': 'user', 'content': prompt})
+        while not len(self.stimuli_buffer):
+            prompt = ""
+            if self.state == 'INIT':
+                prompt = self.prompt_generator.generate_initial_prompt()
+                self.state = 'ITER'
+            elif self.state == 'ITER':
+                prompt = self.prompt_generator.generate_iterative_prompt(coverage_database)
+            elif self.state == 'DONE':  # should never happen
+                prompt = "Thank you."
+            self.log[-1].append({'role': 'user', 'content': prompt})
 
-        response = self.stimulus_generator(prompt)
-        self.log[-1].append({'role': 'assistant', 'content': response})
+            response = self.stimulus_generator(prompt)
+            self.log[-1].append({'role': 'assistant', 'content': response})
 
-        stimuli = self.extractor(response)
-        self.stimuli_buffer.extend(stimuli)
+            stimuli = self.extractor(response)
+            self.stimuli_buffer.extend(stimuli)
 
         return self._get_next_value_from_buffer()
