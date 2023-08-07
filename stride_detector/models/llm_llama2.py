@@ -4,7 +4,7 @@ from llama import Llama
 
 class Llama2(BaseLLM):
     def __init__(self,
-                 model_path='llama-2-7b-chat/',
+                 model_path='../../llama2/llama-2-7b-chat/',
                  tokenizer_path='tokenizer.model',
                  temperature=0.6,
                  top_p=0.9,
