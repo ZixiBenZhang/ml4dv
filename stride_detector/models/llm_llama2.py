@@ -4,8 +4,9 @@ from llama import Llama
 
 class Llama2(BaseLLM):
     def __init__(self,
-                 model_path='../../llama2/llama-2-7b-chat/',
+                 model_path='llama-2-7b-chat/',
                  tokenizer_path='tokenizer.model',
+                 path_predix='../../llama2/',
                  temperature=0.6,
                  top_p=0.9,
                  max_seq_len=8192,
@@ -16,8 +17,8 @@ class Llama2(BaseLLM):
         self.model_name = model_path.split('/')[0]
 
         self.generator = Llama.build(
-            ckpt_dir=model_path,
-            tokenizer_path=tokenizer_path,
+            ckpt_dir=path_predix + model_path,
+            tokenizer_path=path_predix + tokenizer_path,
             max_seq_len=max_seq_len,
             max_batch_size=max_batch_size,
         )

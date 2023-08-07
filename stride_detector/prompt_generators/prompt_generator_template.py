@@ -4,6 +4,7 @@ from abc import ABC
 
 class TemplatePromptGenerator(BasePromptGenerator, ABC):
     def __init__(self, dut_code_path: str, bin_descr_path: str):
+        super().__init__()
         self.intro = self._load_introduction()
         self.dut_summary = self._load_dut_summary(dut_code_path)
         self.tb_summary = self._load_testbench_summary(bin_descr_path)

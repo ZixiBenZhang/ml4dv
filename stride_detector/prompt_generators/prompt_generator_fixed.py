@@ -2,9 +2,6 @@ from stride_detector.prompt_generators.prompt_generator_base import *
 
 
 class FixedPromptGenerator4SD1(BasePromptGenerator):
-    def __init__(self):
-        pass
-
     def reset(self):
         pass
 
