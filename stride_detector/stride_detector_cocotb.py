@@ -196,12 +196,12 @@ class SimulationController:
                 if not isinstance(stimulus_obj, Stimulus):
                     assert False, "Saw bad stimulus message"
 
-                if stimulus_obj.value:
-                    self.dut.valid_i.value = 1
-                    self.dut.value_i.value = stimulus_obj.value
-                else:
+                if stimulus_obj.value is None:
                     self.dut.valid_i.value = 0
                     self.dut.value_i.value = 0xbaaddead
+                else:
+                    self.dut.valid_i.value = 1
+                    self.dut.value_i.value = stimulus_obj.value
 
                 await ClockCycles(self.dut.clk_i, 1)
                 await ReadWrite()
