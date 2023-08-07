@@ -1,3 +1,4 @@
+import os
 import random
 from datetime import datetime
 
@@ -199,6 +200,8 @@ class LLMAgent(BaseAgent):
         return stimulus
 
     def save_log(self):
+        if not os.path.exists('./logs'):
+            os.makedirs('./logs')
         with open(self.log_path, 'a') as f:
             while self.logged_index < len(self.log[-1]):
                 rec = self.log[-1][self.logged_index]
