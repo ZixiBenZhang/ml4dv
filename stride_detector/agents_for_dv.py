@@ -179,7 +179,7 @@ class LLMAgent(BaseAgent):
     def end_simulation(self, coverage_database: Union[None, CoverageDatabase]):
         if coverage_database is None:
             return False
-        if self.stimulus_cnt >= 100000:
+        if self.stimulus_cnt >= 10000:
             coverage = get_coverage_plan(coverage_database)
             self.log[-1].append({'role': 'coverage', 'content': coverage})
             self.log[-1].append({'role': 'stop', 'content': 'max stimuli number'})
@@ -234,13 +234,14 @@ class LLMAgent(BaseAgent):
         if len(self.stimuli_buffer):
             return self._get_next_value_from_buffer()
 
-        coverage = get_coverage_plan(coverage_database)
-        self.log[-1].append({'role': 'coverage', 'content': coverage})
+        if coverage_database is not None:  # not first stimulus
+            coverage = get_coverage_plan(coverage_database)
+            self.log[-1].append({'role': 'coverage', 'content': coverage})
 
-        coverage_plan = {k: v for (k, v) in coverage.items() if v > 0}
-        print(f"Dialog #{self.dialog_index} done, hits: {coverage_plan}")
+            coverage_plan = {k: v for (k, v) in coverage.items() if v > 0}
+            print(f"Dialog #{self.dialog_index} done, hits: {coverage_plan}")
 
-        self.save_log()
+            self.save_log()
 
         prompt = ""
         if self.state == 'INIT':
