@@ -43,3 +43,5 @@ class ChatGPT(BaseLLM):
 
     def reset(self):
         self.messages.clear()
+        if self.system_prompt != "":
+            self.messages.append({"role": "system", "content": self.system_prompt})

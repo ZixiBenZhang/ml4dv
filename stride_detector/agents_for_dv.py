@@ -167,6 +167,12 @@ class LLMAgent(BaseAgent):
         self.save_log()
         self.log.append([])
         self.logged_index = 0
+        self.log[-1].append({'role': 'info',
+                             'content': {'Prompter': type(self.prompt_generator).__name__,
+                                         'Generator': str(self.stimulus_generator),
+                                         'Extractor': type(self.extractor).__name__}})
+        if self.stimulus_generator.system_prompt != "":
+            self.log[-1].append({'role': 'system', 'content': self.stimulus_generator.system_prompt})
 
         self.state = 'INIT'
         self.stimuli_buffer = []
@@ -234,7 +240,7 @@ class LLMAgent(BaseAgent):
         if len(self.stimuli_buffer):
             return self._get_next_value_from_buffer()
 
-        if coverage_database is not None:  # not first stimulus
+        if self.state != 'INIT':  # not first stimulus
             coverage = get_coverage_plan(coverage_database)
             self.log[-1].append({'role': 'coverage', 'content': coverage})
 

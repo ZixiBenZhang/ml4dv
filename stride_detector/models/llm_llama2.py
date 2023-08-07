@@ -56,3 +56,5 @@ class Llama2(BaseLLM):
 
     def reset(self):
         self.conversations = [[]]
+        if self.system_prompt != "":
+            self.conversations[-1].append({"role": "system", "content": self.system_prompt})
