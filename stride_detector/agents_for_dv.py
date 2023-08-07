@@ -151,6 +151,7 @@ class LLMAgent(BaseAgent):
         # {role: info, content: [agent_info]},
         # {role: ..., content: ...},
         # {role: coverage, content: [coverage_plan]}
+        # {role: stop, content: done | max stimuli number
         self.log: List[List[Dict[str, Union[str, dict]]]] = [[]]
         self.logged_index = 0
         self.dialog_index = 0
@@ -178,11 +179,17 @@ class LLMAgent(BaseAgent):
         if coverage_database is None:
             return False
         if self.stimulus_cnt >= 100000:
+            coverage = get_coverage_plan(coverage_database)
+            self.log[-1].append({'role': 'coverage', 'content': coverage})
+            self.log[-1].append({'role': 'stop', 'content': 'max stimuli number'})
             return True
         coverage_plan = get_coverage_plan(coverage_database)
         missed_bins = list(map(lambda p: p[0], filter(lambda p: p[1] == 0, coverage_plan.items())))
         if len(missed_bins) == 0:
             self.state = 'DONE'
+            coverage = get_coverage_plan(coverage_database)
+            self.log[-1].append({'role': 'coverage', 'content': coverage})
+            self.log[-1].append({'role': 'stop', 'content': 'done'})
             return True
 
     def _get_next_value_from_buffer(self):
@@ -207,6 +214,9 @@ class LLMAgent(BaseAgent):
                     coverage_plan = {k: v for (k, v) in coverage.items() if v > 0}
                     f.write(f'Coverage rate: {len(coverage_plan)} / {len(coverage)}\n')
                     f.write(f'Coverage plan: {coverage_plan}\n\n')
+
+                elif rec['role'] == 'stop':
+                    f.write(f'Done: {rec["content"]}\n')
 
                 else:
                     f.write(f'Index: {self.dialog_index}\n')

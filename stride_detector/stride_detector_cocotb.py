@@ -237,5 +237,5 @@ async def basic_test(dut):
 
         # coverage_monitor.coverage_database.output_coverage()
         from coverage_database_helper import get_coverage_plan
-        print("***** FINAL COVERAGE *****")
-        print(get_coverage_plan(coverage_monitor.coverage_database))
+        # print("***** FINAL COVERAGE *****")
+        # print(get_coverage_plan(coverage_monitor.coverage_database))
