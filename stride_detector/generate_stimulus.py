@@ -40,12 +40,15 @@ class StimulusSender:
 
 def main():
     prompt_generator = FixedPromptGenerator4SD1()
+    # TODO: how SYSTEM prompt works?
+    # TODO: tune SYSTEM prompt
     stimulus_generator = Llama2(system_format_prompt=
-                                "Please output (positive or negative) integers only, and ensure each "
-                                "could be represented by a signed 32-bit int.")
+                                "Please output (positive or negative) integers only, "
+                                "each between -999 and 999.")
     print('Llama2 successfully built')
     extractor = DumbExtractor()
-    agent = LLMAgent(prompt_generator, stimulus_generator, extractor)
+    stimulus_filter = Filter4SD(-999, 999)
+    agent = LLMAgent(prompt_generator, stimulus_generator, extractor, stimulus_filter)
     print('Agent successfully built')
 
     stimulus = Stimulus(value=0, finish=False)

@@ -6,6 +6,7 @@ from coverage_database_helper import *
 from models.llm_base import BaseLLM
 from prompt_generators.prompt_generator_base import BasePromptGenerator
 from stimuli_extractor import *
+from stimuli_filter import *
 
 
 class BaseAgent:
@@ -138,11 +139,13 @@ class LLMAgent(BaseAgent):
                  prompt_generator: BasePromptGenerator,
                  stimulus_generator: BaseLLM,
                  stimulus_extractor: BaseExtractor,
+                 stimulus_filter: BaseFilter,
                  log_path=''):
         super().__init__(log_path)
         self.prompt_generator = prompt_generator
         self.stimulus_generator = stimulus_generator
         self.extractor = stimulus_extractor
+        self.stimulus_filter = stimulus_filter
 
         self.state = 'INIT'  # states: INIT, ITER, DONE
         self.stimuli_buffer = []
@@ -260,7 +263,7 @@ class LLMAgent(BaseAgent):
             response = self.stimulus_generator(prompt)
             self.log[-1].append({'role': 'assistant', 'content': response})
 
-            stimuli = self.extractor(response)
+            stimuli = self.stimulus_filter(self.extractor(response))
             self.stimuli_buffer.extend(stimuli)
 
         return self._get_next_value_from_buffer()

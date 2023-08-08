@@ -37,6 +37,7 @@ class Llama2(BaseLLM):
         return self.model_name
 
     def __call__(self, prompt: str) -> str:
+        # TODO: FIFO, ignore earlier iter dialogs; OR summarise previous dialogs
         self.conversations[0].append({"role": "user", "content": prompt})
 
         results = self.generator.chat_completion(

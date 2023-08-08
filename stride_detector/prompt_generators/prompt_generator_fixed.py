@@ -36,6 +36,7 @@ class FixedPromptGenerator4SD1(BasePromptGenerator):
         return prompt
 
     def generate_iterative_prompt(self, coverage_database: CoverageDatabase) -> str:
+        # TODO: prompt to ask LLM to fix gibberish
         prompt = "Thanks for the response, but this doesn't hit all the bins. Please generate more integers to " \
                  "hit the unreached bins."
         return prompt
