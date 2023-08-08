@@ -237,15 +237,14 @@ class LLMAgent(BaseAgent):
                 self.logged_index += 1
 
     def generate_next_value(self, coverage_database: Union[None, CoverageDatabase]):
-        if len(self.stimuli_buffer) == 0:
-            if self.state != 'INIT':  # not first stimulus
-                coverage = get_coverage_plan(coverage_database)
-                self.log[-1].append({'role': 'coverage', 'content': coverage})
+        if len(self.stimuli_buffer) == 0 and self.state != 'INIT':  # not first stimulus
+            coverage = get_coverage_plan(coverage_database)
+            self.log[-1].append({'role': 'coverage', 'content': coverage})
 
-                coverage_plan = {k: v for (k, v) in coverage.items() if v > 0}
-                print(f"Dialog #{self.dialog_index} done, hits: {coverage_plan}")
+            coverage_plan = {k: v for (k, v) in coverage.items() if v > 0}
+            print(f"Dialog #{self.dialog_index} done, hits: {coverage_plan}")
 
-                self.save_log()
+            self.save_log()
 
         while len(self.stimuli_buffer) == 0:
             prompt = ""

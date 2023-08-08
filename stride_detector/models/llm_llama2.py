@@ -1,3 +1,5 @@
+from math import inf
+
 from stride_detector.models.llm_base import *
 from llama import Llama
 
@@ -9,7 +11,7 @@ class Llama2(BaseLLM):
                  path_predix='../../llama2/',
                  temperature=0.6,
                  top_p=0.9,
-                 max_seq_len=4096,
+                 max_seq_len=inf,
                  max_batch_size=4,
                  max_gen_len=None,
                  system_format_prompt=""):
