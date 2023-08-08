@@ -5,6 +5,14 @@ class FixedPromptGenerator4SD1(BasePromptGenerator):
     def reset(self):
         pass
 
+    def generate_system_prompt(self) -> str:
+        # TODO: tune SYSTEM message
+        return "Please output (positive or negative) integers only, each between -999 and 999."
+
+    # TODO: Start with clear instruction
+    # TODO: Repeat instruction at the end
+    # TODO: Add clear paragraph syntax
+    # TODO: Specify output structure
     def generate_initial_prompt(self) -> str:
         prompt = \
             "Please generate a list of integers such that:\n\n" \

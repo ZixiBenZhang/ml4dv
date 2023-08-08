@@ -45,6 +45,10 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
     def _load_iter_question(self) -> str:
         raise NotImplementedError
 
+    def generate_system_prompt(self) -> str:
+        # TODO: generate SYSTEM message
+        return ""
+
     def generate_initial_prompt(self) -> str:
         # Initial Template: introduction + summaries + question
         initial_prompt = self.intro + '\n' + self.dut_summary + self.tb_summary + self.init_question

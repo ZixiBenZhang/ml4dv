@@ -18,8 +18,7 @@ class DumbExtractor(BaseExtractor):
         super().__init__()
 
     def __call__(self, text: str):
-        # TODO: regex matching bug
-        literals = re.findall(r'((-?\d+)|(0x[\dA-Fa-f]+))(?!\.)', text, re.I)
+        literals = list(filter(lambda x: x[-1] != '.', re.findall(r'0x[\da-fA-F]+|-?\d+[.:]?', text, re.I)))
         numbers = list(map(lambda x: (int(x, 16) if x[:2] == '0x' else int(x)), literals))
         return numbers
 

@@ -5,16 +5,17 @@ from stride_detector.models.llm_base import *
 
 class Llama2(BaseLLM):
     def __init__(self,
+                 system_prompt: str = "",
                  model_path='llama-2-7b-chat/',
                  tokenizer_path='tokenizer.model',
                  path_predix='../../llama2/',
-                 temperature=0.85,
+                 # TODO: temperature tuning (high => random)
+                 temperature=0.4,
                  top_p=0.9,
-                 max_seq_len=15000,
+                 max_seq_len=10000,
                  max_batch_size=4,
-                 max_gen_len=1024,
-                 system_format_prompt=""):
-        super().__init__()
+                 max_gen_len=1024):
+        super().__init__(system_prompt)
         self.model_name = model_path.split('/')[0]
 
         self.generator = Llama.build(
@@ -29,7 +30,6 @@ class Llama2(BaseLLM):
 
         self.conversations = [[]]
 
-        self.system_prompt = system_format_prompt
         if self.system_prompt != "":
             self.conversations[-1].append({"role": "system", "content": self.system_prompt})
 

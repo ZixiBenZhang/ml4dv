@@ -11,6 +11,13 @@ class BasePromptGenerator:
         raise NotImplementedError
 
     @abstractmethod
+    def generate_system_prompt(self) -> str:
+        # TODO: how SYSTEM prompt works?
+        # SYSTEM message: to describe the assistant’s personality, define what the model should and
+        # should not answer, and define the format of model responses
+        raise NotImplementedError
+
+    @abstractmethod
     def generate_initial_prompt(self) -> str:
         raise NotImplementedError
 

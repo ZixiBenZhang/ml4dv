@@ -7,17 +7,16 @@ import openai
 
 class ChatGPT(BaseLLM):
     def __init__(self,
+                 system_prompt: str = "",
                  model_name='gpt-3.5-turbo',
                  temperature=1,
                  # top_p=0.9,
-                 max_tokens=inf,
-                 system_format_prompt=""):
-        super().__init__()
+                 max_tokens=inf):
+        super().__init__(system_prompt)
         openai.api_key = os.getenv("OPENAI_API_KEY")
         self.model_name = model_name
         self.temperature = temperature
         self.max_tokens = max_tokens
-        self.system_prompt = system_format_prompt
 
         self.messages = []
         if self.system_prompt != "":
