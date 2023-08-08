@@ -37,8 +37,9 @@ class Llama2(BaseLLM):
         return self.model_name
 
     def __call__(self, prompt: str) -> str:
-        # TODO: FIFO, ignore earlier iter dialogs; OR summarise previous dialogs
-        self.conversations[0].append({"role": "user", "content": prompt})
+        # TODO: OR summarise previous dialogs
+        self._compress_conversation()
+        self.conversations[-1].append({"role": "user", "content": prompt})
 
         results = self.generator.chat_completion(
             self.conversations,  # type: ignore
@@ -46,15 +47,25 @@ class Llama2(BaseLLM):
             temperature=self.temperature,
             top_p=self.top_p,
         )
-        response = results[0]['generation']['content']
+        response = results[-1]['generation']['content']
 
         # print the new dialog
         # print(f"{self.conversations[0][-1]['role'].capitalize()}: {self.conversations[0][-1]['content']}\n")
         # print(f"> {results[0]['generation']['role'].capitalize()}: {response}")
 
-        self.conversations[0].append({"role": "assistant", "content": response})
+        self.conversations[-1].append({"role": "assistant", "content": response})
 
         return response
+
+    def _compress_conversation(self):
+        if len(self.conversations[-1]) < 10:
+            return
+        if self.conversations[-1][0]['role'] == 'system':
+            init = self.conversations[-1][:3]
+        else:
+            init = self.conversations[-1][:2]
+        self.conversations[-1] = init + self.conversations[-1][-6:]
+        return
 
     def reset(self):
         self.conversations = [[]]

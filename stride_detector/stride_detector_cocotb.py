@@ -235,7 +235,7 @@ async def basic_test(dut):
         await simulation_controller.end_simulation_event.wait()
         await ClockCycles(dut.clk_i, 5)
 
-        # TODO
+        # TODO: print final coverage
         # coverage_monitor.coverage_database.output_coverage()
         from coverage_database_helper import get_coverage_plan
         # print("***** FINAL COVERAGE *****")
