@@ -8,9 +8,9 @@ class Llama2(BaseLLM):
                  model_path='llama-2-7b-chat/',
                  tokenizer_path='tokenizer.model',
                  path_predix='../../llama2/',
-                 temperature=0.6,
+                 temperature=0.85,
                  top_p=0.9,
-                 max_seq_len=65536,
+                 max_seq_len=1048576,
                  max_batch_size=4,
                  max_gen_len=None,
                  system_format_prompt=""):
