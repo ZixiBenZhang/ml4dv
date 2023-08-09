@@ -157,8 +157,9 @@ class LLMAgent(BaseAgent):
         # {role: coverage, content: [coverage_plan]}
         # {role: stop, content: done | max stimuli number
         self.log: List[List[Dict[str, Union[str, dict]]]] = [[]]
-        self.logged_index = 0
-        self.dialog_index = 0
+        self.logged_index = 0  # log index for logging
+        self.logged_dialog_index = 0  # dialog index for logging
+        self.dialog_index = 0  # dialog index for running
         self.log[-1].append({'role': 'info',
                              'content': {'Prompter': type(self.prompt_generator).__name__,
                                          'Generator': str(self.stimulus_generator),
@@ -170,6 +171,8 @@ class LLMAgent(BaseAgent):
         self.save_log()
         self.log.append([])
         self.logged_index = 0
+        self.logged_dialog_index = 0
+        self.dialog_index = 0
         self.log[-1].append({'role': 'info',
                              'content': {'Prompter': type(self.prompt_generator).__name__,
                                          'Generator': str(self.stimulus_generator),
@@ -188,10 +191,10 @@ class LLMAgent(BaseAgent):
     def end_simulation(self, coverage_database: Union[None, CoverageDatabase]):
         if coverage_database is None:
             return False
-        if self.stimulus_cnt >= 10000:
+        if self.dialog_index >= 20:
             coverage = get_coverage_plan(coverage_database)
             self.log[-1].append({'role': 'coverage', 'content': coverage})
-            self.log[-1].append({'role': 'stop', 'content': 'max stimuli number'})
+            self.log[-1].append({'role': 'stop', 'content': 'max dialog number'})
             return True
         coverage_plan = get_coverage_plan(coverage_database)
         missed_bins = list(map(lambda p: p[0], filter(lambda p: p[1] == 0, coverage_plan.items())))
@@ -231,9 +234,9 @@ class LLMAgent(BaseAgent):
                     f.write(f'Done: {rec["content"]}\n')
 
                 else:
-                    f.write(f'Index: {self.dialog_index}\n')
                     if rec['role'] == 'assistant':
-                        self.dialog_index += 1
+                        self.logged_dialog_index += 1
+                    f.write(f'Index: {self.logged_dialog_index}\n')
                     f.write(f'Role: {rec["role"]}\n')
                     f.write(f'Content: {rec["content"]}\n\n')
 
@@ -261,9 +264,12 @@ class LLMAgent(BaseAgent):
             self.log[-1].append({'role': 'user', 'content': prompt})
 
             response = self.stimulus_generator(prompt)
+            self.dialog_index += 1
             self.log[-1].append({'role': 'assistant', 'content': response})
 
             stimuli = self.stimulus_filter(self.extractor(response))
             self.stimuli_buffer.extend(stimuli)
+
+            self.save_log()
 
         return self._get_next_value_from_buffer()

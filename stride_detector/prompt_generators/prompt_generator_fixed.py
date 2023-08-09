@@ -11,7 +11,8 @@ class FixedPromptGenerator4SD1(BasePromptGenerator):
 
     def generate_system_prompt(self) -> str:
         # TODO: tune SYSTEM message
-        return "Please output (positive or negative) integers only, each between -999 and 999."
+        return "Please output (positive or negative) integers only, " \
+               "each larger than -1000 and smaller than 1000."
 
     # TODO: Specify output structure
     def generate_initial_prompt(self) -> str:
@@ -19,7 +20,7 @@ class FixedPromptGenerator4SD1(BasePromptGenerator):
             "Please generate a list of integers that satisfies these conditions:\n" \
             "------\n" \
             "CONDITIONS\n" \
-            "- The list contains segments (i.e. subsequences) of int.\n" \
+            "- The list contains segments (i.e. subsequences) of integers, each between -1000 and 1000.\n" \
             "- Each segment is of length 16.\n" \
             "- A segment follows a single-stride pattern with a stride width x if: the differences between " \
             "two adjacent integers are always x.\n" \
@@ -51,7 +52,7 @@ class FixedPromptGenerator4SD1(BasePromptGenerator):
             "another segment with a double/single stride pattern.\n" \
             "---\n" \
             "------\n" \
-            "Please generate a list of integers that satisfies the above conditions.\n" \
+            "Please generate a list of integers between -1000 and 1000 that satisfies the above conditions.\n" \
             "Output format: [x, y, z, ...]"
         return prompt
 
@@ -59,10 +60,11 @@ class FixedPromptGenerator4SD1(BasePromptGenerator):
         cur_coverage = get_coverage_rate(coverage_database)
         if cur_coverage == self.prev_coverage:
             gibberish_prompt = "Your response doesn't answer my query. \n" \
-                               "Please generate a list of integers, with output format: [x, y, z, ...]"
+                               "Please generate a list of integers between -1000 and 1000, " \
+                               "with output format: [x, y, z, ...]"
             return gibberish_prompt
 
         prompt = "The values you provided failed to cover all the bins.\n" \
-                 "Please regenerate a list of integers to cover more bins."
+                 "Please regenerate a list of integers between -1000 and 1000 to cover more bins."
         self.prev_coverage = cur_coverage
         return prompt
