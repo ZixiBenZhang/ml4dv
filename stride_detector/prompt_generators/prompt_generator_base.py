@@ -12,9 +12,9 @@ class BasePromptGenerator:
 
     @abstractmethod
     def generate_system_prompt(self) -> str:
-        # TODO: how SYSTEM prompt works?
         # SYSTEM message: to describe the assistant’s personality, define what the model should and
-        # should not answer, and define the format of model responses
+        # should not answer, and define the format of model responses.
+        # In theory, the model always obey the SYSTEM message despite USER messages
         raise NotImplementedError
 
     @abstractmethod

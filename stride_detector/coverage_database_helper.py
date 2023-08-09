@@ -22,3 +22,9 @@ def get_coverage_plan(coverage_database: CoverageDatabase) -> Dict[str, int]:
 
     coverage_plan = {**coverage_plan, **coverage_database.misc_bins}
     return coverage_plan
+
+
+def get_coverage_rate(coverage_database: CoverageDatabase) -> Tuple[int, int]:
+    coverage = get_coverage_plan(coverage_database)
+    coverage_hit = {k: v for (k, v) in coverage if v > 0}
+    return len(coverage_hit), len(coverage)

@@ -1,0 +1,19 @@
+- The list contains segments (i.e. subsequences) of int.
+- Each segment is of length 16.
+- A segment follows a single-stride pattern with a stride width x if: the differences between two adjacent integers are always x.
+- A segment follows a double-stride pattern with a stride width pair (x, y) if: the differences between two adjacent integers are alternating x and y, meanwhile x and y are different.
+- A segment has no stride pattern if it neither follows a single-stride pattern nor a double-stride pattern.
+- The maximum stride width is 15, and the minimum stride width is -16.
+- For each of the following bins, the list contains at least one segment that satisfies it:
+---
+    - stride_1_seen - One bin per possible stride width between the minimum and maximum stride width, where the segment follows a single-stride pattern of the stride width.
+    - stride_2_seen - One bin per pair of possible stride widths between the minimum and maximum stride width, where the segment follows a double-stride pattern of the stride width pair.
+    - misc_bins - Various bins grouped in a dictionary:
+        - single_stride_[n|p]_overflow - A segment where an incoming stream of values has a valid single stride but that stride is below the minimum (n) or above the maximum (p) stride width.
+        - double_stride_[n|p][n|p] - A segment where an incoming stream of values has a valid double stride but those strides are below the minimum (n) or above the maximum (p) stride widths, nn indicates both are below the minimum, where np indicates one is below the minimum and the other above the maximum.
+---
+- Also, the list contains consecutive segments that satisfy the following bins:
+---
+    - no_stride_to_[single|double] - A segment has no repeating stride pattern, followed by another segment with a single/double stride pattern.
+    - [single|double]_stride_[double|single] - A segment of single/double repeating stride pattern, followed by another segment with a double/single pattern.
+---

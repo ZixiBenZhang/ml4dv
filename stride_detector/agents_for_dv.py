@@ -197,7 +197,7 @@ class LLMAgent(BaseAgent):
         missed_bins = list(map(lambda p: p[0], filter(lambda p: p[1] == 0, coverage_plan.items())))
         if len(missed_bins) == 0:
             self.state = 'DONE'
-            coverage = get_coverage_plan(coverage_database)
+            coverage = coverage_plan
             self.log[-1].append({'role': 'coverage', 'content': coverage})
             self.log[-1].append({'role': 'stop', 'content': 'done'})
             return True

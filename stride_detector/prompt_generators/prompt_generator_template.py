@@ -3,11 +3,11 @@ from abc import ABC
 
 
 class TemplatePromptGenerator(BasePromptGenerator, ABC):
-    def __init__(self, dut_code_path: str, bin_descr_path: str):
+    def __init__(self, dut_code_path: str, tb_code_path: str, bin_descr_path: str):
         super().__init__()
         self.intro = self._load_introduction()
-        self.dut_summary = self._load_dut_summary(dut_code_path)
-        self.tb_summary = self._load_testbench_summary(bin_descr_path)
+        self.code_summary = self._load_code_summary(dut_code_path, tb_code_path)
+        self.tb_summary = self._load_bins_summary(bin_descr_path)
         self.init_question = self._load_init_question()
 
         self.res_summary = self._load_result_summary()
@@ -22,11 +22,11 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def _load_dut_summary(self, dut_code_dir) -> str:
+    def _load_code_summary(self, dut_code_dir, tb_code_dir) -> str:
         raise NotImplementedError
 
     @abstractmethod
-    def _load_testbench_summary(self, bin_descr_dir) -> str:
+    def _load_bins_summary(self, bin_descr_dir) -> str:
         raise NotImplementedError
 
     @abstractmethod
@@ -51,7 +51,12 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
 
     def generate_initial_prompt(self) -> str:
         # Initial Template: introduction + summaries + question
-        initial_prompt = self.intro + '\n' + self.dut_summary + self.tb_summary + self.init_question
+        initial_prompt = self.intro + \
+                         '\n----------\n' + \
+                         self.code_summary + \
+                         self.tb_summary + \
+                         '\n----------\n' + \
+                         self.init_question
         return initial_prompt
 
     def generate_iterative_prompt(self, coverage_database: CoverageDatabase) -> str:
@@ -64,46 +69,64 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
         for bin_name in missed_bins:
             coverage_difference += self.coverage_difference_prompts_dict[bin_name]
 
-        iterative_prompt = self.res_summary + '\n' + coverage_difference + '\n' + self.iter_question
+        iterative_prompt = \
+            self.res_summary + \
+            '------\n' \
+            'UNREACHED BINS\n' + \
+            coverage_difference + \
+            '------\n' + \
+            self.iter_question
         return iterative_prompt
 
 
 class TemplatePromptGenerator4SD1(TemplatePromptGenerator):
     def _load_introduction(self) -> str:
-        return ""
+        return "You will receive programs of a hardware device and a testbench, " \
+               "and a description of bins (i.e. test cases). " \
+               "Then, you are going to generate a list of integers to cover the test cases.\n"
 
-    def _load_dut_summary(self, dut_code_path) -> str:
+    def _load_code_summary(self, dut_code_path, tb_code_path) -> str:
         with open(dut_code_path, 'r') as f:
             dut_code = f.read()
         dut_summary = \
-            f"I have a device under test (DUT). Here's the SystemVerilog code of the DUT:\n\n{dut_code}\n"
+            f"I have a device under test (DUT). Here's the SystemVerilog code of the DUT:\n" \
+            f"------\n" \
+            f"DUT CODE\n" \
+            f"{dut_code}\n" \
+            f"------\n" \
+            f"I also have a testbench for the DUT. Here's the Python code of the testbench:\n" \
+            f"------\n" \
+            f"TESTBENCH CODE\n" \
+            f"{tb_code_path}\n" \
+            f"------\n"
         return dut_summary
 
-    def _load_testbench_summary(self, bin_descr_dir) -> str:
+    def _load_bins_summary(self, bin_descr_dir) -> str:
         with open(bin_descr_dir, 'r') as f:
             bins_description = f.read()
         tb_summary = \
-            f"I also have a testbench that tests the DUT. Here's a description of the bins (i.e. test cases)" \
-            f" that the testbench cares about:\n\n{bins_description}\n"
+            f"Now, we want to test the DUT with a list of integers as its input. " \
+            f"We want the input to cover the bins (i.e. test cases) that we care about. " \
+            f"Here's a description of the bins that we care about:\n" \
+            f"------\n" \
+            f"BINS DESCRIPTION\n" \
+            f"{bins_description}\n" \
+            f"------\n"
         return tb_summary
 
     def _load_init_question(self) -> str:
+        # TODO: Specify output structure
         init_question = \
-            "Please generate segments of integers such that:\n" \
-            "- Each segment has a length of 16.\n" \
-            "- A segment follows a single-stride pattern with a stride width x if: " \
-            "the differences between two adjacent integers are always x.\n" \
-            "- A segment follows a double-stride pattern with a stride width pair (x, y) if: " \
-            "the differences between two adjacent integers are alternating x and y, meanwhile" \
-            " x and y are different.\n" \
-            "- A segment has no stride pattern if it neither follows a single-stride pattern " \
-            "nor a double-stride pattern.\n" \
-            "- The maximum stride width is 15, and the minimum stride width is -16.\n" \
-            "- For each bin described above, generate a segment."
+            "Following the bins description, and refer to the programs, " \
+            "generate a list that contains segments of integers, which covers " \
+            "the described bins as much as you can.\n"
         return init_question
 
+    # TODO: Specify output structure
     def _load_result_summary(self) -> str:
-        result_summary = "The values you provided failed to satisfy all the bins. " \
+        result_summary = "The values you provided failed to cover all the bins.\n" \
+                         "You will see the result coverage of your previous response(s), and then " \
+                         "generate another list of integers to cover the unreached bins (i.e. test cases)\n" \
                          "Here are the unreached bins:\n"
         return result_summary
 
@@ -129,6 +152,5 @@ class TemplatePromptGenerator4SD1(TemplatePromptGenerator):
         return coverage_difference_template
 
     def _load_iter_question(self) -> str:
-        iter_question = "Please regenerate these unreached segments according to " \
-                        "the bins' descriptions"
+        iter_question = "Please regenerate the segments of integers for these unreached bins."
         return iter_question
