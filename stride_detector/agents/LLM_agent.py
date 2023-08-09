@@ -66,7 +66,6 @@ class LLMAgent(BaseAgent):
 
         return False
 
-    # TODO: init CSV logger
     def log_headers(self):
         for logger in self.loggers:
             t = type(logger)
@@ -76,6 +75,8 @@ class LLMAgent(BaseAgent):
                 logger.log[-1].append({'role': 'info',
                                        'content': {'Prompter': type(self.prompt_generator).__name__,
                                                    'Generator': str(self.stimulus_generator),
+                                                   'Temperature': self.stimulus_generator.temperature,
+                                                   'Top_p': self.stimulus_generator.top_p,
                                                    'Extractor': type(self.extractor).__name__}})
                 if self.stimulus_generator.system_prompt != "":
                     logger.log[-1].append({'role': 'system',
@@ -83,8 +84,13 @@ class LLMAgent(BaseAgent):
 
             elif t == type(CSVLogger):
                 logger: CSVLogger
+                logger.save_info(['Model', str(self.stimulus_generator),
+                                  'SYSTEM', self.stimulus_generator.system_prompt,
+                                  'temperature', self.stimulus_generator.temperature,
+                                  'top_p', self.stimulus_generator.top_p,
+                                  'Prompter', type(self.prompt_generator).__name__,
+                                  'Extractor', type(self.extractor).__name__])
 
-    # TODO: CSV logger reset
     def log_reset(self):
         for logger in self.loggers:
             t = type(logger)
@@ -106,8 +112,15 @@ class LLMAgent(BaseAgent):
 
             elif t == type(CSVLogger):
                 logger: CSVLogger
+                logger.log[-1]['Action'] = "reset"
+                logger.save_log()
 
-    # TODO: append to CSV logger
+    # elements:
+    # {role: info, content: [agent_info]},
+    # {role: ..., content: ...},
+    # {role: coverage, content: [coverage_plan]}
+    # {role: stop, content: done | max stimuli number}
+    # {role: reset}
     def log_append(self, entry: Dict[str, Union[str, dict]]):
         for logger in self.loggers:
             t = type(logger)
@@ -118,6 +131,18 @@ class LLMAgent(BaseAgent):
 
             elif t == type(CSVLogger):
                 logger: CSVLogger
+                if entry['role'] == 'user':
+                    logger.log.append({})
+                    logger.log[-1]['USER'] = '"' + entry['content'] + '"'
+                    logger.log[-1]['Action'] = "none"
+                elif entry['role'] == 'assistant':
+                    logger.log[-1]['ASSISTANT'] = '"' + entry['content'] + '"'
+                elif entry['role'] == 'coverage':
+                    logger.log[-1]['Coverage Plan'] = str(entry['content'])
+                elif entry['role'] == 'stop':
+                    logger.log[-1]['Action'] = entry['content']
+                elif entry['role'] == 'reset':
+                    logger.log[-1]['Action'] = "reset"
 
     def save_log(self):
         for logger in self.loggers:

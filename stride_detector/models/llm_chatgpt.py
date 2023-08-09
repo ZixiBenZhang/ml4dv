@@ -10,12 +10,13 @@ class ChatGPT(BaseLLM):
                  system_prompt: str = "",
                  model_name='gpt-3.5-turbo',
                  temperature=1,
-                 # top_p=0.9,
+                 top_p=1,
                  max_tokens=inf):
         super().__init__(system_prompt)
         openai.api_key = os.getenv("OPENAI_API_KEY")
         self.model_name = model_name
         self.temperature = temperature
+        self.top_p = top_p
         self.max_tokens = max_tokens
 
         self.messages = []

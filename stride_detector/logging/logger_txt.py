@@ -10,6 +10,8 @@ class TXTLogger(BaseLogger):
             self.log_path = f'./logs/{t}.txt'
         else:
             self.log_path = log_path
+        if not os.path.exists('./logs'):
+            os.makedirs('./logs')
 
         # elements:
         # {role: info, content: [agent_info]},
@@ -22,8 +24,6 @@ class TXTLogger(BaseLogger):
         self.logged_dialog_index = 0  # dialog index for logging
 
     def save_log(self):
-        if not os.path.exists('./logs'):
-            os.makedirs('./logs')
         with open(self.log_path, 'a+') as f:
             while self.logged_index < len(self.log[-1]):
                 rec = self.log[-1][self.logged_index]
