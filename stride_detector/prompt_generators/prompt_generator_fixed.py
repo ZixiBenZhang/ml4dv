@@ -19,7 +19,7 @@ class FixedPromptGenerator4SD1(BasePromptGenerator):
             "Please generate a list of integers that satisfies these conditions:\n" \
             "------\n" \
             "CONDITIONS\n" \
-            "- The list contains segments of int.\n" \
+            "- The list contains segments (i.e. subsequences) of int.\n" \
             "- Each segment is of length 16.\n" \
             "- A segment follows a single-stride pattern with a stride width x if: the differences between " \
             "two adjacent integers are always x.\n" \
@@ -51,7 +51,8 @@ class FixedPromptGenerator4SD1(BasePromptGenerator):
             "another segment with a double/single stride pattern.\n" \
             "---\n" \
             "------\n" \
-            "Please generate a list of integers that satisfies the above conditions."
+            "Please generate a list of integers that satisfies the above conditions.\n" \
+            "Output format: [x, y, z, ...]"
         return prompt
 
     def generate_iterative_prompt(self, coverage_database: CoverageDatabase) -> str:
