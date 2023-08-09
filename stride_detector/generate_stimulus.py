@@ -14,12 +14,16 @@ class StimulusSender:
 
     def send_stimulus(self, stimulus_obj):
         self.socket.send_pyobj(stimulus_obj)
-        coverage_obj = self.socket.recv_pyobj()
+        state_coverage_obj = self.socket.recv_pyobj()
 
-        if not isinstance(coverage_obj, CoverageDatabase):
+        if not isinstance(state_coverage_obj, tuple):
             raise RuntimeError("Bad format of coverage response")
+        if not isinstance(state_coverage_obj[0], DUTState):
+            raise RuntimeError("Bad format of coverage response element 0")
+        if not isinstance(state_coverage_obj[1], CoverageDatabase):
+            raise RuntimeError("Bad format of coverage response element 1")
 
-        return coverage_obj
+        return state_coverage_obj
 
     def close(self):
         if self.socket:
@@ -31,7 +35,7 @@ def main():
 
     with closing(StimulusSender("tcp://localhost:5555")) as stimulus_sender:
         while current_stride <= STRIDE_MAX:
-            coverage = stimulus_sender.send_stimulus(stimulus)
+            dut_state, coverage = stimulus_sender.send_stimulus(stimulus)
 
             if coverage.stride_1_seen[current_stride] > 16:
                 current_stride += 1

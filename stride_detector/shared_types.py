@@ -11,6 +11,33 @@ class Stimulus:
     value: Optional[int]
     finish: bool
 
+@dataclass
+class DUTState:
+    # Value range is 32-bit signed integer
+    last_value: int
+
+    # Value range is the same as the stride range (min -16, max 15)
+    stride_1: int
+    # Value range is 0 - 3 (inclusive)
+    stride_1_confidence: int
+
+    # Value range is the same as the stride range (min -16, max 15)
+    stride_2: list[int]
+    # Possible values are 0, 1
+    stride_2_state: int
+    # Value range is 0 - 3 (inclusive)
+    stride_2_confidence: list[int]
+
+    def state_vector(self):
+        return [self.last_value,
+                self.stride_1,
+                self.stride_1_confidence,
+                self.stride_2[0],
+                self.stride_2[1],
+                self.stride_2_state,
+                self.stride_2_confidence[0],
+                self.stride_2_confidence[1]]
+
 class CoverageDatabase:
     stride_1_seen: list[int]
     stride_2_seen: list[list[int]]

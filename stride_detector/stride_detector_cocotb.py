@@ -196,6 +196,8 @@ class SimulationController:
                 if not isinstance(stimulus_obj, Stimulus):
                     assert False, "Saw bad stimulus message"
 
+                dut_state = self.sample_dut_state()
+
                 if stimulus_obj.value is None:
                     self.dut.valid_i.value = 0
                     self.dut.value_i.value = 0xbaaddead
@@ -207,11 +209,26 @@ class SimulationController:
                 await ReadWrite()
 
                 self.coverage_monitor.sample_coverage()
-                socket.send(pickle.dumps(self.coverage_monitor.coverage_database))
+                socket.send_pyobj((dut_state,
+                    self.coverage_monitor.coverage_database))
 
                 if stimulus_obj.finish:
                     self.end_simulation_event.set()
                     break
+
+    def sample_dut_state(self):
+        return DUTState(
+                last_value = self.dut.last_value.value,
+
+                stride_1 = self.dut.stride_1_q.value,
+                stride_1_confidence = self.dut.stride_1_confidence_q.value,
+
+                stride_2 = self.dut.stride_2_q.value,
+                stride_2_state = self.dut.stride_2_state_q.value,
+                stride_2_confidence = [self.dut.stride_2_confidence_q[0].value,
+                                       self.dut.stride_2_confidence_q[1].value]
+        )
+
 
     def close(self):
         self.zmq_context.term()
