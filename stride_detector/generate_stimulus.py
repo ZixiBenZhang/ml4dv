@@ -43,7 +43,7 @@ def main():
     stimulus_generator = Llama2(system_prompt=prompt_generator.generate_system_prompt())
     print('Llama2 successfully built')
     extractor = DumbExtractor()
-    stimulus_filter = Filter4SD(-999, 999)
+    stimulus_filter = Filter4SD(-10000, 10000)
 
     agent = LLMAgent(prompt_generator, stimulus_generator, extractor, stimulus_filter)
     print('Agent successfully built')

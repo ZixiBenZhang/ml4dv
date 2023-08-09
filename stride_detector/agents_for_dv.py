@@ -195,6 +195,7 @@ class LLMAgent(BaseAgent):
             coverage = get_coverage_plan(coverage_database)
             self.log[-1].append({'role': 'coverage', 'content': coverage})
             self.log[-1].append({'role': 'stop', 'content': 'max dialog number'})
+            self.save_log()
             return True
         coverage_plan = get_coverage_plan(coverage_database)
         missed_bins = list(map(lambda p: p[0], filter(lambda p: p[1] == 0, coverage_plan.items())))
@@ -203,7 +204,9 @@ class LLMAgent(BaseAgent):
             coverage = coverage_plan
             self.log[-1].append({'role': 'coverage', 'content': coverage})
             self.log[-1].append({'role': 'stop', 'content': 'done'})
+            self.save_log()
             return True
+        return False
 
     def _get_next_value_from_buffer(self):
         stimulus = self.stimuli_buffer[0]
@@ -234,7 +237,7 @@ class LLMAgent(BaseAgent):
                     f.write(f'Done: {rec["content"]}\n')
 
                 else:
-                    if rec['role'] == 'assistant':
+                    if rec['role'] == 'user':
                         self.logged_dialog_index += 1
                     f.write(f'Index: {self.logged_dialog_index}\n')
                     f.write(f'Role: {rec["role"]}\n')
