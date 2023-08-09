@@ -16,7 +16,6 @@ class FixedPromptGenerator4SD1(BasePromptGenerator):
         return "Please output (positive or negative) integers only, " \
                f"each larger than -{BOUND} and smaller than {BOUND}."
 
-    # TODO: Specify output structure
     def generate_initial_prompt(self) -> str:
         prompt = \
             "Please generate a list of integers that satisfies these conditions:\n" \

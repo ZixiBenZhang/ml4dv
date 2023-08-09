@@ -11,7 +11,16 @@ class TXTLogger(BaseLogger):
         else:
             self.log_path = log_path
 
-    # TODO: txt logger
+        # elements:
+        # {role: info, content: [agent_info]},
+        # {role: ..., content: ...},
+        # {role: coverage, content: [coverage_plan]}
+        # {role: stop, content: done | max stimuli number}
+        # {role: reset}
+        self.log: List[List[Dict[str, Union[str, dict]]]] = [[]]
+        self.logged_index = 0  # log index for logging
+        self.logged_dialog_index = 0  # dialog index for logging
+
     def save_log(self):
         if not os.path.exists('./logs'):
             os.makedirs('./logs')
@@ -32,7 +41,10 @@ class TXTLogger(BaseLogger):
                     f.write(f'Coverage plan: {coverage_plan}\n\n')
 
                 elif rec['role'] == 'stop':
-                    f.write(f'Stop: {rec["content"]}\n')
+                    f.write(f'Stop: {rec["content"]}\n\n')
+
+                elif rec['role'] == 'reset':
+                    f.write('<<<Reset>>>\n\n')
 
                 else:
                     if rec['role'] == 'user':
