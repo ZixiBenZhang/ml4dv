@@ -40,7 +40,7 @@ class StimulusSender:
 
 def main():
     prompt_generator = FixedPromptGenerator4SD1()
-    stimulus_generator = Llama2(prompt_generator.generate_system_prompt())
+    stimulus_generator = Llama2(system_prompt=prompt_generator.generate_system_prompt())
     print('Llama2 successfully built')
     extractor = DumbExtractor()
     stimulus_filter = Filter4SD(-999, 999)

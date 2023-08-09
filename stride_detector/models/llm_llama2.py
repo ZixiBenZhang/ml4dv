@@ -14,7 +14,7 @@ class Llama2(BaseLLM):
                  top_p=0.9,
                  max_seq_len=10000,
                  max_batch_size=4,
-                 max_gen_len=1024):
+                 max_gen_len=800):
         super().__init__(system_prompt)
         self.model_name = model_path.split('/')[0]
 
