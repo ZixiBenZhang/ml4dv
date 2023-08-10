@@ -67,9 +67,7 @@ class LLMAgent(BaseAgent):
 
     def log_headers(self):
         for logger in self.loggers:
-            t = type(logger)
-
-            if t == TXTLogger.__class__:
+            if isinstance(logger, TXTLogger):
                 logger: TXTLogger
                 logger.log[-1].append({'role': 'info',
                                        'content': {'Prompter': type(self.prompt_generator).__name__,
@@ -81,7 +79,7 @@ class LLMAgent(BaseAgent):
                     logger.log[-1].append({'role': 'system',
                                            'content': self.stimulus_generator.system_prompt})
 
-            elif t == CSVLogger.__class__:
+            elif isinstance(logger, CSVLogger):
                 logger: CSVLogger
                 logger.save_info(['Model', str(self.stimulus_generator),
                                   'SYSTEM', self.stimulus_generator.system_prompt,
@@ -92,9 +90,7 @@ class LLMAgent(BaseAgent):
 
     def log_reset(self):
         for logger in self.loggers:
-            t = type(logger)
-
-            if t == TXTLogger.__class__:
+            if isinstance(logger, TXTLogger):
                 logger: TXTLogger
                 logger.log[-1].append({'role': 'reset'})
                 logger.save_log()
@@ -109,7 +105,7 @@ class LLMAgent(BaseAgent):
                     logger.log[-1].append({'role': 'system',
                                            'content': self.stimulus_generator.system_prompt})
 
-            elif t == CSVLogger.__class__:
+            elif isinstance(logger, CSVLogger):
                 logger: CSVLogger
                 logger.log[-1]['Action'] = "reset"
                 logger.save_log()
@@ -122,13 +118,11 @@ class LLMAgent(BaseAgent):
     # {role: reset}
     def log_append(self, entry: Dict[str, Union[str, dict]]):
         for logger in self.loggers:
-            t = type(logger)
-
-            if t == TXTLogger.__class__:
+            if isinstance(logger, TXTLogger):
                 logger: TXTLogger
                 logger.log[-1].append(entry)
 
-            elif t == CSVLogger.__class__:
+            elif isinstance(logger, CSVLogger):
                 logger: CSVLogger
                 if entry['role'] == 'user':
                     logger.log.append({})
