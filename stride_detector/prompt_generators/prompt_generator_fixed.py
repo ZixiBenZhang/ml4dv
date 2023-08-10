@@ -66,7 +66,7 @@ class FixedPromptGenerator4SD1(BasePromptGenerator):
             return gibberish_prompt
 
         if cur_coverage == self.prev_coverage:
-            prompt = "The values you provided didn't cover any bins.\n" \
+            prompt = "The values you just provided didn't cover any bins.\n" \
                      "Please regenerate a list of integers to cover the bins you haven't covered."
         else:
             prompt = "The values you provided failed to cover all the bins.\n" \
