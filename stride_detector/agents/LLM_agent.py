@@ -14,9 +14,8 @@ class LLMAgent(BaseAgent):
                  stimulus_generator: BaseLLM,
                  stimulus_extractor: BaseExtractor,
                  stimulus_filter: BaseFilter,
-                 loggers: List[BaseLogger],
-                 log_path=''):
-        super().__init__(log_path)
+                 loggers: List[BaseLogger]):
+        super().__init__()
         self.prompt_generator = prompt_generator
         self.stimulus_generator = stimulus_generator
         self.extractor = stimulus_extractor
