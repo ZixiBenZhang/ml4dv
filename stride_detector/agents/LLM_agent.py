@@ -131,7 +131,8 @@ class LLMAgent(BaseAgent):
                 elif entry['role'] == 'assistant':
                     logger.log[-1]['ASSISTANT'] = '"' + entry['content'] + '"'
                 elif entry['role'] == 'coverage':
-                    logger.log[-1]['Coverage Plan'] = str(entry['content'])
+                    coverage_plan = {k: v for (k, v) in entry['content'].items() if v > 0}
+                    logger.log[-1]['Coverage Plan'] = str(coverage_plan)
                 elif entry['role'] == 'stop':
                     logger.log[-1]['Action'] = entry['content']
                 elif entry['role'] == 'reset':
