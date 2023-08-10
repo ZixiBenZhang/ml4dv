@@ -26,12 +26,16 @@ class StimulusSender:
 
     def send_stimulus(self, stimulus_obj):
         self.socket.send_pyobj(stimulus_obj)
-        coverage_obj = self.socket.recv_pyobj()
+        state_coverage_obj = self.socket.recv_pyobj()
 
-        if not isinstance(coverage_obj, CoverageDatabase):
+        if not isinstance(state_coverage_obj, tuple):
             raise RuntimeError("Bad format of coverage response")
+        if not isinstance(state_coverage_obj[0], DUTState):
+            raise RuntimeError("Bad format of coverage response element 0")
+        if not isinstance(state_coverage_obj[1], CoverageDatabase):
+            raise RuntimeError("Bad format of coverage response element 1")
 
-        return coverage_obj
+        return state_coverage_obj
 
     def close(self):
         if self.socket:
@@ -60,7 +64,7 @@ def main():
     with closing(StimulusSender("tcp://128.232.65.218:5555")) as stimulus_sender:
         while not agent.end_simulation(coverage):
             # print(f'Sending stimulus from dialog #{agent.dialog_index}')
-            coverage = stimulus_sender.send_stimulus(stimulus)
+            dut_state, coverage = stimulus_sender.send_stimulus(stimulus)
             # print('Generating next stimulus')
             stimulus.value = agent.generate_next_value(coverage)
 

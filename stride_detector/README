@@ -49,7 +49,8 @@ for it at all.
 A client/server model is used where the server runs the simulation and the
 cocotb testbench and the client provides stimulus. For every new piece of
 stimulus sent from the client the server responds with the latest coverage
-following the stimulus being used.
+following the stimulus being used and the full DUT state at the time the
+stimulus was applied.
 
 The client is a stand-alone python program. Note that the client and server do
 not have to run in the same python environment.
@@ -131,6 +132,15 @@ Coverage is provided via a 'CoverageDatabase' object defined in
 `get_coverage_vector` method is provided. This takes the structured coverage and
 flattens it into a single list of integers. Not useful for human analysis but
 useful for driving a training/evaluation process.
+
+The state of the DUT is provided via a 'DUTState' object. The names of fields in
+this object directly map to flops (registers, clocked state holding elements) in
+the RTL. A `state_vector` method is provided that maps this state into a list of
+integers.
+
+Whilst the state is represented as integers each part of the state has a
+different set of valid values, these are described in the comments of
+shared_types.py
 
 A `get_coverage_bool_vector` is also provided. This just turns the integers from
 `get_coverage_vector` into either 0 or 1 depending on whether the coverage bin

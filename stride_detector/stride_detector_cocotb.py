@@ -8,10 +8,10 @@ import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import Timer, ClockCycles, ReadWrite, ReadOnly, Event
 
-
 NO_STRIDE = 0
 SINGLE_STRIDE = 1
 DOUBLE_STRIDE = 2
+
 
 # Gathers the coverage, coverage bins are:
 # * stride_1_seen - One bin per possible stride, counts when a single stride has
@@ -44,26 +44,26 @@ class CoverageMonitor:
             self.coverage_database.stride_2_seen.append([0] * NUM_STRIDES)
 
         self.signals = {
-                'clk'   : dut.clk_i,
-                'valid' : dut.valid_i,
-                'value' : dut.value_i,
-                'stride_1' : dut.stride_1_o,
-                'stride_1_valid' : dut.stride_1_valid_o,
-                'stride_2' : dut.stride_2_o,
-                'stride_2_valid' : dut.stride_2_valid_o,
+            'clk': dut.clk_i,
+            'valid': dut.valid_i,
+            'value': dut.value_i,
+            'stride_1': dut.stride_1_o,
+            'stride_1_valid': dut.stride_1_valid_o,
+            'stride_2': dut.stride_2_o,
+            'stride_2_valid': dut.stride_2_valid_o,
         }
 
         self.coverage_database.misc_bins = {
-                'single_stride_n_overflow' : 0,
-                'single_stride_p_overflow' : 0,
-                'double_stride_nn_overflow' : 0,
-                'double_stride_np_overflow' : 0,
-                'double_stride_pn_overflow' : 0,
-                'double_stride_pp_overflow' : 0,
-                'no_stride_to_double' : 0,
-                'no_stride_to_single' : 0,
-                'single_stride_to_double' : 0,
-                'double_stride_to_single' : 0,
+            'single_stride_n_overflow': 0,
+            'single_stride_p_overflow': 0,
+            'double_stride_nn_overflow': 0,
+            'double_stride_np_overflow': 0,
+            'double_stride_pn_overflow': 0,
+            'double_stride_pp_overflow': 0,
+            'no_stride_to_double': 0,
+            'no_stride_to_single': 0,
+            'single_stride_to_double': 0,
+            'double_stride_to_single': 0,
         }
 
         self.stride_state = NO_STRIDE
@@ -82,7 +82,8 @@ class CoverageMonitor:
 
         if self.signals['stride_1_valid'].value:
             if self.signals['stride_2_valid'].value:
-                self.coverage_database.stride_2_seen[self.signals['stride_1'].value][self.signals['stride_2'].value] += 1
+                self.coverage_database.stride_2_seen[self.signals['stride_1'].value][
+                    self.signals['stride_2'].value] += 1
             else:
                 self.coverage_database.stride_1_seen[self.signals['stride_1'].value] += 1
 
@@ -153,7 +154,7 @@ class CoverageMonitor:
 
             if len(first_stride_set) == 1 and len(second_stride_set) == 1:
                 self.sample_double_stride_coverage(next(iter(first_stride_set)),
-                        next(iter(second_stride_set)))
+                                                   next(iter(second_stride_set)))
             else:
                 self.no_strides_count += 1
         else:
@@ -161,6 +162,7 @@ class CoverageMonitor:
 
         if self.no_strides_count > 16:
             self.stride_state = NO_STRIDE
+
 
 async def do_reset(dut):
     dut.rst_ni.value = 1
@@ -171,6 +173,7 @@ async def do_reset(dut):
     await Timer(5, units="ns")
 
     dut.rst_ni.value = 1
+
 
 # Produces the stimulus for the testbench based on observed coverage
 class SimulationController:
@@ -189,12 +192,14 @@ class SimulationController:
             await ClockCycles(self.dut.clk_i, 1)
             await ReadWrite()
 
-            while(True):
+            while (True):
                 stimulus_msg = socket.recv()
                 stimulus_obj = pickle.loads(stimulus_msg)
 
                 if not isinstance(stimulus_obj, Stimulus):
                     assert False, "Saw bad stimulus message"
+
+                dut_state = self.sample_dut_state()
 
                 if stimulus_obj.value is None:
                     self.dut.valid_i.value = 0
@@ -207,17 +212,32 @@ class SimulationController:
                 await ReadWrite()
 
                 self.coverage_monitor.sample_coverage()
-                socket.send(pickle.dumps(self.coverage_monitor.coverage_database))
+                socket.send_pyobj((dut_state,
+                                   self.coverage_monitor.coverage_database))
 
                 if stimulus_obj.finish:
                     self.end_simulation_event.set()
                     break
+
+    def sample_dut_state(self):
+        return DUTState(
+            last_value=self.dut.last_value.value,
+
+            stride_1=self.dut.stride_1_q.value,
+            stride_1_confidence=self.dut.stride_1_confidence_q.value,
+
+            stride_2=self.dut.stride_2_q.value,
+            stride_2_state=self.dut.stride_2_state_q.value,
+            stride_2_confidence=[self.dut.stride_2_confidence_q[0].value,
+                                 self.dut.stride_2_confidence_q[1].value]
+        )
 
     def close(self):
         self.zmq_context.term()
 
     def run_controller(self):
         cocotb.start_soon(self.controller_loop())
+
 
 @cocotb.test()
 async def basic_test(dut):
