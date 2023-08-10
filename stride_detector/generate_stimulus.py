@@ -45,7 +45,13 @@ def main():
     extractor = DumbExtractor()
     stimulus_filter = Filter4SD(-10000, 10000)
 
-    agent = LLMAgent(prompt_generator, stimulus_generator, extractor, stimulus_filter)
+    t = datetime.now()
+    t = t.strftime('%Y%m%d_%H%M%S')
+    logger_txt = TXTLogger(f'./logs/{t}.txt')
+    logger_csv = CSVLogger(f'./logs/{t}.csv')
+
+    agent = LLMAgent(prompt_generator, stimulus_generator, extractor, stimulus_filter,
+                     [logger_txt, logger_csv])
     print('Agent successfully built')
 
     stimulus = Stimulus(value=0, finish=False)
