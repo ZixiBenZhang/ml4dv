@@ -1,6 +1,6 @@
 from stride_detector.prompt_generators.prompt_generator_base import *
 
-BOUND = 521
+BOUND = 523
 
 
 class FixedPromptGenerator4SD1(BasePromptGenerator):
