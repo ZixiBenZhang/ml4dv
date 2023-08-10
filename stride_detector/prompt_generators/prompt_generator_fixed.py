@@ -58,13 +58,13 @@ class FixedPromptGenerator4SD1(BasePromptGenerator):
         return prompt
 
     def generate_iterative_prompt(self, coverage_database: CoverageDatabase, **kwargs) -> str:
-        cur_coverage = get_coverage_rate(coverage_database)
         if kwargs['response_invalid']:
             gibberish_prompt = "Your response doesn't answer my query. \n" \
                                f"Please generate a list of integers between -{BOUND} and {BOUND}, " \
                                "with output format: [x0, x1, x2, ...]"
             return gibberish_prompt
 
+        cur_coverage = get_coverage_rate(coverage_database)
         if cur_coverage == self.prev_coverage:
             prompt = "The values you just provided didn't cover any bins.\n" \
                      "Please regenerate a list of integers to cover the bins you haven't covered."

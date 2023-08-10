@@ -65,8 +65,8 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
 
     def generate_iterative_prompt(self, coverage_database: CoverageDatabase, **kwargs) -> str:
         # Iterative Template: result summary + difference + question
-        # TODO: deal with gibberish
         cur_coverage = get_coverage_rate(coverage_database)
+        kwargs['response_invalid'] = cur_coverage == self.prev_coverage
 
         # calculate difference
         coverage_difference = ""
@@ -78,12 +78,12 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
             coverage_difference += self.coverage_difference_prompts_dict[bin_name]
 
         iterative_prompt = \
-            self._load_result_summary(no_new_hit=cur_coverage == self.prev_coverage) + \
+            self._load_result_summary(**kwargs) + \
             '------\n' \
             'UNREACHED BINS\n' + \
             coverage_difference + \
             '------\n' + \
-            self._load_iter_question()
+            self._load_iter_question(**kwargs)
 
         self.prev_coverage = cur_coverage
         return iterative_prompt
@@ -132,13 +132,21 @@ class TemplatePromptGenerator4SD1(TemplatePromptGenerator):
         return init_question
 
     def _load_result_summary(self, **kwargs) -> str:
-        if kwargs['no_new_hit']:
+        if kwargs['response_invalid']:
+            result_summary = \
+                "Your response doesn't answer my query. \n" \
+                f"Please generate a list of integers between -{BOUND} and {BOUND}, " \
+                "with output format: [x0, x1, x2, ...].\n" \
+                "Here are the unreached bins:\n"
+
+        elif kwargs['no_new_hit']:
             result_summary = \
                 "The values you just provided didn't cover any bins. You need to try to cover as " \
                 "much of the described bins as you can.\n" \
                 "You will see the result coverage of your previous response(s), and then " \
                 "generate another list of integers to cover the unreached bins (i.e. test cases)\n" \
                 "Here are the unreached bins:\n"
+
         else:
             result_summary = \
                 "The values you provided failed to cover all the bins.\n" \
@@ -169,5 +177,9 @@ class TemplatePromptGenerator4SD1(TemplatePromptGenerator):
         return coverage_difference_template
 
     def _load_iter_question(self, **kwargs) -> str:
-        iter_question = "Please regenerate the segments of integers for these unreached bins."
+        if kwargs['response_invalid']:
+            iter_question = f"Please generate a list of integers between -{BOUND} and {BOUND}, " \
+                            "with output format: [x0, x1, x2, ...]"
+        else:
+            iter_question = "Please regenerate the segments of integers for these unreached bins."
         return iter_question

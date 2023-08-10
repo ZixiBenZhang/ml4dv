@@ -37,7 +37,7 @@ class Llama2(BaseLLM):
         return self.model_name
 
     def __call__(self, prompt: str) -> str:
-        # TODO: OR summarise previous dialogs
+        # TODO: OR summarise previous dialogs?
         self._compress_conversation()
         self.conversations[-1].append({"role": "user", "content": prompt})
 
