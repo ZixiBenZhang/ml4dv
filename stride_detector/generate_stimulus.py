@@ -73,7 +73,7 @@ def main():
             # print('Generating next stimulus')
             stimulus.value = agent.generate_next_value(dut_state, coverage)
 
-        coverage_plan = {k: v for (k, v) in coverage.items() if v > 0}
+        coverage_plan = {k: v for (k, v) in get_coverage_plan(coverage).items() if v > 0}
         print(f"Finished, with dialog of length {agent.dialog_index}, hits: {coverage_plan}")
 
         stimulus.value = None
