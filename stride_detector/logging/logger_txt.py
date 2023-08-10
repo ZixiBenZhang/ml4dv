@@ -25,6 +25,7 @@ class TXTLogger(BaseLogger):
 
     def save_log(self):
         with open(self.log_path, 'a+') as f:
+            print('Saving txt log...')
             while self.logged_index < len(self.log[-1]):
                 rec = self.log[-1][self.logged_index]
 

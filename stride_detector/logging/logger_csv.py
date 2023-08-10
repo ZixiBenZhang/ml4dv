@@ -30,6 +30,7 @@ class CSVLogger(BaseLogger):
 
     def save_log(self):
         with open(self.log_path, 'a+', encoding='UTF8', newline="") as f:
+            print('Saving csv log...')
             dict_writer = csv.DictWriter(f, fieldnames=self.header)
             while self.logged_index < len(self.log):
                 self.log[self.logged_index]['Message#'] = self.logged_index + 1
