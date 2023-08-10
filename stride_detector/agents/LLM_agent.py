@@ -162,14 +162,14 @@ class LLMAgent(BaseAgent):
                 self.log_append({'role': 'coverage', 'content': coverage})
                 print(f"Dialog #{self.dialog_index} done, doesn't hit any bin")
                 self.save_log()
-            f_ = 1
 
             prompt = ""
             if self.state == 'INIT':
                 prompt = self.prompt_generator.generate_initial_prompt()
                 self.state = 'ITER'
             elif self.state == 'ITER':
-                prompt = self.prompt_generator.generate_iterative_prompt(coverage_database)
+                prompt = self.prompt_generator.generate_iterative_prompt(coverage_database,
+                                                                         response_invalid=f_)
             elif self.state == 'DONE':  # should never happen
                 prompt = "Thank you."
             self.log_append({'role': 'user', 'content': prompt})
@@ -180,5 +180,7 @@ class LLMAgent(BaseAgent):
 
             stimuli = self.stimulus_filter(self.extractor(response))
             self.stimuli_buffer.extend(stimuli)
+
+            f_ = 1
 
         return self._get_next_value_from_buffer()

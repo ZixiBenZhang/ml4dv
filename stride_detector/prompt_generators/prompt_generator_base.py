@@ -18,9 +18,9 @@ class BasePromptGenerator:
         raise NotImplementedError
 
     @abstractmethod
-    def generate_initial_prompt(self) -> str:
+    def generate_initial_prompt(self, **kwargs) -> str:
         raise NotImplementedError
 
     @abstractmethod
-    def generate_iterative_prompt(self, coverage_database: CoverageDatabase) -> str:
+    def generate_iterative_prompt(self, coverage_database: CoverageDatabase, **kwargs) -> str:
         raise NotImplementedError

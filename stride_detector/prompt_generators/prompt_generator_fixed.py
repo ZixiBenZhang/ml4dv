@@ -14,7 +14,8 @@ class FixedPromptGenerator4SD1(BasePromptGenerator):
     def generate_system_prompt(self) -> str:
         # TODO: tune SYSTEM message
         return "Please output (positive or negative) integers only, " \
-               f"each larger than -{BOUND} and smaller than {BOUND}."
+               f"each between -{BOUND} and {BOUND}. \n" \
+               f"Output format: [x0, x1, x2, ...]."
 
     def generate_initial_prompt(self) -> str:
         prompt = \
@@ -53,13 +54,12 @@ class FixedPromptGenerator4SD1(BasePromptGenerator):
             "another segment with a double/single stride pattern.\n" \
             "---\n" \
             "------\n" \
-            f"Please generate a list of integers between -{BOUND} and {BOUND} that satisfies the above conditions.\n" \
-            "Output format: [x0, x1, x2, ...]"
+            f"Please generate a list of integers between -{BOUND} and {BOUND} that satisfies the above conditions.\n"
         return prompt
 
-    def generate_iterative_prompt(self, coverage_database: CoverageDatabase) -> str:
+    def generate_iterative_prompt(self, coverage_database: CoverageDatabase, **kwargs) -> str:
         cur_coverage = get_coverage_rate(coverage_database)
-        if cur_coverage == self.prev_coverage:
+        if kwargs['response_invalid']:
             gibberish_prompt = "Your response doesn't answer my query. \n" \
                                f"Please generate a list of integers between -{BOUND} and {BOUND}, " \
                                "with output format: [x0, x1, x2, ...]"

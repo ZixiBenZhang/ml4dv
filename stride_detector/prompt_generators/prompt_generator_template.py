@@ -59,8 +59,9 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
                          self.init_question
         return initial_prompt
 
-    def generate_iterative_prompt(self, coverage_database: CoverageDatabase) -> str:
+    def generate_iterative_prompt(self, coverage_database: CoverageDatabase, **kwargs) -> str:
         # Iterative Template: result summary + difference + question
+        # TODO: deal with gibberish
         coverage_difference = ""
         coverage_plan = get_coverage_plan(coverage_database)
         missed_bins = list(map(lambda p: p[0], filter(lambda p: p[1] == 0, coverage_plan.items())))
