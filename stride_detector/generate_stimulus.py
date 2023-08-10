@@ -59,6 +59,7 @@ def main():
     print('Agent successfully built')
 
     stimulus = Stimulus(value=0, finish=False)
+    dut_state = None
     coverage = None
 
     with closing(StimulusSender("tcp://128.232.65.218:5555")) as stimulus_sender:
