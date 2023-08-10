@@ -1,18 +1,20 @@
 from stride_detector.prompt_generators.prompt_generator_base import *
 from abc import ABC
 
+BOUND = 523
+
 
 class TemplatePromptGenerator(BasePromptGenerator, ABC):
     def __init__(self, dut_code_path: str, tb_code_path: str, bin_descr_path: str):
         super().__init__()
+        self.prev_coverage = (0, -1)
+
         self.intro = self._load_introduction()
         self.code_summary = self._load_code_summary(dut_code_path, tb_code_path)
         self.tb_summary = self._load_bins_summary(bin_descr_path)
         self.init_question = self._load_init_question()
 
-        self.res_summary = self._load_result_summary()
         self.coverage_difference_prompts_dict = self._load_coverage_difference_prompts_dict()
-        self.iter_question = self._load_iter_question()
 
     def reset(self):
         pass
@@ -34,7 +36,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def _load_result_summary(self) -> str:
+    def _load_result_summary(self, **kwargs) -> str:
         raise NotImplementedError
 
     @abstractmethod
@@ -42,12 +44,14 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def _load_iter_question(self) -> str:
+    def _load_iter_question(self, **kwargs) -> str:
         raise NotImplementedError
 
     def generate_system_prompt(self) -> str:
-        # TODO: generate SYSTEM message
-        return ""
+        # TODO: tune SYSTEM message
+        return "Please output (positive or negative) a list of integers only, " \
+               f"each integer between -{BOUND} and {BOUND}. \n" \
+               f"Output format: [x0, x1, x2, ...]."
 
     def generate_initial_prompt(self) -> str:
         # Initial Template: introduction + summaries + question
@@ -62,6 +66,9 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
     def generate_iterative_prompt(self, coverage_database: CoverageDatabase, **kwargs) -> str:
         # Iterative Template: result summary + difference + question
         # TODO: deal with gibberish
+        cur_coverage = get_coverage_rate(coverage_database)
+
+        # calculate difference
         coverage_difference = ""
         coverage_plan = get_coverage_plan(coverage_database)
         missed_bins = list(map(lambda p: p[0], filter(lambda p: p[1] == 0, coverage_plan.items())))
@@ -71,12 +78,14 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
             coverage_difference += self.coverage_difference_prompts_dict[bin_name]
 
         iterative_prompt = \
-            self.res_summary + \
+            self._load_result_summary(no_new_hit=cur_coverage == self.prev_coverage) + \
             '------\n' \
             'UNREACHED BINS\n' + \
             coverage_difference + \
             '------\n' + \
-            self.iter_question
+            self._load_iter_question()
+
+        self.prev_coverage = cur_coverage
         return iterative_prompt
 
 
@@ -116,19 +125,26 @@ class TemplatePromptGenerator4SD1(TemplatePromptGenerator):
         return tb_summary
 
     def _load_init_question(self) -> str:
-        # TODO: Specify output structure
         init_question = \
             "Following the bins description, and refer to the programs, " \
             "generate a list that contains segments of integers, which covers " \
             "the described bins as much as you can.\n"
         return init_question
 
-    # TODO: Specify output structure
-    def _load_result_summary(self) -> str:
-        result_summary = "The values you provided failed to cover all the bins.\n" \
-                         "You will see the result coverage of your previous response(s), and then " \
-                         "generate another list of integers to cover the unreached bins (i.e. test cases)\n" \
-                         "Here are the unreached bins:\n"
+    def _load_result_summary(self, **kwargs) -> str:
+        if kwargs['no_new_hit']:
+            result_summary = \
+                "The values you just provided didn't cover any bins. You need to try to cover as " \
+                "much of the described bins as you can.\n" \
+                "You will see the result coverage of your previous response(s), and then " \
+                "generate another list of integers to cover the unreached bins (i.e. test cases)\n" \
+                "Here are the unreached bins:\n"
+        else:
+            result_summary = \
+                "The values you provided failed to cover all the bins.\n" \
+                "You will see the result coverage of your previous response(s), and then " \
+                "generate another list of integers to cover the unreached bins (i.e. test cases)\n" \
+                "Here are the unreached bins:\n"
         return result_summary
 
     def _load_coverage_difference_prompts_dict(self) -> Dict[str, str]:
@@ -152,6 +168,6 @@ class TemplatePromptGenerator4SD1(TemplatePromptGenerator):
         coverage_difference_template = {**single_bins_difference, **double_bins_difference, **misc_bins_difference}
         return coverage_difference_template
 
-    def _load_iter_question(self) -> str:
+    def _load_iter_question(self, **kwargs) -> str:
         iter_question = "Please regenerate the segments of integers for these unreached bins."
         return iter_question

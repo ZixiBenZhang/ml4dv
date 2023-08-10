@@ -1,9 +1,12 @@
+import os
+from pprint import pprint
+
 import fire as fire
-from llama import Llama
+# from llama import Llama
 import openai
 
 
-def main(ckpt_dir='llama-2-7b-chat/', max_seq_len=4096, max_gen_len=None):
+def testLlama(ckpt_dir='llama-2-7b-chat/', max_seq_len=4096, max_gen_len=None):
     generator = Llama.build(
         ckpt_dir=ckpt_dir,
         tokenizer_path='tokenizer.model',
@@ -50,7 +53,8 @@ def main(ckpt_dir='llama-2-7b-chat/', max_seq_len=4096, max_gen_len=None):
 
 
 def testGPT():
-    openai.Model.list()
+    openai.api_key = os.getenv("OPENAI_API_KEY")
+    pprint(openai.Model.list())
 
 
 if __name__ == '__main__':

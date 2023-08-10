@@ -41,6 +41,18 @@ class ChatGPT(BaseLLM):
         self.messages.append(response_choices[0])
         return response_choices[0]['content']
 
+    # not in use
+    def _compress_conversation(self):
+        REMAIN_ITER_NUM = 5
+        if len(self.messages) < 4 + 2 * REMAIN_ITER_NUM:
+            return
+        if self.messages[-1]['role'] == 'system':
+            init = self.messages[:3]
+        else:
+            init = self.messages[:2]
+        self.messages = init + self.messages[-2 * REMAIN_ITER_NUM:]
+        return
+
     def reset(self):
         self.messages.clear()
         if self.system_prompt != "":
