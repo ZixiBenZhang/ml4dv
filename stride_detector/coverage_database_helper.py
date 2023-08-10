@@ -1,6 +1,6 @@
 from typing import *
 
-from shared_types import CoverageDatabase
+from shared_types import *
 
 
 def get_coverage_plan(coverage_database: CoverageDatabase) -> Dict[str, int]:

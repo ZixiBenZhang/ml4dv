@@ -42,7 +42,7 @@ class LLMAgent(BaseAgent):
         self.stimulus_generator.reset()
         self.extractor.reset()
 
-    def end_simulation(self, coverage_database: Union[None, CoverageDatabase]):
+    def end_simulation(self, dut_state: Union[None, DUTState], coverage_database: Union[None, CoverageDatabase]):
         if coverage_database is None:
             return False
 
@@ -153,7 +153,7 @@ class LLMAgent(BaseAgent):
         self.stimulus_cnt += 1
         return stimulus
 
-    def generate_next_value(self, coverage_database: Union[None, CoverageDatabase]):
+    def generate_next_value(self, dut_state: Union[None, DUTState], coverage_database: Union[None, CoverageDatabase]):
         coverage = get_coverage_plan(coverage_database)
 
         if len(self.stimuli_buffer) == 0 and self.state != 'INIT':  # not first stimulus

@@ -11,9 +11,9 @@ class BaseAgent:
         raise NotImplementedError
 
     @abstractmethod
-    def end_simulation(self, coverage_database: Union[None, CoverageDatabase]):
+    def end_simulation(self, dut_state: Union[None, DUTState], coverage_database: Union[None, CoverageDatabase]):
         raise NotImplementedError
 
     @abstractmethod
-    def generate_next_value(self, coverage_database: Union[None, CoverageDatabase]):
+    def generate_next_value(self, dut_state: Union[None, DUTState], coverage_database: Union[None, CoverageDatabase]):
         raise NotImplementedError

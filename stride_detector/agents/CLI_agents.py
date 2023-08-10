@@ -9,13 +9,13 @@ class CLIAgent(BaseAgent):
         self.stimuli = input('Please enter stimuli list:\n')
         self.stimuli = list(map(int, self.stimuli[1:-1].split(',')))
 
-    def end_simulation(self, coverage_database):
+    def end_simulation(self, dut_state: Union[None, DUTState], coverage_database):
         return self.i >= len(self.stimuli)
 
     def reset(self):
         self.i = 0
 
-    def generate_next_value(self, coverage_database):
+    def generate_next_value(self, dut_state: Union[None, DUTState], coverage_database):
         self.i += 1
         return self.stimuli[self.i - 1]
 
@@ -43,7 +43,7 @@ class CLIStringDialogAgent(BaseAgent):
         self.done = False
         return
 
-    def end_simulation(self, coverage_database):
+    def end_simulation(self, dut_state: Union[None, DUTState], coverage_database):
         if self.i >= len(self.stimuli):
             coverage = get_coverage_plan(coverage_database)
             print({k: v for (k, v) in coverage.items() if v > 0}, '\n')
@@ -54,6 +54,6 @@ class CLIStringDialogAgent(BaseAgent):
         self.i = 0
         self.stimuli.clear()
 
-    def generate_next_value(self, coverage_database):
+    def generate_next_value(self, dut_state: Union[None, DUTState], coverage_database):
         self.i += 1
         return self.stimuli[self.i - 1] if len(self.stimuli) else 0

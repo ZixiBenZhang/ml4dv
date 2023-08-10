@@ -14,10 +14,10 @@ class DumbAgent4SD(BaseAgent):
         self.new_value = None
         self.current_stride = 1
 
-    def end_simulation(self, coverage_database: Union[None, CoverageDatabase]):
+    def end_simulation(self, dut_state: Union[None, DUTState], coverage_database: Union[None, CoverageDatabase]):
         return not self.current_stride <= self.STRIDE_MAX
 
-    def generate_next_value(self, coverage_database: Union[None, CoverageDatabase]):
+    def generate_next_value(self, dut_state: Union[None, DUTState], coverage_database: Union[None, CoverageDatabase]):
         if self.new_value is None:
             self.new_value = 1
             return self.new_value
