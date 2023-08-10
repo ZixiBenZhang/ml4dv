@@ -1,6 +1,6 @@
 from stride_detector.prompt_generators.prompt_generator_base import *
 
-BOUND = 600
+BOUND = 521
 
 
 class FixedPromptGenerator4SD1(BasePromptGenerator):
@@ -13,8 +13,8 @@ class FixedPromptGenerator4SD1(BasePromptGenerator):
 
     def generate_system_prompt(self) -> str:
         # TODO: tune SYSTEM message
-        return "Please output (positive or negative) integers only, " \
-               f"each between -{BOUND} and {BOUND}. \n" \
+        return "Please output (positive or negative) a list of integers only, " \
+               f"each integer between -{BOUND} and {BOUND}. \n" \
                f"Output format: [x0, x1, x2, ...]."
 
     def generate_initial_prompt(self) -> str:
@@ -66,6 +66,6 @@ class FixedPromptGenerator4SD1(BasePromptGenerator):
             return gibberish_prompt
 
         prompt = "The values you provided failed to cover all the bins.\n" \
-                 f"Please regenerate a list of integers between -{BOUND} and {BOUND} to cover more bins."
+                 f"Please regenerate a list of integers to cover more bins."
         self.prev_coverage = cur_coverage
         return prompt

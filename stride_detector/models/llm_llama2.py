@@ -58,13 +58,14 @@ class Llama2(BaseLLM):
         return response
 
     def _compress_conversation(self):
-        if len(self.conversations[-1]) < 10:
+        REMAIN_ITER_NUM = 5
+        if len(self.conversations[-1]) < 4 + 2 * REMAIN_ITER_NUM:
             return
         if self.conversations[-1][0]['role'] == 'system':
             init = self.conversations[-1][:3]
         else:
             init = self.conversations[-1][:2]
-        self.conversations[-1] = init + self.conversations[-1][-6:]
+        self.conversations[-1] = init + self.conversations[-1][-2 * REMAIN_ITER_NUM:]
         return
 
     def reset(self):
