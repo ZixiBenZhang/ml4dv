@@ -68,9 +68,8 @@ def main():
 
     with closing(StimulusSender("tcp://128.232.65.218:5555")) as stimulus_sender:
         while not agent.end_simulation(dut_state, coverage):
-            # print(f'Sending stimulus from dialog #{agent.dialog_index}')
             dut_state, coverage = stimulus_sender.send_stimulus(stimulus)
-            # print('Generating next stimulus')
+
             stimulus.value = agent.generate_next_value(dut_state, coverage)
 
         coverage_plan = {k: v for (k, v) in get_coverage_plan(coverage).items() if v > 0}

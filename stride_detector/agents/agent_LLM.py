@@ -55,8 +55,7 @@ class LLMAgent(BaseAgent):
             self.save_log()
             return True
 
-        # TODO: Bug? (isn't newest coverage)
-        if self.dialog_index >= 20:
+        if self.dialog_index >= 20 and len(self.stimuli_buffer) == 0:
             coverage = get_coverage_plan(coverage_database)
             self.log_append({'role': 'coverage', 'content': coverage})
             self.log_append({'role': 'stop', 'content': 'max dialog number'})
