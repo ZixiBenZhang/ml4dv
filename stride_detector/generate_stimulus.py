@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.dirname(directory))
 # print(sys.path)
 
 from shared_types import *
-from agents.LLM_agent import *
+from agents.agent_LLM import *
 from prompt_generators.prompt_generator_fixed import *
 from prompt_generators.prompt_generator_template import *
 from models.llm_llama2 import *
