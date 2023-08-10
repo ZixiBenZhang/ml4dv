@@ -46,20 +46,20 @@ class LLMAgent(BaseAgent):
         if coverage_database is None:
             return False
 
+        coverage = get_coverage_plan(coverage_database)
+        missed_bins = list(map(lambda p: p[0], filter(lambda p: p[1] == 0, coverage.items())))
+        if len(missed_bins) == 0:
+            self.state = 'DONE'
+            self.log_append({'role': 'coverage', 'content': coverage})
+            self.log_append({'role': 'stop', 'content': 'done'})
+            self.save_log()
+            return True
+
+        # TODO: Bug? (isn't newest coverage)
         if self.dialog_index >= 20:
             coverage = get_coverage_plan(coverage_database)
             self.log_append({'role': 'coverage', 'content': coverage})
             self.log_append({'role': 'stop', 'content': 'max dialog number'})
-            self.save_log()
-            return True
-
-        coverage_plan = get_coverage_plan(coverage_database)
-        missed_bins = list(map(lambda p: p[0], filter(lambda p: p[1] == 0, coverage_plan.items())))
-        if len(missed_bins) == 0:
-            self.state = 'DONE'
-            coverage = coverage_plan
-            self.log_append({'role': 'coverage', 'content': coverage})
-            self.log_append({'role': 'stop', 'content': 'done'})
             self.save_log()
             return True
 

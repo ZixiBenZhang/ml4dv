@@ -6,10 +6,10 @@ BOUND = 521
 class FixedPromptGenerator4SD1(BasePromptGenerator):
     def __init__(self):
         super().__init__()
-        self.prev_coverage = (0, 0)
+        self.prev_coverage = (0, -1)
 
     def reset(self):
-        self.prev_coverage = (0, 0)
+        self.prev_coverage = (0, -1)
 
     def generate_system_prompt(self) -> str:
         # TODO: tune SYSTEM message
@@ -58,6 +58,7 @@ class FixedPromptGenerator4SD1(BasePromptGenerator):
         return prompt
 
     def generate_iterative_prompt(self, coverage_database: CoverageDatabase, **kwargs) -> str:
+        # TODO: prompt for valid but no new hits?
         cur_coverage = get_coverage_rate(coverage_database)
         if kwargs['response_invalid']:
             gibberish_prompt = "Your response doesn't answer my query. \n" \
@@ -65,7 +66,11 @@ class FixedPromptGenerator4SD1(BasePromptGenerator):
                                "with output format: [x0, x1, x2, ...]"
             return gibberish_prompt
 
-        prompt = "The values you provided failed to cover all the bins.\n" \
-                 f"Please regenerate a list of integers to cover more bins."
+        if cur_coverage == self.prev_coverage:
+            prompt = "The values you provided didn't cover any bins.\n" \
+                     "Please regenerate a list of integers to cover the bins you haven't covered."
+        else:
+            prompt = "The values you provided failed to cover all the bins.\n" \
+                     "Please regenerate a list of integers to cover more bins."
         self.prev_coverage = cur_coverage
         return prompt
