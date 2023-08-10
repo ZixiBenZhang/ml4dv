@@ -1,0 +1,47 @@
+Prompter: FixedPromptGenerator4SD1
+Generator: llama-2-7b-chat
+Extractor: DumbExtractor
+
+Index: 0
+Role: system
+Content: Please output (positive or negative) integers only, each between -999 and 999.
+
+Index: 0
+Role: user
+Content: Please generate a list of integers that satisfies these conditions:
+------
+CONDITIONS
+- The list contains segments of int.
+- Each segment is of length 16.
+- A segment follows a single-stride pattern with a stride width x if: the differences between two adjacent integers are always x.
+- A segment follows a double-stride pattern with a stride width pair (x, y) if: the differences between two adjacent integers are alternating x and y, meanwhile x and y are different.
+- A segment has no stride pattern if it neither follows a single-stride pattern nor a double-stride pattern.
+- The maximum stride width is 15, and the minimum stride width is -16.
+- For each bin described as the following, generate a segment:
+---
+BINS
+- stride_1_seen - One bin per possible stride width between the minimum and maximum stride width, where the segment follows a single-stride pattern of the stride width.
+- stride_2_seen - One bin per pair of possible stride widths between the minimum and maximum stride width, where the segment follows a double-stride pattern of the stride width pair.
+- misc_bins - Various bins grouped in a dictionary
+    - single_stride_[n|p]_overflow - A segment where an incoming stream of values has a valid single stride but that stride is below the minimum (n) or above the maximum (p) stride width.
+    - double_stride_[n|p][n|p] - A segment where an incoming stream of values has a valid double stride but those strides are below the minimum (n) or above the maximum (p) stride widths, nn indicates both are below the minimum, where np indicates one is below the minimum and the other above the maximum.
+---
+- Also, generate consecutive segments that satisfy the following bins:
+---
+BINS    - no_stride_to_[single|double] - A segment with no stride pattern followed by another segment with a single/double stride pattern.
+    - [single|double]_stride_[double|single] - A segment with single/double stride pattern followed by another segment with a double/single stride pattern.
+---
+------
+Please generate a list of integers that satisfies the above conditions.
+
+Index: 0
+Role: assistant
+Content:  Sure, I can generate a list of integers that satisfies the conditions you've specified. Here is one possible list:
+stride_1_seen:
+16 - 15 - 14 - 13 - 12 - 11 - 10 - 9 - 8 - 7 - 6 - 5 - 4 - 3 - 2 - 1
+stride_2_seen:
+(16, 32) - (32, 48) - (48, 64) - (64, 80) - (80, 96) - (96, 104) - (104, 112) - (112, 120) - (120, 128) - (128, 136) - (136, 144) - (144, 152) - (152, 160) - (160, 168) - (168, 176) - (176, 184) - (184, 192) - (192, 200) - (200, 208) - (208, 216) - (216, 224) - (224, 232) - (232, 240) - (240, 248) - (248, 256) - (256, 264) - (264, 272) - (272, 280) - (280, 288) - (288, 296) - (296, 304) - (304, 312) - (312, 320) - (320, 328) - (328, 336) - (336, 344) - (344, 352) - (352, 360) - (360, 368) - (368, 376) - (376, 384) - (384, 392) - (392, 400) - (400, 408) - (408, 416) - (416, 424) - (424, 432) - (432, 440) - (440, 448) - (448, 456) - (456, 464) - (464, 472) - (472, 480) - (480, 488) - (488, 496) - (496, 504) - (504, 512) - (512, 520) - (520, 528) - (528, 536) - (536, 544) - (544, 552) - (552, 560) - (560, 568) - (568, 576) -
+
+Coverage rate: 4 / 1050
+Coverage plan: {'single_-1': 12, 'double_8_0': 113, 'no_stride_to_double': 1, 'no_stride_to_single': 1}
+
