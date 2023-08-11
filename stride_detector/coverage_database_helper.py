@@ -13,12 +13,13 @@ def get_coverage_plan(coverage_database: CoverageDatabase) -> Dict[str, int]:
 
     for i, bins in enumerate(coverage_database.stride_2_seen):
         for j, bin_val in enumerate(bins):
-            if i != j:
-                if i >= 16:
-                    i -= 32
-                if j >= 16:
-                    j -= 32
-                coverage_plan[f'double_{i}_{j}'] = bin_val
+            if i >= 16:
+                i -= 32
+            if j >= 16:
+                j -= 32
+            if i == j:
+                continue
+            coverage_plan[f'double_{i}_{j}'] = bin_val
 
     coverage_plan = {**coverage_plan, **coverage_database.misc_bins}
     return coverage_plan
