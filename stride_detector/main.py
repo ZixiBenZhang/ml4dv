@@ -54,7 +54,19 @@ def testLlama(ckpt_dir='llama-2-7b-chat/', max_seq_len=4096, max_gen_len=None):
 
 def testGPT():
     openai.api_key = os.getenv("OPENAI_API_KEY")
-    pprint(openai.Model.list())
+    prompt = "What's Bayesian optimization?"
+    messages = [{"role": "user", "content": prompt}]
+
+    result = openai.ChatCompletion.create(
+        model='gpt-3.5-turbo',
+        messages=messages,
+        n=3,
+    )
+    response_choices = [choice['message'] for choice in result['choices']]
+
+    print("Responses:")
+    for i, msg in enumerate(response_choices):
+        print(f"Choice {i}:\n{msg}\n")
 
 
 if __name__ == '__main__':
