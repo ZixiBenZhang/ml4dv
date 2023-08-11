@@ -59,7 +59,8 @@ class FixedPromptGenerator4SD1(BasePromptGenerator):
 
     def generate_iterative_prompt(self, coverage_database: CoverageDatabase, **kwargs) -> str:
         if kwargs['response_invalid']:
-            gibberish_prompt = "Your response doesn't answer my query. \n" \
+            # TODO: tune gibberish prompt (or maybe it's limitation of fixed prompts?)
+            gibberish_prompt = "Your response doesn't follow the output format requirement.\n" \
                                f"Please generate a list of integers, " \
                                f"each integer between -{BOUND} and {BOUND}, " \
                                "with output format: [x0, x1, x2, ...]"

@@ -133,6 +133,7 @@ class TemplatePromptGenerator4SD1(TemplatePromptGenerator):
 
     def _load_result_summary(self, **kwargs) -> str:
         if kwargs['response_invalid']:
+            # TODO: tune gibberish prompts
             result_summary = \
                 "Your response doesn't answer my query. \n" \
                 f"Please generate a list of integers between -{BOUND} and {BOUND}, " \
