@@ -2,18 +2,21 @@ from stride_detector.prompt_generators.prompt_generator_base import *
 from abc import ABC
 
 BOUND = 523
+SAMPLE_MISSED_BINS_NUM = 5
 
 
 class TemplatePromptGenerator(BasePromptGenerator, ABC):
     def __init__(self,
                  dut_code_path: str = './examples/dut_code.txt',
                  tb_code_path: str = './examples/tb_code.txt',
-                 code_summary_type: int = 0,  # 0: no code, 1: code, 2: summary
                  bin_descr_path: str = './examples/bins_description.txt',
+                 code_summary_type: int = 0,  # 0: no code, 1: code, 2: summary
+                 sampling_missed_bins: bool = True,
                  ):
         super().__init__()
         self.prev_coverage = (0, -1)
         self.code_summary_type = code_summary_type
+        self.sampling_missed_bins = sampling_missed_bins
 
         self.intro = self._load_introduction()
         self.code_summary = self._load_code_summary(dut_code_path, tb_code_path)
@@ -80,6 +83,8 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
         missed_bins = list(map(lambda p: p[0], filter(lambda p: p[1] == 0, coverage_plan.items())))
         if len(missed_bins) == 0:
             pass
+        if self.sampling_missed_bins:
+            missed_bins = missed_bins[:min(SAMPLE_MISSED_BINS_NUM, len(missed_bins))]
         for bin_name in missed_bins:
             coverage_difference += self.coverage_difference_prompts_dict[bin_name]
 
@@ -106,7 +111,7 @@ class TemplatePromptGenerator4SD1(TemplatePromptGenerator):
                    "a hardware device under test (DUT). " \
                    "Then, you are going to generate a list of integers to cover these test cases.\n"
         else:
-            # TODO: code summaries
+            # TODO: intro for code summaries
             raise NotImplementedError
 
     def _load_code_summary(self, dut_code_path, tb_code_path) -> str:
@@ -130,7 +135,7 @@ class TemplatePromptGenerator4SD1(TemplatePromptGenerator):
                 f"------\n"
             return dut_summary
         else:
-            # TODO
+            # TODO: code summaries
             raise NotImplementedError
 
     def _load_bins_summary(self, bin_descr_dir) -> str:
@@ -161,7 +166,7 @@ class TemplatePromptGenerator4SD1(TemplatePromptGenerator):
                 "Your response doesn't answer my query. \n" \
                 f"Please generate a list of integers between -{BOUND} and {BOUND}, " \
                 "with output format: [a, b, c, ...].\n" \
-                "Here are the unreached bins:\n"
+                f"Here are {'some of ' if self.sampling_missed_bins else ''}the unreached bins:\n"
 
         elif kwargs['no_new_hit']:
             result_summary = \
@@ -169,14 +174,14 @@ class TemplatePromptGenerator4SD1(TemplatePromptGenerator):
                 "much of the described bins as you can.\n" \
                 "You will see the result coverage of your previous response(s), and then " \
                 "generate another list of integers to cover the unreached bins (i.e. test cases)\n" \
-                "Here are the unreached bins:\n"
+                f"Here are {'some of ' if self.sampling_missed_bins else ''} the unreached bins:\n"
 
         else:
             result_summary = \
                 "The values you provided failed to cover all the bins.\n" \
                 "You will see the result coverage of your previous response(s), and then " \
                 "generate another list of integers to cover the unreached bins (i.e. test cases)\n" \
-                "Here are the unreached bins:\n"
+                f"Here are {'some of ' if self.sampling_missed_bins else ''}the unreached bins:\n"
         return result_summary
 
     def _load_coverage_difference_prompts_dict(self) -> Dict[str, str]:
