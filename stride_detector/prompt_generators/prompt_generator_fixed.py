@@ -15,7 +15,7 @@ class FixedPromptGenerator4SD1(BasePromptGenerator):
         # TODO: tune SYSTEM message
         return "Please output (positive or negative) a list of integers only, " \
                f"each integer between -{BOUND} and {BOUND}. \n" \
-               f"Output format: x0, x1, x2, ..."
+               f"Output format: [a, b, c, ...]."
 
     def generate_initial_prompt(self) -> str:
         prompt = \
@@ -63,7 +63,7 @@ class FixedPromptGenerator4SD1(BasePromptGenerator):
             gibberish_prompt = "Your response doesn't answer my query.\n" \
                                f"Please generate a list of integers, " \
                                f"each integer between -{BOUND} and {BOUND}, " \
-                               "with output format: x0, x1, x2, ..."
+                               "with output format: [a, b, c, ...]"
             return gibberish_prompt
 
         cur_coverage = get_coverage_rate(coverage_database)
