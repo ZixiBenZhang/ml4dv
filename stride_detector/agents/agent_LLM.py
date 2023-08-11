@@ -156,7 +156,7 @@ class LLMAgent(BaseAgent):
             print(f"Dialog #{self.dialog_index} done, hits: {coverage_plan}")
             self.save_log()
 
-        f_ = 0
+        f_ = 0  # i.e. no stimuli in response
         while len(self.stimuli_buffer) == 0:
             if f_:
                 self.log_append({'role': 'coverage', 'content': coverage})
