@@ -15,7 +15,7 @@ class FixedPromptGenerator4SD1(BasePromptGenerator):
         # TODO: tune SYSTEM message
         return "Please output (positive or negative) a list of integers only, " \
                f"each integer between -{BOUND} and {BOUND}. \n" \
-               f"Output format: [x0, x1, x2, ...]."
+               f"Output format: x0, x1, x2, ..."
 
     def generate_initial_prompt(self) -> str:
         prompt = \
@@ -60,10 +60,10 @@ class FixedPromptGenerator4SD1(BasePromptGenerator):
     def generate_iterative_prompt(self, coverage_database: CoverageDatabase, **kwargs) -> str:
         if kwargs['response_invalid']:
             # TODO: tune gibberish prompt (or maybe it's limitation of fixed prompts?)
-            gibberish_prompt = "Your response doesn't follow the output format requirement.\n" \
+            gibberish_prompt = "Your response doesn't answer my query.\n" \
                                f"Please generate a list of integers, " \
                                f"each integer between -{BOUND} and {BOUND}, " \
-                               "with output format: [x0, x1, x2, ...]"
+                               "with output format: x0, x1, x2, ..."
             return gibberish_prompt
 
         cur_coverage = get_coverage_rate(coverage_database)

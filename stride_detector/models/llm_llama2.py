@@ -58,7 +58,7 @@ class Llama2(BaseLLM):
         return response
 
     def _compress_conversation(self):
-        REMAIN_ITER_NUM = 5
+        REMAIN_ITER_NUM = 3
         if len(self.conversations[-1]) < 4 + 2 * REMAIN_ITER_NUM:
             return
         if self.conversations[-1][0]['role'] == 'system':
