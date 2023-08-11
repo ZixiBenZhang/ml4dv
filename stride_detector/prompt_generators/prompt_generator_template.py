@@ -5,7 +5,10 @@ BOUND = 523
 
 
 class TemplatePromptGenerator(BasePromptGenerator, ABC):
-    def __init__(self, dut_code_path: str, tb_code_path: str, bin_descr_path: str):
+    def __init__(self,
+                 dut_code_path: str = './examples/dut_code.txt',
+                 tb_code_path: str = './examples/tb_code.txt',
+                 bin_descr_path: str = './examples/bins_description.txt'):
         super().__init__()
         self.prev_coverage = (0, -1)
 
@@ -51,7 +54,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
         # TODO: tune SYSTEM message
         return "Please output (positive or negative) a list of integers only, " \
                f"each integer between -{BOUND} and {BOUND}. \n" \
-               f"Output format: [x0, x1, x2, ...]."
+               f"Output format: [a, b, c, ...]."
 
     def generate_initial_prompt(self) -> str:
         # Initial Template: introduction + summaries + question
@@ -137,12 +140,12 @@ class TemplatePromptGenerator4SD1(TemplatePromptGenerator):
             result_summary = \
                 "Your response doesn't answer my query. \n" \
                 f"Please generate a list of integers between -{BOUND} and {BOUND}, " \
-                "with output format: [x0, x1, x2, ...].\n" \
+                "with output format: [a, b, c, ...].\n" \
                 "Here are the unreached bins:\n"
 
         elif kwargs['no_new_hit']:
             result_summary = \
-                "The values you just provided didn't cover any bins. You need to try to cover as " \
+                "The new values you just provided didn't cover any new bins. You need to try to cover as " \
                 "much of the described bins as you can.\n" \
                 "You will see the result coverage of your previous response(s), and then " \
                 "generate another list of integers to cover the unreached bins (i.e. test cases)\n" \
@@ -180,7 +183,7 @@ class TemplatePromptGenerator4SD1(TemplatePromptGenerator):
     def _load_iter_question(self, **kwargs) -> str:
         if kwargs['response_invalid']:
             iter_question = f"Please generate a list of integers between -{BOUND} and {BOUND}, " \
-                            "with output format: [x0, x1, x2, ...]"
+                            "with output format: [a, b, c, ...]"
         else:
             iter_question = "Please regenerate the segments of integers for these unreached bins."
         return iter_question
