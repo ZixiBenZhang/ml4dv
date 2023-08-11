@@ -8,9 +8,12 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
     def __init__(self,
                  dut_code_path: str = './examples/dut_code.txt',
                  tb_code_path: str = './examples/tb_code.txt',
-                 bin_descr_path: str = './examples/bins_description.txt'):
+                 code_summary_type: int = 0,  # 0: no code, 1: code, 2: summary
+                 bin_descr_path: str = './examples/bins_description.txt',
+                 ):
         super().__init__()
         self.prev_coverage = (0, -1)
+        self.code_summary_type = code_summary_type
 
         self.intro = self._load_introduction()
         self.code_summary = self._load_code_summary(dut_code_path, tb_code_path)
@@ -94,25 +97,41 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
 
 class TemplatePromptGenerator4SD1(TemplatePromptGenerator):
     def _load_introduction(self) -> str:
-        return "You will receive programs of a hardware device and a testbench, " \
-               "and a description of bins (i.e. test cases). " \
-               "Then, you are going to generate a list of integers to cover the test cases.\n"
+        if self.code_summary_type == 1:
+            return "You will receive programs of a hardware device and a testbench, " \
+                   "and a description of bins (i.e. test cases). " \
+                   "Then, you are going to generate a list of integers to cover the test cases.\n"
+        elif self.code_summary_type == 0:
+            return "You will receive a description of bins (i.e. test cases) of a testbench for " \
+                   "a hardware device under test (DUT). " \
+                   "Then, you are going to generate a list of integers to cover these test cases.\n"
+        else:
+            # TODO: code summaries
+            raise NotImplementedError
 
     def _load_code_summary(self, dut_code_path, tb_code_path) -> str:
-        with open(dut_code_path, 'r') as f:
-            dut_code = f.read()
-        dut_summary = \
-            f"I have a device under test (DUT). Here's the SystemVerilog code of the DUT:\n" \
-            f"------\n" \
-            f"DUT CODE\n" \
-            f"{dut_code}\n" \
-            f"------\n" \
-            f"I also have a testbench for the DUT. Here's the Python code of the testbench:\n" \
-            f"------\n" \
-            f"TESTBENCH CODE\n" \
-            f"{tb_code_path}\n" \
-            f"------\n"
-        return dut_summary
+        if self.code_summary_type == 0:
+            return ""
+        elif self.code_summary_type == 1:
+            with open(dut_code_path, 'r') as f:
+                dut_code = f.read()
+            with open(tb_code_path, 'r') as f:
+                tb_code = f.read()
+            dut_summary = \
+                f"I have a device under test (DUT). Here's the SystemVerilog code of the DUT:\n" \
+                f"------\n" \
+                f"DUT CODE\n" \
+                f"{dut_code}\n" \
+                f"------\n" \
+                f"I also have a testbench for the DUT. Here's the Python code of the testbench:\n" \
+                f"------\n" \
+                f"TESTBENCH CODE\n" \
+                f"{tb_code}\n" \
+                f"------\n"
+            return dut_summary
+        else:
+            # TODO
+            raise NotImplementedError
 
     def _load_bins_summary(self, bin_descr_dir) -> str:
         with open(bin_descr_dir, 'r') as f:
@@ -120,7 +139,7 @@ class TemplatePromptGenerator4SD1(TemplatePromptGenerator):
         tb_summary = \
             f"Now, we want to test the DUT with a list of integers as its input. " \
             f"We want the input to cover the bins (i.e. test cases) that we care about. " \
-            f"Here's a description of the bins that we care about:\n" \
+            f"Here's the description of the bins that we care about:\n" \
             f"------\n" \
             f"BINS DESCRIPTION\n" \
             f"{bins_description}\n" \
@@ -129,8 +148,9 @@ class TemplatePromptGenerator4SD1(TemplatePromptGenerator):
 
     def _load_init_question(self) -> str:
         init_question = \
-            "Following the bins description, and refer to the programs, " \
-            "generate a list that contains segments of integers, which covers " \
+            "Following the bins description" + \
+            (", and refer to the programs" if self.code_summary_type != 0 else "") + \
+            ", generate a list that contains segments of integers, which covers " \
             "the described bins as much as you can.\n"
         return init_question
 
