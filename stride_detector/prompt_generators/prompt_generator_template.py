@@ -69,7 +69,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
     def generate_iterative_prompt(self, coverage_database: CoverageDatabase, **kwargs) -> str:
         # Iterative Template: result summary + difference + question
         cur_coverage = get_coverage_rate(coverage_database)
-        kwargs['response_invalid'] = cur_coverage == self.prev_coverage
+        kwargs['no_new_hit'] = cur_coverage == self.prev_coverage
 
         # calculate difference
         coverage_difference = ""
