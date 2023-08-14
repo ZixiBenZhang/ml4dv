@@ -17,7 +17,7 @@ class CSVLogger(BaseLogger):
 
         # one entry per dialog (USER + ASSISTANT)
         self.log: List[Dict[str, Union[int, str]]] = []
-        self.header = ["Message#", "USER", "ASSISTANT", "Action", "Coverage Plan"]
+        self.header = ["Message#", "USER", "ASSISTANT", "Action", "Coverage Rate", "Coverage Plan"]
         self.logged_index = 0  # log index for logging
 
     def save_info(self, info: List[Union[str, int]]):
