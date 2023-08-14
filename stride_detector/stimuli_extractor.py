@@ -18,11 +18,9 @@ class DumbExtractor(BaseExtractor):
         super().__init__()
 
     def __call__(self, text: str):
-        literals = list(filter(lambda x: x[-1] != '.', re.findall(r'0x[\da-fA-F]+|-?\d+[.:]?', text, re.I)))
+        literals = list(re.findall(r'(?:0x[\da-fA-F]+)|(?:-?\d+(?!\d)(?!\.)(?!:))', text, re.I))
         numbers = list(
-            map(lambda x: (int(x, 16) if x[:2] == '0x' else
-                           int(x) if x[-1] != '.' and x[-1] != ':' else int(x[:-1])),
-                literals))
+            map(lambda x: (int(x, 16) if x[:2] == '0x' else int(x)), literals))
         return numbers
 
     def reset(self):
