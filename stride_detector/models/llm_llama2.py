@@ -59,7 +59,7 @@ class Llama2(BaseLLM):
 
     def _compress_conversation(self):
         # TODO: relation between REMAIN_ITER_NUM and gibberish
-        REMAIN_ITER_NUM = 3
+        REMAIN_ITER_NUM = 5
         if len(self.conversations[-1]) < 4 + 2 * REMAIN_ITER_NUM:
             return
         if self.conversations[-1][0]['role'] == 'system':
