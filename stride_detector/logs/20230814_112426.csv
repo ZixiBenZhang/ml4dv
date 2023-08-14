@@ -1,0 +1,3 @@
+Model,llama-2-7b-chat,SYSTEM,"Please output (positive or negative) a list of integers only, each integer between -523 and 523. 
+Output format: [a, b, c, ...].",temperature,0.4,top_p,0.9,Prompter,TemplatePromptGenerator4SD1,Extractor,DumbExtractor
+Message#,USER,ASSISTANT,Action,Coverage Plan
