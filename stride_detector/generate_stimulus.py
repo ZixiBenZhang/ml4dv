@@ -45,7 +45,7 @@ class StimulusSender:
 def main():
     # build components
     prompt_generator = FixedPromptGenerator4SD1()
-    stimulus_generator = Llama2(system_prompt=prompt_generator.generate_system_prompt())
+    stimulus_generator = ChatGPT(system_prompt=prompt_generator.generate_system_prompt())
     print('Llama2 successfully built')
     # stimulus_generator = ChatGPT(system_prompt=prompt_generator.generate_system_prompt())
     extractor = DumbExtractor()
@@ -54,8 +54,8 @@ def main():
     # build loggers
     t = datetime.now()
     t = t.strftime('%Y%m%d_%H%M%S')
-    logger_txt = TXTLogger(f'./logs/{t}.txt')
-    logger_csv = CSVLogger(f'./logs/{t}.csv')
+    logger_txt = TXTLogger(f'./logs_fixed/{t}.txt')
+    logger_csv = CSVLogger(f'./logs_fixed/{t}.csv')
 
     # create agent
     agent = LLMAgent(prompt_generator, stimulus_generator, extractor, stimulus_filter,
