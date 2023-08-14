@@ -190,9 +190,10 @@ class TemplatePromptGenerator4SD1(TemplatePromptGenerator):
         return result_summary
 
     def _load_coverage_difference_prompts_dict(self) -> Dict[str, str]:
-        single_bins_difference = {f'single_{i}': f"Single-stride pattern of stride width {i} is unreached.\n"
+        # TODO: improve difference prompts
+        single_bins_difference = {f'single_{i}': f"- Single-stride pattern segment of stride width {i} is unreached.\n"
                                   for i in range(-16, 16)}
-        double_bins_difference = {f'double_{i}_{j}': f"Double-stride pattern of stride width pair "
+        double_bins_difference = {f'double_{i}_{j}': f"- Double-stride pattern segment of stride width pair "
                                                      f"({i}, {j}) is unreached.\n"
                                   for i in range(-16, 16) for j in range(-16, 16) if i != j}
         misc_bins = ['single_stride_n_overflow',
@@ -205,7 +206,7 @@ class TemplatePromptGenerator4SD1(TemplatePromptGenerator):
                      'no_stride_to_single',
                      'single_stride_to_double',
                      'double_stride_to_single']
-        misc_bins_difference = {bin_name: f'{bin_name} is unreached.\n' for bin_name in misc_bins}
+        misc_bins_difference = {bin_name: f'- {bin_name} is unreached.\n' for bin_name in misc_bins}
 
         coverage_difference_template = {**single_bins_difference, **double_bins_difference, **misc_bins_difference}
         return coverage_difference_template
