@@ -66,6 +66,7 @@ class Llama2(BaseLLM):
             self.conversations[-1] = self.conversations[-1][:3] + self.conversations[-1][-2 * REMAIN_ITER_NUM:]
         else:
             self.conversations[-1] = self.conversations[-1][:2] + self.conversations[-1][-2 * REMAIN_ITER_NUM:]
+        print("Dialog compressed...")
         return
 
     def reset(self):
