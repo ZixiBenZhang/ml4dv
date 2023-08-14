@@ -215,5 +215,6 @@ class TemplatePromptGenerator4SD1(TemplatePromptGenerator):
             iter_question = f"Please generate a list of integers between -{BOUND} and {BOUND}, " \
                             "with output format: [a, b, c, ...]"
         else:
-            iter_question = "Please regenerate the segments of integers for these unreached bins."
+            iter_question = "Please regenerate a segment of length 16 for each of these unreached bins " \
+                            "according to the BINS DESCRIPTION."
         return iter_question
