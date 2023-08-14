@@ -156,11 +156,12 @@ class LLMAgent(BaseAgent):
             print(f"Dialog #{self.dialog_index} done, hits: {coverage_plan}")
             self.save_log()
 
-        f_ = 0  # i.e. no stimuli in response
+        # TODO: other ways to detect gibberish with numbers
+        f_ = 0  # i.e. gibberish response
         while len(self.stimuli_buffer) == 0:
             if f_:
                 self.log_append({'role': 'coverage', 'content': coverage})
-                print(f"Dialog #{self.dialog_index} done, doesn't hit any bin")
+                print(f"Dialog #{self.dialog_index} done, gibberish response")
                 self.save_log()
 
             prompt = ""
@@ -178,9 +179,25 @@ class LLMAgent(BaseAgent):
             self.dialog_index += 1
             self.log_append({'role': 'assistant', 'content': response})
 
+            gibberish = self._check_gibberish(response)
+            if gibberish:
+                f_ = 1
+                continue
+
             stimuli = self.stimulus_filter(self.extractor(response))
             self.stimuli_buffer.extend(stimuli)
 
-            f_ = 1
-
         return self._get_next_value_from_buffer()
+
+    def _check_gibberish(self, response: str) -> bool:
+        stimuli = self.stimulus_filter(self.extractor(response))
+        if len(stimuli) == 0:
+            return True
+        lines = response.split('\n')
+        cnt = 0
+        for line in lines:
+            if len(line) == 0:
+                cnt += 1
+        if cnt >= len(lines) // 2:
+            return True
+        return False
