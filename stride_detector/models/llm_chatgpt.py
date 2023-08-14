@@ -33,6 +33,7 @@ class ChatGPT(BaseLLM):
             model=self.model_name,
             messages=self.messages,
             temperature=self.temperature,
+            top_p=self.top_p,
             max_tokens=self.max_tokens,
             n=1,
         )
