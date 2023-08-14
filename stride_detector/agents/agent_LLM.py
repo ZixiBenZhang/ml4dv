@@ -7,6 +7,8 @@ from stride_detector.logging.logger_base import BaseLogger
 from stride_detector.logging.logger_txt import TXTLogger
 from stride_detector.logging.logger_csv import CSVLogger
 
+DIALOG_BOUND = 20
+
 
 class LLMAgent(BaseAgent):
     def __init__(self,
@@ -55,7 +57,7 @@ class LLMAgent(BaseAgent):
             self.save_log()
             return True
 
-        if self.dialog_index >= 20 and len(self.stimuli_buffer) == 0:
+        if self.dialog_index >= DIALOG_BOUND and len(self.stimuli_buffer) == 0:
             coverage = get_coverage_plan(coverage_database)
             self.log_append({'role': 'coverage', 'content': coverage})
             self.log_append({'role': 'stop', 'content': 'max dialog number'})
@@ -147,7 +149,8 @@ class LLMAgent(BaseAgent):
         self.stimulus_cnt += 1
         return stimulus
 
-    def generate_next_value(self, dut_state: Union[None, DUTState], coverage_database: Union[None, CoverageDatabase]):
+    def generate_next_value(self, dut_state: Union[None, DUTState],
+                            coverage_database: Union[None, CoverageDatabase]) -> Union[int, None]:
         coverage = get_coverage_plan(coverage_database)
 
         if len(self.stimuli_buffer) == 0 and self.state != 'INIT':  # not first stimulus
@@ -159,6 +162,10 @@ class LLMAgent(BaseAgent):
         # TODO: other ways to detect gibberish with numbers
         f_ = 0  # i.e. gibberish response
         while len(self.stimuli_buffer) == 0:
+            if self.dialog_index >= DIALOG_BOUND:
+                # return None (same as 0), so entering end_simulation and stops in next loop
+                return None
+
             if f_:
                 self.log_append({'role': 'coverage', 'content': coverage})
                 print(f"Dialog #{self.dialog_index} done, gibberish response")
