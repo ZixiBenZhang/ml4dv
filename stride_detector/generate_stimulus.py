@@ -44,9 +44,10 @@ class StimulusSender:
 
 def main():
     # build components
-    prompt_generator = TemplatePromptGenerator4SD1()
-    stimulus_generator = Llama2(system_prompt=prompt_generator.generate_system_prompt())
-    print('Llama2 successfully built')
+    prompt_generator = FixedPromptGenerator4SD1()
+    # stimulus_generator = Llama2(system_prompt=prompt_generator.generate_system_prompt())
+    # print('Llama2 successfully built')
+    stimulus_generator = ChatGPT(system_prompt=prompt_generator.generate_system_prompt())
     extractor = DumbExtractor()
     stimulus_filter = Filter4SD(-10000, 10000)
 
