@@ -68,10 +68,10 @@ class FixedPromptGenerator4SD1(BasePromptGenerator):
 
         cur_coverage = get_coverage_rate(coverage_database)
         if cur_coverage == self.prev_coverage:
-            prompt = "The values you just provided didn't cover any bins.\n" \
+            prompt = "The new values you just provided didn't cover any new bins.\n" \
                      "Please regenerate a list of integers to cover the bins you haven't covered."
         else:
-            prompt = "The values you provided failed to cover all the bins.\n" \
+            prompt = "The values you provided covered some but not all the bins.\n" \
                      "Please regenerate a list of integers to cover more bins."
         self.prev_coverage = cur_coverage
         return prompt
