@@ -1,5 +1,9 @@
+import random
+import time
+
 from stride_detector.models.llm_base import *
 import os
+
 import openai
 import tiktoken
 
@@ -38,18 +42,28 @@ class ChatGPT(BaseLLM):
         else:
             model = self.long_context_model_name
 
-        result = openai.ChatCompletion.create(
-            model=model,
-            messages=self.messages,
-            temperature=self.temperature,
-            top_p=self.top_p,
-            max_tokens=self.max_gen_tokens,
-            n=1,
-        )
-        response_choices: List[Dict[str, str]] = [choice['message'] for choice in result['choices']]
-
-        self.messages.append(response_choices[0])
-        return response_choices[0]['content']
+        for delay in [2 ** x for x in range(0, 6)]:
+            try:
+                result = openai.ChatCompletion.create(
+                    model=model,
+                    messages=self.messages,
+                    temperature=self.temperature,
+                    top_p=self.top_p,
+                    max_tokens=self.max_gen_tokens,
+                    n=1,
+                )
+            except (openai.error.ServiceUnavailableError,
+                    openai.error.APIError,
+                    openai.error.Timeout) as e:
+                randomness_collision_avoidance = random.randint(0, 1000) / 100.0
+                sleep_dur = delay + randomness_collision_avoidance
+                print(f"Error: {e}. Retrying in {round(sleep_dur, 2)} seconds.")
+                time.sleep(sleep_dur)
+                continue
+            else:
+                response_choices: List[Dict[str, str]] = [choice['message'] for choice in result['choices']]
+                self.messages.append(response_choices[0])
+                return response_choices[0]['content']
 
     def _compress_conversation(self):
         REMAIN_ITER_NUM = 3
