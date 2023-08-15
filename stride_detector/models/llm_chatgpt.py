@@ -1,5 +1,3 @@
-from math import inf
-
 from stride_detector.models.llm_base import *
 import os
 import openai
@@ -11,12 +9,13 @@ class ChatGPT(BaseLLM):
                  model_name='gpt-3.5-turbo',
                  temperature=0.4,
                  top_p=1,
-                 max_tokens=inf):
+                 max_tokens=800):
         super().__init__(system_prompt)
         openai_api_key = os.getenv("OPENAI_API_KEY")
         assert openai_api_key is not None, "OpenAI API key not found."
         openai.api_key = openai_api_key
         self.model_name = model_name
+        self.long_context_model_name = model_name + '-16k'  # not in use
         self.temperature = temperature
         self.top_p = top_p
         self.max_tokens = max_tokens
@@ -29,15 +28,15 @@ class ChatGPT(BaseLLM):
         return self.model_name
 
     def __call__(self, prompt: str) -> str:
+        self._compress_conversation()
         self.messages.append({"role": "user", "content": prompt})
 
-        # TODO: debug
         result = openai.ChatCompletion.create(
             model=self.model_name,
             messages=self.messages,
             temperature=self.temperature,
             top_p=self.top_p,
-            # max_tokens=self.max_tokens,
+            max_tokens=self.max_tokens,
             n=1,
         )
         response_choices: List[Dict[str, str]] = [choice['message'] for choice in result['choices']]
@@ -47,7 +46,7 @@ class ChatGPT(BaseLLM):
 
     # not in use
     def _compress_conversation(self):
-        REMAIN_ITER_NUM = 5
+        REMAIN_ITER_NUM = 3
         if len(self.messages) < 4 + 2 * REMAIN_ITER_NUM:
             return
         if self.messages[-1]['role'] == 'system':
@@ -55,6 +54,8 @@ class ChatGPT(BaseLLM):
         else:
             init = self.messages[:2]
         self.messages = init + self.messages[-2 * REMAIN_ITER_NUM:]
+
+        # TODO: compress by summarization using Ada?
         return
 
     def reset(self):
