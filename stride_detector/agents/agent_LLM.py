@@ -197,6 +197,7 @@ class LLMAgent(BaseAgent):
 
         return self._get_next_value_from_buffer()
 
+    # Todo: debug
     def _check_gibberish(self, response: str) -> bool:
         stimuli = self.stimulus_filter(self.extractor(response))
         if len(stimuli) == 0:
@@ -206,6 +207,6 @@ class LLMAgent(BaseAgent):
         for line in lines:
             if len(line) == 0:
                 cnt += 1
-        if cnt >= len(lines) // 2:
+        if cnt >= len(lines) // 3 * 2:
             return True
         return False
