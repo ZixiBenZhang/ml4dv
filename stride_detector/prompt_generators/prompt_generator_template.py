@@ -83,6 +83,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
         missed_bins = list(map(lambda p: p[0], filter(lambda p: p[1] == 0, coverage_plan.items())))
         if len(missed_bins) == 0:
             pass
+        # Sampling missed bins
         if self.sampling_missed_bins and len(missed_bins) > 5:
             missed_bins = np.concatenate([missed_bins[:2],
                                           np.random.choice(missed_bins[2:min(25, len(missed_bins))],
