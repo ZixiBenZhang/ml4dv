@@ -8,7 +8,7 @@ import openai
 class ChatGPT(BaseLLM):
     def __init__(self,
                  system_prompt: str = "",
-                 model_name='gpt-3.5-turbo',
+                 model_name="gpt-3.5-turbo",
                  temperature=1,
                  top_p=1,
                  max_tokens=inf):
@@ -29,13 +29,15 @@ class ChatGPT(BaseLLM):
     def __call__(self, prompt: str) -> str:
         self.messages.append({"role": "user", "content": prompt})
 
+        # TODO: debug
+        openai.api_key = os.getenv("OPENAI_API_KEY")
         result = openai.ChatCompletion.create(
             model=self.model_name,
             messages=self.messages,
             temperature=self.temperature,
             top_p=self.top_p,
-            max_tokens=self.max_tokens,
             n=1,
+            max_tokens=self.max_tokens,
         )
         response_choices: List[Dict[str, str]] = [choice['message'] for choice in result['choices']]
 
