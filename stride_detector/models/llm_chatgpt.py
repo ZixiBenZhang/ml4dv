@@ -10,7 +10,7 @@ class ChatGPT(BaseLLM):
                  model_name='gpt-3.5-turbo',
                  temperature=0.4,
                  top_p=1,
-                 max_gen_tokens=800):
+                 max_gen_tokens=600):
         super().__init__(system_prompt)
         openai_api_key = os.getenv("OPENAI_API_KEY")
         assert openai_api_key is not None, "OpenAI API key not found."
@@ -33,7 +33,7 @@ class ChatGPT(BaseLLM):
         self._compress_conversation()
         self.messages.append({"role": "user", "content": prompt})
         token_cnt = self._check_token_num()
-        if self.model_max_context is None or token_cnt <= self.model_max_context:
+        if self.model_max_context is None or token_cnt + self.max_gen_tokens <= self.model_max_context:
             model = self.model_name
         else:
             model = self.long_context_model_name
