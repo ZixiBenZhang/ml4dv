@@ -1,3 +1,10 @@
+import sys
+import os
+
+directory = os.path.dirname(os.path.abspath("__file__"))
+sys.path.insert(0, os.path.dirname(directory))
+# print(sys.path)
+
 import functools
 import zmq
 import pickle
