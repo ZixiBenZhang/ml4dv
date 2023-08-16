@@ -156,11 +156,11 @@ class LLMAgent(BaseAgent):
 
         if len(self.stimuli_buffer) == 0 and self.state != 'INIT':  # not first stimulus
             self.log_append({'role': 'coverage', 'content': coverage})
+            self.save_log()
             coverage_plan = {k: v for (k, v) in coverage.items() if v > 0}
             print(f"Dialog #{self.dialog_index} done, \n"
                   f"Hits: {coverage_plan}, \n"
                   f"Coverage rate: {coverage_database.get_coverage_rate()}\n")
-            self.save_log()
 
         # TODO: other ways to detect gibberish with numbers
         f_ = 0  # i.e. gibberish response
@@ -171,8 +171,8 @@ class LLMAgent(BaseAgent):
 
             if f_:
                 self.log_append({'role': 'coverage', 'content': coverage})
-                print(f"Dialog #{self.dialog_index} done, gibberish response")
                 self.save_log()
+                print(f"Dialog #{self.dialog_index} done, gibberish response")
 
             prompt = ""
             if self.state == 'INIT':
