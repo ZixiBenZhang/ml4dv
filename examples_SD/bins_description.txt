@@ -1,5 +1,5 @@
 - The list contains segments (i.e. subsequences) of int.
-- Each segment is of length 20.
+- Each segment is of length 18.
 - A segment follows a single-stride pattern with a stride width x if: the differences between two adjacent integers are always x.
 - A segment follows a double-stride pattern with a stride width pair (x, y) if: the differences between two adjacent integers are alternating x and y, meanwhile x and y are different.
 - A segment has no stride pattern if it neither follows a single-stride pattern nor a double-stride pattern.
