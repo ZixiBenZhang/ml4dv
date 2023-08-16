@@ -1,4 +1,5 @@
-from stride_detector.prompt_generators.prompt_generator_base import *
+import stride_detector.shared_types
+from prompt_generators.prompt_generator_base import *
 
 BOUND = 523
 
@@ -57,7 +58,9 @@ class FixedPromptGenerator4SD1(BasePromptGenerator):
             f"Please generate a list of integers between -{BOUND} and {BOUND} that satisfies the above conditions.\n"
         return prompt
 
-    def generate_iterative_prompt(self, coverage_database: CoverageDatabase, **kwargs) -> str:
+    def generate_iterative_prompt(self, coverage_database: GlobalCoverageDatabase, **kwargs) -> str:
+        assert coverage_database.get() is stride_detector.shared_types.CoverageDatabase
+
         if kwargs['response_invalid']:
             # TODO: tune gibberish prompt (or maybe it's limitation of fixed prompts?)
             gibberish_prompt = "Your response doesn't answer my query.\n" \
@@ -66,7 +69,7 @@ class FixedPromptGenerator4SD1(BasePromptGenerator):
                                "with output format: [a, b, c, ...]"
             return gibberish_prompt
 
-        cur_coverage = get_coverage_rate(coverage_database)
+        cur_coverage = coverage_database.get_coverage_rate()
         if cur_coverage == self.prev_coverage:
             prompt = "The new values you just provided didn't cover any new bins.\n" \
                      "Please regenerate a list of integers to cover the bins you haven't covered."

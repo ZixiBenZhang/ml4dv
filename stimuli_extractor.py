@@ -2,8 +2,6 @@ import re
 from abc import abstractmethod
 from typing import List
 
-import numpy as np
-
 
 class BaseExtractor:
     @abstractmethod

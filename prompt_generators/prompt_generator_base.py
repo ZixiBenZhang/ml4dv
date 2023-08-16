@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from stride_detector.coverage_database_helper import *
+from global_shared_types import *
 
 
 class BasePromptGenerator:
@@ -22,5 +22,5 @@ class BasePromptGenerator:
         raise NotImplementedError
 
     @abstractmethod
-    def generate_iterative_prompt(self, coverage_database: CoverageDatabase, **kwargs) -> str:
+    def generate_iterative_prompt(self, coverage_database: GlobalCoverageDatabase, **kwargs) -> str:
         raise NotImplementedError

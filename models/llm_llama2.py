@@ -1,6 +1,6 @@
 from llama import Llama
 
-from stride_detector.models.llm_base import *
+from models.llm_base import *
 
 
 class Llama2(BaseLLM):

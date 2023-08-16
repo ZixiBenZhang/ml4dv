@@ -1,4 +1,4 @@
-from stride_detector.logging.logger_base import *
+from loggers.logger_base import *
 
 
 class TXTLogger(BaseLogger):
@@ -7,11 +7,11 @@ class TXTLogger(BaseLogger):
         if log_path == '':
             t = datetime.now()
             t = t.strftime('%Y%m%d_%H%M%S')
-            self.log_path = f'./logs/{t}.txt'
+            self.log_path = f'./logs_SD_template/{t}.txt'
         else:
             self.log_path = log_path
-        if not os.path.exists('./logs'):
-            os.makedirs('./logs')
+        if not os.path.exists('./logs_SD_template'):
+            os.makedirs('./logs_SD_template')
 
         # elements:
         # {role: info, content: [agent_info]},

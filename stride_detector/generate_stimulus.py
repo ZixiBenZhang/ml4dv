@@ -1,5 +1,6 @@
 #!/bin/env python3
 
+from datetime import datetime
 import zmq
 import pickle
 from contextlib import closing
@@ -11,11 +12,16 @@ sys.path.insert(0, os.path.dirname(directory))
 # print(sys.path)
 
 from shared_types import *
-from agents.agent_LLM import *
-from prompt_generators.prompt_generator_fixed import *
-from prompt_generators.prompt_generator_template import *
-from models.llm_llama2 import *
-from models.llm_chatgpt import *
+from global_shared_types import *
+from agents.agent_LLM import LLMAgent
+from prompt_generators.prompt_generator_fixed_SD import FixedPromptGenerator4SD1
+from prompt_generators.prompt_generator_template import TemplatePromptGenerator4SD1
+from models.llm_llama2 import Llama2
+from models.llm_chatgpt import ChatGPT
+from stimuli_extractor import DumbExtractor
+from stimuli_filter import Filter4SD
+from loggers.logger_csv import CSVLogger
+from loggers.logger_txt import TXTLogger
 
 
 class StimulusSender:
@@ -43,8 +49,16 @@ class StimulusSender:
 
 
 def main():
+    # TODO: auto trials
     # build components
     prompt_generator = TemplatePromptGenerator4SD1()
+    if isinstance(prompt_generator, FixedPromptGenerator4SD1):
+        prefix = './logs_SD_fixed/'
+    elif isinstance(prompt_generator, TemplatePromptGenerator4SD1):
+        prefix = './logs_SD_template/'
+    else:
+        raise TypeError(f"Prompt generator of type {type(prompt_generator)} is not supported")
+
     # stimulus_generator = Llama2(system_prompt=prompt_generator.generate_system_prompt())
     # print('Llama2 successfully built')
     stimulus_generator = ChatGPT(system_prompt=prompt_generator.generate_system_prompt())
@@ -54,8 +68,8 @@ def main():
     # build loggers
     t = datetime.now()
     t = t.strftime('%Y%m%d_%H%M%S')
-    logger_txt = TXTLogger(f'./logs/{t}.txt')
-    logger_csv = CSVLogger(f'./logs/{t}.csv')
+    logger_txt = TXTLogger(f'{prefix}{t}.txt')
+    logger_csv = CSVLogger(f'{prefix}{t}.csv')
 
     # create agent
     agent = LLMAgent(prompt_generator, stimulus_generator, extractor, stimulus_filter,
@@ -64,16 +78,18 @@ def main():
 
     # run test
     stimulus = Stimulus(value=0, finish=False)
-    dut_state = None
-    coverage = None
+    g_dut_state = GlobalDUTState()
+    g_coverage = GlobalCoverageDatabase()
 
     with closing(StimulusSender("tcp://128.232.65.218:5555")) as stimulus_sender:
-        while not agent.end_simulation(dut_state, coverage):
+        while not agent.end_simulation(g_dut_state, g_coverage):
             dut_state, coverage = stimulus_sender.send_stimulus(stimulus)
+            g_dut_state.set(dut_state)
+            g_coverage.set(coverage)
 
-            stimulus.value = agent.generate_next_value(dut_state, coverage)
+            stimulus.value = agent.generate_next_value(g_dut_state, g_coverage)
 
-        coverage_plan = {k: v for (k, v) in get_coverage_plan(coverage).items() if v > 0}
+        coverage_plan = {k: v for (k, v) in g_coverage.get_coverage_plan().items() if v > 0}
         print(f"Finished, with dialog of length {agent.dialog_index}, hits: {coverage_plan}")
 
         stimulus.value = None

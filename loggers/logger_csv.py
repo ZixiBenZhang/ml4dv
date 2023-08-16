@@ -1,6 +1,6 @@
 import csv
 
-from stride_detector.logging.logger_base import *
+from loggers.logger_base import *
 
 
 class CSVLogger(BaseLogger):
@@ -9,11 +9,11 @@ class CSVLogger(BaseLogger):
         if log_path == '':
             t = datetime.now()
             t = t.strftime('%Y%m%d_%H%M%S')
-            self.log_path = f'./logs/{t}.csv'
+            self.log_path = f'./logs_SD_template/{t}.csv'
         else:
             self.log_path = log_path
-        if not os.path.exists('./logs'):
-            os.makedirs('./logs')
+        if not os.path.exists('./logs_SD_template'):
+            os.makedirs('./logs_SD_template')
 
         # one entry per dialog (USER + ASSISTANT)
         self.log: List[Dict[str, Union[int, str]]] = []

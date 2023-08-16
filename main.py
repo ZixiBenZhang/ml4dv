@@ -2,11 +2,11 @@ import os
 from pprint import pprint
 
 import fire as fire
-# from llama import Llama
 import openai
 
 
 def testLlama(ckpt_dir='llama-2-7b-chat/', max_seq_len=4096, max_gen_len=None):
+    from llama import Llama
     generator = Llama.build(
         ckpt_dir=ckpt_dir,
         tokenizer_path='tokenizer.model',

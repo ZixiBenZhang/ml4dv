@@ -1,7 +1,7 @@
 import random
 import time
 
-from stride_detector.models.llm_base import *
+from models.llm_base import *
 import os
 
 import openai
@@ -55,7 +55,7 @@ class ChatGPT(BaseLLM):
             except (openai.error.ServiceUnavailableError,
                     openai.error.APIError,
                     openai.error.Timeout) as e:
-                randomness_collision_avoidance = random.randint(0, 1000) / 100.0
+                randomness_collision_avoidance = random.randint(0, 1000) / 300.0
                 sleep_dur = delay + randomness_collision_avoidance
                 print(f"Error: {e}. Retrying in {round(sleep_dur, 2)} seconds.")
                 time.sleep(sleep_dur)

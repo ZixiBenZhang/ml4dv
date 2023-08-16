@@ -256,6 +256,6 @@ async def basic_test(dut):
         await ClockCycles(dut.clk_i, 5)
 
         # coverage_monitor.coverage_database.output_coverage()
-        from coverage_database_helper import get_coverage_plan
+        from global_shared_types import GlobalCoverageDatabase
         print("***** FINAL COVERAGE *****")
-        print(get_coverage_plan(coverage_monitor.coverage_database))
+        print(GlobalCoverageDatabase(coverage_monitor.coverage_database).get_coverage_plan())
