@@ -3,9 +3,9 @@ from prompt_generators.prompt_generator_template import *
 
 class TemplatePromptGenerator4SD1(TemplatePromptGenerator):
     def __init__(self,
-                 dut_code_path: str = './examples_SD/dut_code.txt',
-                 tb_code_path: str = './examples_SD/tb_code.txt',
-                 bin_descr_path: str = './examples_SD/bins_description.txt',
+                 dut_code_path: str = '../examples_SD/dut_code.txt',
+                 tb_code_path: str = '../examples_SD/tb_code.txt',
+                 bin_descr_path: str = '../examples_SD/bins_description.txt',
                  code_summary_type: int = 0,  # 0: no code, 1: code, 2: summary
                  sampling_missed_bins: bool = True,
                  ):

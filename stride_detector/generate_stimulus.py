@@ -53,9 +53,9 @@ def main():
     # build components
     prompt_generator = TemplatePromptGenerator4SD1()
     # if isinstance(prompt_generator, FixedPromptGenerator4SD1):
-    #     prefix = './logs_SD_fixed/'
+    #     prefix = '../logs_SD_fixed/'
     # elif isinstance(prompt_generator, TemplatePromptGenerator4SD1):
-    #     prefix = './logs_SD_template/'
+    #     prefix = '../logs_SD_template/'
     # else:
     #     raise TypeError(f"Prompt generator of type {type(prompt_generator)} is not supported")
     prefix = './logs/'
