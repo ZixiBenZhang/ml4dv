@@ -2,7 +2,7 @@ import functools
 import zmq
 import pickle
 from contextlib import closing
-from shared_types import *
+from ibex_decoder.shared_types import *
 
 import cocotb
 from cocotb.clock import Clock
