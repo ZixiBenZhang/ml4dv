@@ -1,0 +1,114 @@
+Model,gpt-3.5-turbo,SYSTEM,"Please output (positive or negative) a list of integers only, each integer between -523 and 523. 
+Output format: [a, b, c, ...].",temperature,0.4,top_p,1,Prompter,TemplatePromptGenerator4SD1,Extractor,DumbExtractor
+Message#,USER,ASSISTANT,Action,Coverage Rate,Coverage Plan
+1,"""You will receive a description of bins (i.e. test cases) of a testbench for a hardware device under test (DUT). Then, you are going to generate a list of integers to cover these test cases.
+
+----------
+Now, we want to test the DUT with a list of integers as its input. We want the input to cover the bins (i.e. test cases) that we care about. Here's the description of the bins that we care about:
+------
+BINS DESCRIPTION
+- The list contains segments (i.e. subsequences) of int.
+- Each segment is of length 20.
+- A segment follows a single-stride pattern with a stride width x if: the differences between two adjacent integers are always x.
+- A segment follows a double-stride pattern with a stride width pair (x, y) if: the differences between two adjacent integers are alternating x and y, meanwhile x and y are different.
+- A segment has no stride pattern if it neither follows a single-stride pattern nor a double-stride pattern.
+- The maximum stride width is 15, and the minimum stride width is -16.
+- For each of the following bins, the list contains at least one segment that satisfies it:
+---
+    - stride_1_seen - One bin per possible stride width between the minimum and maximum stride width, where the segment follows a single-stride pattern of the stride width.
+    - stride_2_seen - One bin per pair of possible stride widths between the minimum and maximum stride width, where the segment follows a double-stride pattern of the stride width pair.
+    - misc_bins - Various bins grouped in a dictionary:
+        - single_stride_[n|p]_overflow - A segment where an incoming stream of values has a valid single stride but that stride is below the minimum (n) or above the maximum (p) stride width.
+        - double_stride_[n|p][n|p] - A segment where an incoming stream of values has a valid double stride but those strides are below the minimum (n) or above the maximum (p) stride widths, nn indicates both are below the minimum, where np indicates one is below the minimum and the other above the maximum.
+---
+- Also, the list contains consecutive segments that satisfy the following bins:
+---
+    - no_stride_to_[single|double] - A segment has no repeating stride pattern, followed by another segment with a single/double stride pattern.
+    - [single|double]_stride_[double|single] - A segment of single/double repeating stride pattern, followed by another segment with a double/single pattern.
+---
+
+------
+
+----------
+Following the bins description, generate a list that contains segments of integers, which covers the described bins as much as you can.
+""","""Here is a list that covers the described bins as much as possible:
+
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 
+-1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15, -16, -17, -18, -19, -20, 
+1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35, 37, 39, 
+-1, -3, -5, -7, -9, -11, -13, -15, -17, -19, -21, -23, -25, -27, -29, -31, -33, -35, -37, -39, 
+2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 
+-2, -4, -6, -8, -10, -12, -14, -16, -18, -20, -22, -24, -26, -28, -30, -32, -34, -36, -38, -40, 
+1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43, 46, 49, 52, 55, 58, 
+-1, -4, -7, -10, -13, -16, -19, -22, -25, -28, -31, -34, -37, -40, -43, -46, -49, -52, -55, -58, 
+2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35, 38, 41, 44, 47, 50, 53, 56, 59, 
+-2, -5, -8, -11, -14, -17, -20, -23, -26, -29, -32, -35, -38, -41""",none,7,"{'single_1': 17, 'single_2': 30, 'single_3': 30, 'single_-3': 23, 'single_-2': 30, 'single_-1': 15, 'no_stride_to_single': 1}"
+2,"""The values you provided failed to cover all the bins.
+You will see the result coverage of your previous response(s), and then generate another list of integers to cover the unreached bins (i.e. test cases)
+Here are some of the unreached bins:
+------
+UNREACHED BINS
+- Single-stride pattern segment of stride width 14 is unreached.
+- Single-stride pattern segment of stride width 0 is unreached.
+- Single-stride pattern segment of stride width 4 is unreached.
+- Single-stride pattern segment of stride width -16 is unreached.
+- Single-stride pattern segment of stride width -11 is unreached.
+------
+Please regenerate a segment of length 20 for each of these unreached bins according to the BINS DESCRIPTION.""","""Apologies for the incomplete coverage. Here's a revised list that covers the unreached bins:
+
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 
+-1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15, -16, -17, -18, -19, -20, 
+1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35, 37, 39, 
+-1, -3, -5, -7, -9, -11, -13, -15, -17, -19, -21, -23, -25, -27, -29, -31, -33, -35, -37, -39, 
+2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 
+-2, -4, -6, -8, -10, -12, -14, -16, -18, -20, -22, -24, -26, -28, -30, -32, -34, -36, -38, -40, 
+1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43, 46, 49, 52, 55, 58, 
+-1, -4, -7, -10, -13, -16, -19, -22, -25, -28, -31, -34, -37, -40, -43, -46, -49, -52, -55, -58, 
+2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35, 38, 41, 44, 47, 50, 53, 56, 59, 
+-2, -5, -8, -11, -14, -17, -20, -23, -26, -29, -32, -35,""",none,7,"{'single_1': 32, 'single_2': 60, 'single_3': 60, 'single_-3': 45, 'single_-2': 60, 'single_-1': 30, 'no_stride_to_single': 2}"
+3,"""The new values you just provided didn't cover any new bins. You need to try to cover as much of the described bins as you can.
+You will see the result coverage of your previous response(s), and then generate another list of integers to cover the unreached bins (i.e. test cases)
+Here are some of  the unreached bins:
+------
+UNREACHED BINS
+- Single-stride pattern segment of stride width 4 is unreached.
+- Single-stride pattern segment of stride width -14 is unreached.
+- Single-stride pattern segment of stride width -10 is unreached.
+- Single-stride pattern segment of stride width 10 is unreached.
+- Single-stride pattern segment of stride width 0 is unreached.
+------
+Please regenerate a segment of length 20 for each of these unreached bins according to the BINS DESCRIPTION.""","""Apologies for the oversight. Here's a revised list that covers the unreached bins:
+
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 
+-1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15, -16, -17, -18, -19, -20, 
+1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35, 37, 39, 
+-1, -3, -5, -7, -9, -11, -13, -15, -17, -19, -21, -23, -25, -27, -29, -31, -33, -35, -37, -39, 
+2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 
+-2, -4, -6, -8, -10, -12, -14, -16, -18, -20, -22, -24, -26, -28, -30, -32, -34, -36, -38, -40, 
+1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43, 46, 49, 52, 55, 58, 
+-1, -4, -7, -10, -13, -16, -19, -22, -25, -28, -31, -34, -37, -40, -43, -46, -49, -52, -55, -58, 
+2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35, 38, 41, 44, 47, 50, 53, 56, 59, 
+-2, -5, -8, -11, -14, -17, -20, -23, -26, -29, -32, -35, -""",none,7,"{'single_1': 47, 'single_2': 90, 'single_3': 90, 'single_-3': 66, 'single_-2': 90, 'single_-1': 45, 'no_stride_to_single': 3}"
+4,"""The new values you just provided didn't cover any new bins. You need to try to cover as much of the described bins as you can.
+You will see the result coverage of your previous response(s), and then generate another list of integers to cover the unreached bins (i.e. test cases)
+Here are some of  the unreached bins:
+------
+UNREACHED BINS
+- Single-stride pattern segment of stride width 9 is unreached.
+- Single-stride pattern segment of stride width 4 is unreached.
+- Single-stride pattern segment of stride width 12 is unreached.
+- Single-stride pattern segment of stride width 0 is unreached.
+- Single-stride pattern segment of stride width -6 is unreached.
+------
+Please regenerate a segment of length 20 for each of these unreached bins according to the BINS DESCRIPTION.""","""Apologies for the oversight. Here's a revised list that covers the unreached bins:
+
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 
+-1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15, -16, -17, -18, -19, -20, 
+1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35, 37, 39, 
+-1, -3, -5, -7, -9, -11, -13, -15, -17, -19, -21, -23, -25, -27, -29, -31, -33, -35, -37, -39, 
+2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 
+-2, -4, -6, -8, -10, -12, -14, -16, -18, -20, -22, -24, -26, -28, -30, -32, -34, -36, -38, -40, 
+1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43, 46, 49, 52, 55, 58, 
+-1, -4, -7, -10, -13, -16, -19, -22, -25, -28, -31, -34, -37, -40, -43, -46, -49, -52, -55, -58, 
+2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35, 38, 41, 44, 47, 50, 53, 56, 59, 
+-2, -5, -8, -11, -14, -17, -20, -23, -26, -29, -32, -35, -""",none,7,"{'single_1': 62, 'single_2': 120, 'single_3': 120, 'single_-3': 87, 'single_-2': 120, 'single_-1': 60, 'no_stride_to_single': 4}"
