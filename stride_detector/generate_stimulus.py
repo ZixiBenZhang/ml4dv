@@ -52,12 +52,13 @@ def main():
     # TODO: auto trials
     # build components
     prompt_generator = TemplatePromptGenerator4SD1()
-    if isinstance(prompt_generator, FixedPromptGenerator4SD1):
-        prefix = './logs_SD_fixed/'
-    elif isinstance(prompt_generator, TemplatePromptGenerator4SD1):
-        prefix = './logs_SD_template/'
-    else:
-        raise TypeError(f"Prompt generator of type {type(prompt_generator)} is not supported")
+    # if isinstance(prompt_generator, FixedPromptGenerator4SD1):
+    #     prefix = './logs_SD_fixed/'
+    # elif isinstance(prompt_generator, TemplatePromptGenerator4SD1):
+    #     prefix = './logs_SD_template/'
+    # else:
+    #     raise TypeError(f"Prompt generator of type {type(prompt_generator)} is not supported")
+    prefix = './logs/'
 
     # stimulus_generator = Llama2(system_prompt=prompt_generator.generate_system_prompt())
     # print('Llama2 successfully built')
