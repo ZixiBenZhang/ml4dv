@@ -107,6 +107,7 @@ class LLMAgent(BaseAgent):
             if len(self.history_cov_rate) >= 7 and self.history_cov_rate[-1] - self.history_cov_rate[-7] < EPSILON:
                 self.reset()
                 f_ = 0
+                print(">>>>> Agent reset <<<<<")
 
             # only for gibberish loops
             if f_:
