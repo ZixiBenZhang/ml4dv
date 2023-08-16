@@ -17,15 +17,17 @@ class GlobalCoverageDatabase:
         if self._coverage_database is not None:
             assert isinstance(coverage, type(self._coverage_database)), \
                 "New coverage is of different type of self._coverage_database."
-        self._coverage_database = coverage
-        if isinstance(self._coverage_database, SDCD):
+
+        if isinstance(coverage, SDCD):
             self._coverage_database: SDCD
-        elif isinstance(self._coverage_database, IDCD):
+        elif isinstance(coverage, IDCD):
             self._coverage_database: IDCD
-        elif self._coverage_database is None:
+        elif coverage is None:
             pass
         else:
-            raise TypeError(f"coverage_database of type {type(self._coverage_database)} not supported.")
+            raise TypeError(f"Coverage of type {type(coverage)} is not supported.")
+
+        self._coverage_database = coverage
 
     def get_coverage_plan(self) -> Dict[str, int]:
         if isinstance(self._coverage_database, SDCD):
@@ -71,10 +73,16 @@ class GlobalDUTState:
         return self._dut_state
 
     def set(self, dut_state):
-        self._dut_state = dut_state
-        if self._dut_state is SDDS:
-            self._coverage_database: SDDS
-        elif self._dut_state is None:
+        if self._dut_state is not None:
+            assert isinstance(dut_state, type(self._dut_state)), \
+                "New dut_state is of different type of self._dut_state."
+
+        if isinstance(dut_state, SDDS):
+            self._dut_state: SDDS
+        elif dut_state is None:
             pass
         else:
-            raise TypeError("Type of 'coverage' not supported.")
+            raise TypeError(f"DUT state of type {type(dut_state)} is not supported.")
+
+        self._dut_state = dut_state
+
