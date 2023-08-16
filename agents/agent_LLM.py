@@ -86,8 +86,21 @@ class LLMAgent(BaseAgent):
                             coverage_database: GlobalCoverageDatabase) -> Union[int, None]:
         coverage = coverage_database.get_coverage_plan()
 
+        # Restart a dialog if low-efficient (nearly converged)
+        self.history_cov_rate.append(coverage_database.get_coverage_rate()[0])
+        if len(self.history_cov_rate) >= 7 and self.history_cov_rate[-1] - self.history_cov_rate[-7] < EPSILON:
+            self.log_append({'role': 'coverage', 'content': coverage})
+            self.save_log()
+            coverage_plan = {k: v for (k, v) in coverage.items() if v > 0}
+            print(f"Dialog #{self.dialog_index} Message #{self.msg_index} done, \n"
+                  f"Total msg cnt: {self.total_msg_cnt}, \n"
+                  f"Hits: {coverage_plan}, \n"
+                  f"Coverage rate: {coverage_database.get_coverage_rate()}\n")
+            self.reset()
+            print("\n>>>>> Agent reset <<<<<\n")
+
         # when not first stimulus & need to generate new response
-        if len(self.stimuli_buffer) == 0 and self.state != 'INIT':
+        elif len(self.stimuli_buffer) == 0 and self.state != 'INIT':
             self.log_append({'role': 'coverage', 'content': coverage})
             self.save_log()
             coverage_plan = {k: v for (k, v) in coverage.items() if v > 0}
@@ -103,14 +116,7 @@ class LLMAgent(BaseAgent):
                 # return None (same as 0), so entering end_simulation and stops in next loop
                 return None
 
-            # Restart a dialog if low-efficient (nearly converged)
-            self.history_cov_rate.append(coverage_database.get_coverage_rate()[0])
-            if len(self.history_cov_rate) >= 7 and self.history_cov_rate[-1] - self.history_cov_rate[-7] < EPSILON:
-                self.reset()
-                f_ = 0
-                print("\n>>>>> Agent reset <<<<<\n")
-
-            # only for gibberish loops
+            # only for gibberish i.e. looped
             if f_:
                 self.log_append({'role': 'coverage', 'content': coverage})
                 self.save_log()
@@ -118,14 +124,20 @@ class LLMAgent(BaseAgent):
                       f"Total msg cnt: {self.total_msg_cnt}, \n"
                       f"Gibberish response\n")
 
+                # Restart a dialog if low-efficient (nearly converged)
+                self.history_cov_rate.append(coverage_database.get_coverage_rate()[0])
+                if len(self.history_cov_rate) >= 7 and self.history_cov_rate[-1] - self.history_cov_rate[-7] < EPSILON:
+                    self.reset()
+                    f_ = 0
+                    print("\n>>>>> Agent reset <<<<<\n")
+
             # Generate prompt
             prompt = ""
             if self.state == 'INIT':
                 prompt = self.prompt_generator.generate_initial_prompt()
                 self.state = 'ITER'
             elif self.state == 'ITER':
-                prompt = self.prompt_generator.generate_iterative_prompt(coverage_database,
-                                                                         response_invalid=f_)
+                prompt = self.prompt_generator.generate_iterative_prompt(coverage_database, response_invalid=f_)
             elif self.state == 'DONE':  # should never happen
                 prompt = "Thank you."
             self.log_append({'role': 'user', 'content': prompt})
