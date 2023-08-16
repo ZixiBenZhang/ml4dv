@@ -7,7 +7,7 @@ from prompt_generators.prompt_generator_base import *
 from stimuli_extractor import *
 from stimuli_filter import *
 
-DIALOG_BOUND = 20
+DIALOG_BOUND = 10000
 
 
 class LLMAgent(BaseAgent):
@@ -157,7 +157,9 @@ class LLMAgent(BaseAgent):
         if len(self.stimuli_buffer) == 0 and self.state != 'INIT':  # not first stimulus
             self.log_append({'role': 'coverage', 'content': coverage})
             coverage_plan = {k: v for (k, v) in coverage.items() if v > 0}
-            print(f"Dialog #{self.dialog_index} done, hits: {coverage_plan}")
+            print(f"Dialog #{self.dialog_index} done, \n"
+                  f"Hits: {coverage_plan}\n,"
+                  f"Coverage rate: {coverage_database.get_coverage_rate()}\n")
             self.save_log()
 
         # TODO: other ways to detect gibberish with numbers

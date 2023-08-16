@@ -90,7 +90,9 @@ def main():
             stimulus.value = agent.generate_next_value(g_dut_state, g_coverage)
 
         coverage_plan = {k: v for (k, v) in g_coverage.get_coverage_plan().items() if v > 0}
-        print(f"Finished, with dialog of length {agent.dialog_index}, hits: {coverage_plan}")
+        print(f"Finished, with dialog of length {agent.dialog_index},\n"
+              f"Hits: {coverage_plan}\n,"
+              f"Coverage rate: {g_coverage.get_coverage_rate()}\n")
 
         stimulus.value = None
         stimulus.finish = True
