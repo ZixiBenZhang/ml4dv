@@ -9,6 +9,10 @@ from stimuli_filter import *
 
 DIALOG_BOUND = 10000
 
+# threshold for restarting a dialog
+EPSILON = 3
+PERIOD = 7
+
 
 class LLMAgent(BaseAgent):
     def __init__(self,
@@ -26,19 +30,25 @@ class LLMAgent(BaseAgent):
         self.state = 'INIT'  # states: INIT, ITER, DONE
         self.stimuli_buffer = []
         self.stimulus_cnt = 0
-        self.dialog_index = 0  # dialog index for running
+        self.total_msg_cnt = 0
+        self.msg_index = 0  # message index for running
+        self.dialog_index = 1  # dialog index for running
 
         # agent updates loggers' records directly; loggers write to files on save_log
         self.loggers = loggers
         self.log_headers()
 
+        self.history_cov_rate = []
+
     def reset(self):
         self.log_reset()
 
-        self.dialog_index = 0
+        self.dialog_index += 1
+        self.msg_index = 0
         self.state = 'INIT'
-        self.stimuli_buffer = []
+        self.stimuli_buffer.clear()
         self.stimulus_cnt = 0
+        self.history_cov_rate.clear()
 
         self.prompt_generator.reset()
         self.stimulus_generator.reset()
@@ -57,13 +67,93 @@ class LLMAgent(BaseAgent):
             self.save_log()
             return True
 
-        if self.dialog_index >= DIALOG_BOUND and len(self.stimuli_buffer) == 0:
+        if self.total_msg_cnt >= DIALOG_BOUND and len(self.stimuli_buffer) == 0:
             coverage = coverage_database.get_coverage_plan()
             self.log_append({'role': 'coverage', 'content': coverage})
             self.log_append({'role': 'stop', 'content': 'max dialog number'})
             self.save_log()
             return True
 
+        return False
+
+    def _get_next_value_from_buffer(self):
+        stimulus = self.stimuli_buffer[0]
+        self.stimuli_buffer.pop(0)
+        self.stimulus_cnt += 1
+        return stimulus
+
+    def generate_next_value(self, dut_state: GlobalDUTState,
+                            coverage_database: GlobalCoverageDatabase) -> Union[int, None]:
+        coverage = coverage_database.get_coverage_plan()
+
+        # when not first stimulus & need to generate new response
+        if len(self.stimuli_buffer) == 0 and self.state != 'INIT':
+            self.log_append({'role': 'coverage', 'content': coverage})
+            self.save_log()
+            coverage_plan = {k: v for (k, v) in coverage.items() if v > 0}
+            print(f"Dialog #{self.dialog_index} Message #{self.msg_index} done, \n"
+                  f"Hits: {coverage_plan}, \n"
+                  f"Coverage rate: {coverage_database.get_coverage_rate()}\n")
+
+        # TODO: other ways to detect gibberish with numbers
+        f_ = 0  # i.e. gibberish response
+        while len(self.stimuli_buffer) == 0:
+            if self.total_msg_cnt >= DIALOG_BOUND:
+                # return None (same as 0), so entering end_simulation and stops in next loop
+                return None
+
+            # Restart a dialog if low-efficient (nearly converged)
+            self.history_cov_rate.append(coverage_database.get_coverage_rate()[0])
+            if len(self.history_cov_rate) >= 7 and self.history_cov_rate[-1] - self.history_cov_rate[-7] < EPSILON:
+                self.reset()
+                f_ = 0
+
+            # only for gibberish loops
+            if f_:
+                self.log_append({'role': 'coverage', 'content': coverage})
+                self.save_log()
+                print(f"Dialog #{self.dialog_index} Message #{self.msg_index} done, gibberish response")
+
+            # Generate prompt
+            prompt = ""
+            if self.state == 'INIT':
+                prompt = self.prompt_generator.generate_initial_prompt()
+                self.state = 'ITER'
+            elif self.state == 'ITER':
+                prompt = self.prompt_generator.generate_iterative_prompt(coverage_database,
+                                                                         response_invalid=f_)
+            elif self.state == 'DONE':  # should never happen
+                prompt = "Thank you."
+            self.log_append({'role': 'user', 'content': prompt})
+
+            # Get response
+            response = self.stimulus_generator(prompt)
+            self.msg_index += 1
+            self.log_append({'role': 'assistant', 'content': response})
+
+            gibberish = self._check_gibberish(response)
+            if gibberish:
+                f_ = 1
+                continue
+
+            stimuli = self.stimulus_filter(self.extractor(response))
+            self.stimuli_buffer.extend(stimuli)
+
+        return self._get_next_value_from_buffer()
+
+    def _check_gibberish(self, response: str) -> bool:
+        stimuli = self.stimulus_filter(self.extractor(response))
+        if len(stimuli) == 0:
+            return True
+        lines = response.split('\n')
+        cnt = 0
+        prev = -1
+        for line in lines:
+            if len(line) == 0 and prev == 0:
+                cnt += 1
+            prev = len(line)
+        if cnt >= len(lines) // 2:
+            return True
         return False
 
     def log_headers(self):
@@ -95,16 +185,19 @@ class LLMAgent(BaseAgent):
                 logger: TXTLogger
                 logger.log[-1].append({'role': 'reset'})
                 logger.save_log()
+
                 logger.log.append([])
                 logger.logged_index = 0
-                logger.logged_dialog_index = 0
-                logger.log[-1].append({'role': 'info',
-                                       'content': {'Prompter': type(self.prompt_generator).__name__,
-                                                   'Generator': str(self.stimulus_generator),
-                                                   'Extractor': type(self.extractor).__name__}})
-                if self.stimulus_generator.system_prompt != "":
-                    logger.log[-1].append({'role': 'system',
-                                           'content': self.stimulus_generator.system_prompt})
+
+                logger.logged_msg_index = 0
+                logger.logged_dialog_index += 1
+                # logger.log[-1].append({'role': 'info',
+                #                        'content': {'Prompter': type(self.prompt_generator).__name__,
+                #                                    'Generator': str(self.stimulus_generator),
+                #                                    'Extractor': type(self.extractor).__name__}})
+                # if self.stimulus_generator.system_prompt != "":
+                #     logger.log[-1].append({'role': 'system',
+                #                            'content': self.stimulus_generator.system_prompt})
 
             elif isinstance(logger, CSVLogger):
                 logger: CSVLogger
@@ -127,6 +220,8 @@ class LLMAgent(BaseAgent):
                 logger: CSVLogger
                 if entry['role'] == 'user':
                     logger.log.append({})
+                    logger.log[-1]['Message #'] = self.msg_index
+                    logger.log[-1]['Dialog #'] = self.dialog_index
                     logger.log[-1]['USER'] = '"' + entry['content'] + '"'
                     logger.log[-1]['Action'] = "none"
                 elif entry['role'] == 'assistant':
@@ -143,73 +238,3 @@ class LLMAgent(BaseAgent):
     def save_log(self):
         for logger in self.loggers:
             logger.save_log()
-
-    def _get_next_value_from_buffer(self):
-        stimulus = self.stimuli_buffer[0]
-        self.stimuli_buffer.pop(0)
-        self.stimulus_cnt += 1
-        return stimulus
-
-    def generate_next_value(self, dut_state: GlobalDUTState,
-                            coverage_database: GlobalCoverageDatabase) -> Union[int, None]:
-        coverage = coverage_database.get_coverage_plan()
-
-        if len(self.stimuli_buffer) == 0 and self.state != 'INIT':  # not first stimulus
-            self.log_append({'role': 'coverage', 'content': coverage})
-            self.save_log()
-            coverage_plan = {k: v for (k, v) in coverage.items() if v > 0}
-            print(f"Dialog #{self.dialog_index} done, \n"
-                  f"Hits: {coverage_plan}, \n"
-                  f"Coverage rate: {coverage_database.get_coverage_rate()}\n")
-
-        # TODO: other ways to detect gibberish with numbers
-        f_ = 0  # i.e. gibberish response
-        while len(self.stimuli_buffer) == 0:
-            if self.dialog_index >= DIALOG_BOUND:
-                # return None (same as 0), so entering end_simulation and stops in next loop
-                return None
-
-            if f_:
-                self.log_append({'role': 'coverage', 'content': coverage})
-                self.save_log()
-                print(f"Dialog #{self.dialog_index} done, gibberish response")
-
-            prompt = ""
-            if self.state == 'INIT':
-                prompt = self.prompt_generator.generate_initial_prompt()
-                self.state = 'ITER'
-            elif self.state == 'ITER':
-                prompt = self.prompt_generator.generate_iterative_prompt(coverage_database,
-                                                                         response_invalid=f_)
-            elif self.state == 'DONE':  # should never happen
-                prompt = "Thank you."
-            self.log_append({'role': 'user', 'content': prompt})
-
-            response = self.stimulus_generator(prompt)
-            self.dialog_index += 1
-            self.log_append({'role': 'assistant', 'content': response})
-
-            gibberish = self._check_gibberish(response)
-            if gibberish:
-                f_ = 1
-                continue
-
-            stimuli = self.stimulus_filter(self.extractor(response))
-            self.stimuli_buffer.extend(stimuli)
-
-        return self._get_next_value_from_buffer()
-
-    def _check_gibberish(self, response: str) -> bool:
-        stimuli = self.stimulus_filter(self.extractor(response))
-        if len(stimuli) == 0:
-            return True
-        lines = response.split('\n')
-        cnt = 0
-        prev = -1
-        for line in lines:
-            if len(line) == 0 and prev == 0:
-                cnt += 1
-            prev = len(line)
-        if cnt >= len(lines) // 2:
-            return True
-        return False

@@ -26,7 +26,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
         self.coverage_difference_prompts_dict = self._load_coverage_difference_prompts_dict()
 
     def reset(self):
-        pass
+        self.prev_coverage = (0, -1)
 
     @abstractmethod
     def _load_introduction(self) -> str:

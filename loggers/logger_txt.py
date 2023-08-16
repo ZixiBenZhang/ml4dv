@@ -24,7 +24,10 @@ class TXTLogger(BaseLogger):
         # {role: reset}
         self.log: List[List[Dict[str, Union[str, dict]]]] = [[]]
         self.logged_index = 0  # log index for logging
+
         self.logged_dialog_index = 0  # dialog index for logging
+        self.logged_msg_index = 0  # dialog index for logging
+        self.logged_total_msg_cnt = 0  # dialog index for logging
 
     def save_log(self):
         with open(self.log_path, 'a+') as f:
@@ -47,12 +50,15 @@ class TXTLogger(BaseLogger):
                     f.write(f'Stop: {rec["content"]}\n\n')
 
                 elif rec['role'] == 'reset':
-                    f.write('<<<Reset>>>\n\n')
+                    f.write('\n<<<<< RESET >>>>>\n\n\n')
 
                 else:
                     if rec['role'] == 'user':
-                        self.logged_dialog_index += 1
-                    f.write(f'Index: {self.logged_dialog_index}\n')
+                        self.logged_msg_index += 1
+                        self.logged_total_msg_cnt += 1
+                    f.write(f'Dialog index: {self.logged_dialog_index}\n')
+                    f.write(f'Message index: {self.logged_msg_index}\n')
+                    f.write(f'Total msg cnt: {self.logged_total_msg_cnt}\n')
                     f.write(f'Role: {rec["role"]}\n')
                     f.write(f'Content: {rec["content"]}\n\n')
 
