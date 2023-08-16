@@ -158,7 +158,7 @@ class LLMAgent(BaseAgent):
             self.log_append({'role': 'coverage', 'content': coverage})
             coverage_plan = {k: v for (k, v) in coverage.items() if v > 0}
             print(f"Dialog #{self.dialog_index} done, \n"
-                  f"Hits: {coverage_plan}\n,"
+                  f"Hits: {coverage_plan}, \n"
                   f"Coverage rate: {coverage_database.get_coverage_rate()}\n")
             self.save_log()
 
