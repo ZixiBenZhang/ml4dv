@@ -92,6 +92,7 @@ class LLMAgent(BaseAgent):
             self.save_log()
             coverage_plan = {k: v for (k, v) in coverage.items() if v > 0}
             print(f"Dialog #{self.dialog_index} Message #{self.msg_index} done, \n"
+                  f"Total msg cnt: {self.total_msg_cnt}, \n"
                   f"Hits: {coverage_plan}, \n"
                   f"Coverage rate: {coverage_database.get_coverage_rate()}\n")
 
@@ -107,13 +108,15 @@ class LLMAgent(BaseAgent):
             if len(self.history_cov_rate) >= 7 and self.history_cov_rate[-1] - self.history_cov_rate[-7] < EPSILON:
                 self.reset()
                 f_ = 0
-                print(">>>>> Agent reset <<<<<")
+                print("\n>>>>> Agent reset <<<<<\n")
 
             # only for gibberish loops
             if f_:
                 self.log_append({'role': 'coverage', 'content': coverage})
                 self.save_log()
-                print(f"Dialog #{self.dialog_index} Message #{self.msg_index} done, gibberish response")
+                print(f"Dialog #{self.dialog_index} Message #{self.msg_index} done, \n"
+                      f"Total msg cnt: {self.total_msg_cnt}, \n"
+                      f"Gibberish response\n")
 
             # Generate prompt
             prompt = ""
@@ -221,11 +224,11 @@ class LLMAgent(BaseAgent):
                 logger: CSVLogger
                 if entry['role'] == 'user':
                     logger.log.append({})
-                    logger.log[-1]['Message #'] = self.msg_index
-                    logger.log[-1]['Dialog #'] = self.dialog_index
                     logger.log[-1]['USER'] = '"' + entry['content'] + '"'
                     logger.log[-1]['Action'] = "none"
                 elif entry['role'] == 'assistant':
+                    logger.log[-1]['Message #'] = self.msg_index
+                    logger.log[-1]['Dialog #'] = self.dialog_index
                     logger.log[-1]['ASSISTANT'] = '"' + entry['content'] + '"'
                 elif entry['role'] == 'coverage':
                     coverage_plan = {k: v for (k, v) in entry['content'].items() if v > 0}

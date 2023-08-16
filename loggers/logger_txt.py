@@ -25,7 +25,7 @@ class TXTLogger(BaseLogger):
         self.log: List[List[Dict[str, Union[str, dict]]]] = [[]]
         self.logged_index = 0  # log index for logging
 
-        self.logged_dialog_index = 0  # dialog index for logging
+        self.logged_dialog_index = 1  # dialog index for logging
         self.logged_msg_index = 0  # dialog index for logging
         self.logged_total_msg_cnt = 0  # dialog index for logging
 
