@@ -84,21 +84,8 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
             pass
         # Sampling missed bins
         if self.sampling_missed_bins:
-            if len(missed_bins) >= 40:
-                missed_bins = np.concatenate([missed_bins[:2],
-                                              np.random.choice(missed_bins[2:min(25, len(missed_bins))],
-                                                               3, replace=False),
-                                              np.random.choice(missed_bins[25:], 2, replace=False)])
-            elif len(missed_bins) >= 5:
-                missed_bins = np.concatenate([missed_bins[:2],
-                                              np.random.choice(missed_bins[2:], 3, replace=False)])
-            else:
-                pass
-            # np.random.shuffle(missed_bins)
+            missed_bins = self._sample_missed_bins(missed_bins, coverage_database.get_coverage_rate())
 
-            # missed_bins = np.random.choice(missed_bins[:50], 5, replace=False)
-
-            # missed_bins = missed_bins[:min(5, len(missed_bins))]
         for bin_name in missed_bins:
             coverage_difference += self.coverage_difference_prompts_dict[bin_name]
 
@@ -112,3 +99,26 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
 
         self.prev_coverage = cur_coverage
         return iterative_prompt
+
+    @staticmethod
+    def _sample_missed_bins(missed_bins: List[str], coverage_rate: Tuple[int, int]) -> List[str]:
+        if len(missed_bins) >= 40:
+            if coverage_rate[0] / coverage_rate[1] <= 1 / 20:  # easier bins
+                missed_bins = np.concatenate([missed_bins[:2],
+                                              np.random.choice(missed_bins[2:25], 3, replace=False),
+                                              np.random.choice(missed_bins[25:], 2, replace=False)])
+            else:  # harder bins
+                t = 10  # max(4, len(missed_bins) // 3)
+                missed_bins = np.concatenate([np.random.choice(missed_bins[:t], 3, replace=False),
+                                              np.random.choice(missed_bins[t:], 4, replace=False)])
+        elif len(missed_bins) > 5:
+            missed_bins = np.concatenate([missed_bins[:2],
+                                          np.random.choice(missed_bins[2:], 3, replace=False)])
+        else:
+            np.random.shuffle(missed_bins)
+
+        # missed_bins = np.random.choice(missed_bins[:50], 5, replace=False)
+
+        # missed_bins = missed_bins[:min(5, len(missed_bins))]
+
+        return missed_bins
