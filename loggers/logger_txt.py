@@ -7,11 +7,14 @@ class TXTLogger(BaseLogger):
         if log_path == '':
             t = datetime.now()
             t = t.strftime('%Y%m%d_%H%M%S')
-            self.log_path = f'./logs_SD_template/{t}.txt'
+            self.log_path = f'./logs/{t}.txt'
         else:
             self.log_path = log_path
-        if not os.path.exists('./logs_SD_template'):
-            os.makedirs('./logs_SD_template')
+
+        t = self.log_path.split('/')
+        self.log_prefix = t[0] + '/' + t[1]
+        if not os.path.exists(self.log_prefix):
+            os.makedirs(self.log_prefix)
 
         # elements:
         # {role: info, content: [agent_info]},

@@ -1,11 +1,29 @@
 #!/bin/env python3
 
+from datetime import datetime
 import zmq
 import pickle
 from contextlib import closing
-from pprint import pprint
+import sys
+import os
 
-from shared_types import *
+directory = os.path.dirname(os.path.abspath("__file__"))
+sys.path.insert(0, os.path.dirname(directory))
+# print(sys.path)
+
+from ibex_decoder.shared_types import *
+from global_shared_types import *
+from agents.agent_LLM import LLMAgent
+from prompt_generators.prompt_generator_fixed_SD import FixedPromptGenerator4SD1
+from prompt_generators.prompt_generator_template_SD import TemplatePromptGenerator4SD1
+from models.llm_llama2 import Llama2
+from models.llm_chatgpt import ChatGPT
+from stimuli_extractor import DumbExtractor
+from stimuli_filter import Filter4SD
+from loggers.logger_csv import CSVLogger
+from loggers.logger_txt import TXTLogger
+from agents.agent_ID_dumb import DumbAgent4ID
+
 
 class StimulusSender:
     def __init__(self, zmq_addr):
@@ -26,47 +44,55 @@ class StimulusSender:
         if self.socket:
             self.socket.close()
 
-# Test instructions
-#  add x1, x2, x3
-#  add x2, x3, x4
-#  add x1, x3, x7
-#
-#  addi x18, x20, 1
-#
-#  xor x1, x2, x3
-#  xor x1, x14, x17
-#
-#  lw x10, 16(x11)
-#  lh x10, 16(x11)
-#  lb x10, 16(x11)
-#
-#  sw x10, 16(x11)
-#  sh x10, 16(x11)
-#  sb x10, 16(x11)
-
-test_insns = [
-    0x003100b3,
-    0x00418133,
-    0x007180b3,
-    0x001a0913,
-    0x003140b3,
-    0x011740b3,
-    0x0105a503,
-    0x01059503,
-    0x01058503,
-    0x00a5a823,
-    0x00a59823,
-    0x00a58823,
-]
 
 def main():
+    # # build components
+    # prompt_generator = None
+    # if isinstance(prompt_generator, FixedPromptGenerator4SD1):
+    #     prefix = './logs_ID_fixed/'
+    # elif isinstance(prompt_generator, TemplatePromptGenerator4SD1):
+    #     prefix = './logs_ID_template/'
+    # else:
+    #     raise TypeError(f"Prompt generator of type {type(prompt_generator)} is not supported")
+    #
+    # stimulus_generator = Llama2(system_prompt=prompt_generator.generate_system_prompt())
+    # print('Llama2 successfully built')
+    # # stimulus_generator = ChatGPT(system_prompt=prompt_generator.generate_system_prompt())
+    # extractor = DumbExtractor()
+    # stimulus_filter = Filter4SD(0x0, 0xffffffff)
+    #
+    # # build loggers
+    # t = datetime.now()
+    # t = t.strftime('%Y%m%d_%H%M%S')
+    # logger_txt = TXTLogger(f'{prefix}{t}.txt')
+    # logger_csv = CSVLogger(f'{prefix}{t}.csv')
+    #
+    # # create agent
+    # agent = LLMAgent(prompt_generator, stimulus_generator, extractor, stimulus_filter,
+    #                  [logger_txt, logger_csv])
+    # print('Agent successfully built')
+
+    agent = DumbAgent4ID()
+
+    # run test
+    stimulus = 0
+    g_dut_state = GlobalDUTState()
+    g_coverage = GlobalCoverageDatabase()
     with closing(StimulusSender("tcp://localhost:5555")) as stimulus_sender:
-        for i in test_insns:
-            coverage = stimulus_sender.send_stimulus(i)
+        while not agent.end_simulation(g_dut_state, g_coverage):
+            coverage = stimulus_sender.send_stimulus(stimulus)
+            g_coverage.set(coverage)
+
+            stimulus = agent.generate_next_value(g_dut_state, g_coverage)
 
         coverage = stimulus_sender.send_stimulus(None)
-
         coverage.output_coverage()
+
+        g_coverage.set(coverage)
+        print(f"Finished with hits: {coverage}")
+        # coverage_plan = {k: v for (k, v) in g_coverage.get_coverage_plan().items() if v > 0}
+        # print(f"Finished, with dialog of length {agent.dialog_index}, hits: {coverage_plan}")
+
 
 if __name__ == "__main__":
     main()
