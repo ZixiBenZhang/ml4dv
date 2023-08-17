@@ -1,32 +1,32 @@
 from prompt_generators.prompt_generator_template import *
 
-BOUND = 523
 
-
-class TemplatePromptGenerator4SD1(TemplatePromptGenerator):
+class TemplatePromptGenerator4ID1(TemplatePromptGenerator):
     def __init__(self,
-                 dut_code_path: str = '../examples_SD/dut_code.txt',
-                 tb_code_path: str = '../examples_SD/tb_code.txt',
-                 bin_descr_path: str = '../examples_SD/bins_description.txt',
+                 dut_code_path: str = '../examples_ID/dut_code.txt',
+                 tb_code_path: str = '../examples_ID/tb_code.txt',
+                 bin_descr_path: str = '../examples_ID/bins_description.txt',
                  code_summary_type: int = 0,  # 0: no code, 1: code, 2: summary
                  sampling_missed_bins: bool = True,
                  ):
         super().__init__(dut_code_path, tb_code_path, bin_descr_path, code_summary_type, sampling_missed_bins)
 
     def generate_system_prompt(self) -> str:
-        return "Please output (positive or negative) a list of integers only, " \
-               f"each integer between -{BOUND} and {BOUND}. \n" \
+        return "Please output a list of hexadecimal integers only, " \
+               f"each integer between 0x0 and 0xffffffff. \n" \
                f"Output format: [a, b, c, ...]."
 
     def _load_introduction(self) -> str:
         if self.code_summary_type == 1:
-            return "You will receive programs of a hardware device and a testbench, " \
-                   "and a description of bins (i.e. test cases). " \
-                   "Then, you are going to generate a list of integers to cover the test cases.\n"
+            return "You will receive programs of a RISC-V instruction decoder and a testbench for it, " \
+                   "as well as a description of bins (i.e. test cases). " \
+                   "Then, you are going to generate a list of 32-bit instructions (i.e. hex integers " \
+                   "between 0x0 and 0xffffffff) to cover the test cases.\n"
         elif self.code_summary_type == 0:
             return "You will receive a description of bins (i.e. test cases) of a testbench for " \
-                   "a hardware device under test (DUT). " \
-                   "Then, you are going to generate a list of integers to cover these test cases.\n"
+                   "a hardware device under test (DUT), which is a RISC-V instruction decoder. " \
+                   "Then, you are going to generate a list of 32-bit instructions (i.e. hex integers between " \
+                   "0x0 and 0xffffffff) to cover these test cases.\n"
         else:
             # TODO: intro for code summaries
             raise NotImplementedError
@@ -59,7 +59,7 @@ class TemplatePromptGenerator4SD1(TemplatePromptGenerator):
         with open(bin_descr_dir, 'r') as f:
             bins_description = f.read()
         tb_summary = \
-            f"Now, we want to test the DUT with a list of integers as its input. " \
+            f"Now, we want to test the instruction decoder with a list of 32-bit instructions as its input. " \
             f"We want the input to cover the bins (i.e. test cases) that we care about. " \
             f"Here's the description of the bins that we care about:\n" \
             f"------\n" \
@@ -72,15 +72,15 @@ class TemplatePromptGenerator4SD1(TemplatePromptGenerator):
         init_question = \
             "Following the bins description" + \
             (", and refer to the programs" if self.code_summary_type != 0 else "") + \
-            ", generate a list that contains segments of integers, which covers " \
-            "the described bins as much as you can.\n"
+            ", generate a list of 32-bit instructions (i.e. hex integers between 0x0 and 0xffffffff) " \
+            "which covers the described bins as much as you can.\n"
         return init_question
 
     def _load_result_summary(self, **kwargs) -> str:
         if kwargs['response_invalid']:
             result_summary = \
                 "Your response doesn't answer my query. \n" \
-                f"Please generate a list of integers between -{BOUND} and {BOUND}, " \
+                f"Please generate a list of 32-bit instructions (i.e. hex integers between 0x0 and 0xffffffff), " \
                 "with output format: [a, b, c, ...].\n" \
                 f"Here are {'some of ' if self.sampling_missed_bins else ''}the unreached bins:\n"
 
@@ -89,17 +89,18 @@ class TemplatePromptGenerator4SD1(TemplatePromptGenerator):
                 "The new values you just provided didn't cover any new bins. You need to try to cover as " \
                 "much of the described bins as you can.\n" \
                 "You will see the result coverage of your previous response(s), and then " \
-                "generate another list of integers to cover the unreached bins (i.e. test cases)\n" \
+                "generate another list of 32-bit instructions to cover the unreached bins (i.e. test cases)\n" \
                 f"Here are {'some of ' if self.sampling_missed_bins else ''} the unreached bins:\n"
 
         else:
             result_summary = \
                 "The values you provided failed to cover all the bins.\n" \
                 "You will see the result coverage of your previous response(s), and then " \
-                "generate another list of integers to cover the unreached bins (i.e. test cases)\n" \
+                "generate another list of 32-bit instructions to cover the unreached bins (i.e. test cases)\n" \
                 f"Here are {'some of ' if self.sampling_missed_bins else ''}the unreached bins:\n"
         return result_summary
 
+    # TODO: template prompts for ID
     def _load_coverage_difference_prompts_dict(self) -> Dict[str, str]:
         # TODO: improve difference prompts?
         single_bins_difference = {f'single_{i}': f"- Single-stride pattern segment of stride width {i} is unreached.\n"
@@ -124,9 +125,9 @@ class TemplatePromptGenerator4SD1(TemplatePromptGenerator):
 
     def _load_iter_question(self, **kwargs) -> str:
         if kwargs['response_invalid']:
-            iter_question = f"Please generate a list of integers between -{BOUND} and {BOUND}, " \
-                            "with output format: [a, b, c, ...]"
+            iter_question = f"Please generate a list of 32-bit instructions (i.e. hex integers between " \
+                            f"0x0 and 0xffffffff) , with output format: [a, b, c, ...]"
         else:
-            iter_question = "Please regenerate a segment of length 18 for each of these unreached bins " \
+            iter_question = "Please regenerate a 32-bit instruction for each of these unreached bins " \
                             "according to the BINS DESCRIPTION."
         return iter_question

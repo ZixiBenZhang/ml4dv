@@ -56,6 +56,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
     def _load_iter_question(self, **kwargs) -> str:
         raise NotImplementedError
 
+    # Should be overriden
     def generate_system_prompt(self) -> str:
         return "Please output (positive or negative) a list of integers only, " \
                f"each integer between -{BOUND} and {BOUND}. \n" \
@@ -108,9 +109,8 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
                                               np.random.choice(missed_bins[2:25], 3, replace=False),
                                               np.random.choice(missed_bins[25:], 2, replace=False)])
             else:  # harder bins
-                t = 10  # max(4, len(missed_bins) // 3)
-                missed_bins = np.concatenate([np.random.choice(missed_bins[:t], 3, replace=False),
-                                              np.random.choice(missed_bins[t:], 4, replace=False)])
+                missed_bins = np.concatenate([missed_bins[:2],
+                                              np.random.choice(missed_bins[2:], 5, replace=False)])
         elif len(missed_bins) > 5:
             missed_bins = np.concatenate([missed_bins[:2],
                                           np.random.choice(missed_bins[2:], 3, replace=False)])

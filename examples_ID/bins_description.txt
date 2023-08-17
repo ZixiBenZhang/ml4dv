@@ -1,0 +1,25 @@
+- The list contains 32-bit hexadecimal integers, each represent a RISC-V instruction.
+- There are ten kinds operations that we care about,
+---
+OPERATIONS
+    - add: takes in two register files, and write their addition result to a register file.
+    - addi: takes in one register file and an immediate (i.e. a constant number), and write their addition result to a register file.
+    - sub: takes in two register files, and write their subtraction result to a register file.
+    - subi: takes in one register file and an immediate, and write their subtraction result to a register file.
+    - and: takes in two register files, and write their logical AND result to a register file.
+    - andi: takes in one register file and an immediate, and write their logical AND result to a register file.
+    - or: takes in two register files, and write their logical OR result to a register file.
+    - ori: takes in one register file and an immediate, and write their logical OR result to a register file.
+    - xor: takes in two register files, and write their logical XOR result to a register file.
+    - xori: takes in one register file and an immediate, and write their logical XOR result to a register file.
+    - sll: takes in two register files, and write the result of shifting one value by numbers of bit register file.
+    - slt: takes in two register files, and write their difference to a register file.
+    - sltu: takes in two register files, and write their difference to a register file.
+    - srl: takes in two register files, and write their difference to a register file.
+    - sra: takes in two register files, and write their difference to a register file.
+    - lw:
+    - lh
+    - lb
+    - sw
+    - sh
+    - sb

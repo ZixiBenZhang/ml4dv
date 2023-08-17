@@ -66,6 +66,7 @@ class GlobalCoverageDatabase:
         for bins_type in op_bins:
             bins: Dict[str, int] = getattr(self._coverage_database, bins_type)
             for op, v in bins.items():
+                op = op.upper()
                 k = f'{bins_type}_{op}'
                 if bins_type == 'alu_ops':
                     k = op
@@ -94,6 +95,7 @@ class GlobalCoverageDatabase:
         for bins_type in cross_bins:
             bins: Dict[str, List[int]] = getattr(self._coverage_database, bins_type)
             for op, regs in bins.items():
+                op = op.upper()
                 for i, v in enumerate(regs):
                     k = f"{bins_type}__{op}_{i}"
                     if bins_type == 'alu_ops_x_read_reg_a':

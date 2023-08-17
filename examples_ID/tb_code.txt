@@ -1,0 +1,342 @@
+import cocotb
+from cocotb.clock import Clock
+from cocotb.triggers import Timer, ClockCycles, ReadWrite, ReadOnly, Event
+
+import ibex_consts
+
+
+class CoverageMonitor:
+    alu_op_names = [
+        'add',
+        'sub',
+        'or',
+        'xor',
+        'and',
+        'sll',
+        'srl',
+        'sra',
+        'slt',
+        'sltu']
+
+    mem_size_names = [
+        'word',
+        'half-word',
+        'byte']
+
+    def __init__(self, dut):
+        self.coverage_database = CoverageDatabase.create(self.alu_op_names,
+                                                         self.mem_size_names)
+
+        self.signals = {
+            'alu_operator': dut.u_decoder.alu_operator_o,
+            'imm_a_mux_sel': dut.u_decoder.imm_a_mux_sel_o,
+            'imm_b_mux_sel': dut.u_decoder.imm_b_mux_sel_o,
+            'alu_op_a_mux_sel': dut.u_decoder.alu_op_a_mux_sel_o,
+            'alu_op_b_mux_sel': dut.u_decoder.alu_op_b_mux_sel_o,
+            'rf_we': dut.u_decoder.rf_we_o,
+            'rf_waddr': dut.u_decoder.rf_waddr_o,
+            'rf_raddr_a': dut.u_decoder.rf_raddr_a_o,
+            'rf_raddr_b': dut.u_decoder.rf_raddr_b_o,
+            'rf_ren_a': dut.u_decoder.rf_ren_a_o,
+            'rf_ren_b': dut.u_decoder.rf_ren_b_o,
+            'rf_wdata_sel': dut.u_decoder.rf_wdata_sel_o,
+            'mult_sel': dut.u_decoder.mult_sel_o,
+            'div_sel': dut.u_decoder.div_sel_o,
+            'illegal_insn': dut.u_decoder.illegal_insn_o,
+            'data_req': dut.u_decoder.data_req_o,
+            'data_we': dut.u_decoder.data_we_o,
+            'data_type': dut.u_decoder.data_type_o
+        }
+
+        self.write_reg_seen = None
+        self.read_reg_a_seen = None
+        self.read_reg_b_seen = None
+        self.alu_op_seen = None
+        self.alu_imm_op_seen = None
+        self.store_seen = None
+        self.load_seen = None
+
+    def alu_op_str_from_val(self, alu_operator):
+        if alu_operator == ibex_consts.ALU_ADD:
+            return "add"
+        elif alu_operator == ibex_consts.ALU_SUB:
+            return "sub"
+        elif alu_operator == ibex_consts.ALU_XOR:
+            return "xor"
+        elif alu_operator == ibex_consts.ALU_OR:
+            return "or"
+        elif alu_operator == ibex_consts.ALU_AND:
+            return "and"
+        elif alu_operator == ibex_consts.ALU_SRA:
+            return "sra"
+        elif alu_operator == ibex_consts.ALU_SRL:
+            return "srl"
+        elif alu_operator == ibex_consts.ALU_SLL:
+            return "sll"
+        elif alu_operator == ibex_consts.ALU_SLT:
+            return "slt"
+        elif alu_operator == ibex_consts.ALU_SLTU:
+            return "sltu"
+
+        return None
+
+    def access_size_str_from_type(self, data_type):
+        if data_type == 0:
+            return "word"
+        if data_type == 1:
+            return "half-word"
+        if data_type == 2:
+            return "byte"
+
+        return None
+
+    def clear_seen(self):
+        self.alu_op_seen = None
+        self.alu_imm_op_seen = None
+        self.write_reg_seen = None
+        self.read_reg_a_seen = None
+        self.read_reg_b_seen = None
+        self.store_seen = None
+        self.load_seen = None
+
+    def sample_alu_ops(self):
+
+        if (self.signals['rf_we'].value != 0 and
+                self.signals['mult_sel'].value == 0 and
+                self.signals['div_sel'].value == 0 and
+                self.signals['rf_ren_a'].value != 0 and
+                self.signals['alu_op_a_mux_sel'].value == ibex_consts.OP_A_REG_A and
+                self.signals['rf_wdata_sel'].value == ibex_consts.RF_WD_EX):
+            alu_op_str = self.alu_op_str_from_val(self.signals['alu_operator'])
+            if alu_op_str:
+                if self.signals['alu_op_b_mux_sel'].value == ibex_consts.OP_B_IMM:
+                    self.alu_imm_op_seen = alu_op_str
+                else:
+                    self.alu_op_seen = alu_op_str
+
+    def sample_mem_ops(self):
+        if self.signals['data_req'].value != 0:
+            access_size_str = self.access_size_str_from_type(self.signals['data_type'].value)
+
+            if self.signals['data_we'].value != 0:
+                self.store_seen = access_size_str
+            else:
+                self.load_seen = access_size_str
+
+    def sample_rf_accesses(self):
+        if (self.signals['rf_we'].value != 0) or (self.load_seen is not None):
+            self.write_reg_seen = self.signals['rf_waddr'].value
+
+        if self.signals['rf_ren_a'].value != 0:
+            self.read_reg_a_seen = self.signals['rf_raddr_a'].value
+
+        if self.signals['rf_ren_b'].value != 0:
+            self.read_reg_b_seen = self.signals['rf_raddr_b'].value
+
+    def sample_coverage(self):
+        illegal_insn = False
+        self.clear_seen()
+
+        if self.signals['illegal_insn'].value == 0:
+            self.sample_alu_ops()
+            self.sample_mem_ops()
+            self.sample_rf_accesses()
+        else:
+            illegal_insn = True
+
+        self.coverage_database.update(alu_op_seen=self.alu_op_seen,
+                                      alu_imm_op_seen=self.alu_imm_op_seen,
+                                      illegal_insn_seen=illegal_insn,
+                                      write_reg_seen=self.write_reg_seen,
+                                      read_reg_a_seen=self.read_reg_a_seen,
+                                      read_reg_b_seen=self.read_reg_b_seen,
+                                      load_seen=self.load_seen,
+                                      store_seen=self.store_seen)
+
+
+
+from dataclasses import dataclass
+from typing import Optional
+from pprint import pprint
+
+@dataclass
+class CoverageDatabase:
+    alu_ops: dict[str, int]
+    alu_imm_ops: dict[str, int]
+    misc: dict[str, int]
+    read_reg_a: list[int]
+    read_reg_b: list[int]
+    write_reg: list[int]
+    load_ops: dict[str, int]
+    store_ops: dict[str, int]
+
+    alu_ops_x_read_reg_a: dict[str, list[int]]
+    alu_ops_x_read_reg_b: dict[str, list[int]]
+    alu_ops_x_write_reg: dict[str, list[int]]
+
+    alu_imm_ops_x_read_reg_a: dict[str, list[int]]
+    alu_imm_ops_x_write_reg: dict[str, list[int]]
+
+    load_ops_x_read_reg_a: dict[str, list[int]]
+    load_ops_x_write_reg: dict[str, list[int]]
+
+    store_ops_x_read_reg_a: dict[str, list[int]]
+    store_ops_x_read_reg_b: dict[str, list[int]]
+
+
+    @classmethod
+    def create(cls, alu_op_names, mem_size_names):
+        alu_ops_x_read_reg_a = dict.fromkeys(alu_op_names, None)
+        alu_ops_x_read_reg_b = dict.fromkeys(alu_op_names, None)
+        alu_ops_x_write_reg = dict.fromkeys(alu_op_names, None)
+
+        alu_imm_ops_x_read_reg_a = dict.fromkeys(alu_op_names, None)
+        alu_imm_ops_x_write_reg = dict.fromkeys(alu_op_names, None)
+
+        load_ops_x_read_reg_a = dict.fromkeys(mem_size_names, None)
+        load_ops_x_write_reg = dict.fromkeys(mem_size_names, None)
+
+        store_ops_x_read_reg_a = dict.fromkeys(mem_size_names, None)
+        store_ops_x_read_reg_b = dict.fromkeys(mem_size_names, None)
+
+        for k in alu_op_names:
+            alu_ops_x_read_reg_a[k] = [0] * 32
+            alu_ops_x_read_reg_b[k] = [0] * 32
+            alu_ops_x_write_reg[k] = [0] * 32
+
+            alu_imm_ops_x_read_reg_a[k] = [0] * 32
+            alu_imm_ops_x_write_reg[k] = [0] * 32
+
+        for k in mem_size_names:
+            load_ops_x_read_reg_a[k] = [0] * 32
+            load_ops_x_write_reg[k] = [0] * 32
+
+            store_ops_x_read_reg_a[k] = [0] * 32
+            store_ops_x_read_reg_b[k] = [0] * 32
+
+        return cls(alu_ops = dict.fromkeys(alu_op_names, 0),
+            alu_imm_ops = dict.fromkeys(alu_op_names, 0),
+
+            misc = {'illegal_insn': 0},
+
+            read_reg_a = [0] * 32,
+            read_reg_b = [0] * 32,
+            write_reg = [0] * 32,
+
+            load_ops = dict.fromkeys(mem_size_names, 0),
+            store_ops = dict.fromkeys(mem_size_names, 0),
+
+            alu_ops_x_read_reg_a = alu_ops_x_read_reg_a,
+            alu_ops_x_read_reg_b = alu_ops_x_read_reg_b,
+            alu_ops_x_write_reg = alu_ops_x_write_reg,
+
+            alu_imm_ops_x_read_reg_a = alu_imm_ops_x_read_reg_a,
+            alu_imm_ops_x_write_reg = alu_imm_ops_x_write_reg,
+
+            load_ops_x_read_reg_a = load_ops_x_read_reg_a,
+            load_ops_x_write_reg = load_ops_x_write_reg,
+
+            store_ops_x_read_reg_a = store_ops_x_read_reg_a,
+            store_ops_x_read_reg_b = store_ops_x_read_reg_b
+        )
+
+    def update(self, alu_op_seen, alu_imm_op_seen, illegal_insn_seen,
+            write_reg_seen, read_reg_a_seen, read_reg_b_seen, load_seen,
+            store_seen):
+
+        if illegal_insn_seen:
+            self.misc['illegal_insn'] += 1
+            return
+
+        if read_reg_a_seen is not None:
+            self.read_reg_a[read_reg_a_seen] += 1
+
+        if read_reg_b_seen is not None:
+            self.read_reg_b[read_reg_b_seen] += 1
+
+        if write_reg_seen is not None:
+            self.write_reg[write_reg_seen] += 1
+
+        if alu_op_seen:
+            assert read_reg_a_seen is not None
+            assert read_reg_b_seen is not None
+            assert write_reg_seen is not None
+
+            self.alu_ops[alu_op_seen] += 1
+
+            self.alu_ops_x_read_reg_a[alu_op_seen][read_reg_a_seen] += 1
+            self.alu_ops_x_read_reg_b[alu_op_seen][read_reg_b_seen] += 1
+            self.alu_ops_x_write_reg[alu_op_seen][write_reg_seen] += 1
+
+        if alu_imm_op_seen:
+            assert read_reg_a_seen is not None
+            assert write_reg_seen is not None
+
+            self.alu_imm_ops[alu_imm_op_seen] += 1
+
+            self.alu_imm_ops_x_read_reg_a[alu_imm_op_seen][read_reg_a_seen] += 1
+            self.alu_imm_ops_x_write_reg[alu_imm_op_seen][write_reg_seen] += 1
+
+        if load_seen is not None:
+            assert read_reg_a_seen is not None
+            assert write_reg_seen is not None
+
+            self.load_ops[load_seen] += 1
+
+            self.load_ops_x_read_reg_a[load_seen][read_reg_a_seen] += 1
+            self.load_ops_x_write_reg[load_seen][write_reg_seen] += 1
+
+        if store_seen is not None:
+            assert read_reg_a_seen is not None
+            assert read_reg_b_seen is not None
+
+            self.store_ops[store_seen] += 1
+
+            self.store_ops_x_read_reg_a[store_seen][read_reg_a_seen] += 1
+            self.store_ops_x_read_reg_b[store_seen][read_reg_b_seen] += 1
+
+    def output_cross_coverage(self, cross_coverage):
+        op_str_width = max(map(lambda x: len(x), cross_coverage.keys()))
+
+        for op, reg_hits in cross_coverage.items():
+            padding = ''.join([' '] * (op_str_width - len(op)))
+            print(f'{op}{padding}:', end='')
+            print(','.join(map(lambda x: f'{x:03d}', reg_hits)))
+
+    def output_coverage(self):
+        print("ALU Ops:")
+        pprint(self.alu_ops)
+        print("ALU Imm Ops:")
+        pprint(self.alu_imm_ops)
+        print("Load Ops:")
+        pprint(self.load_ops)
+        print("Store Ops:")
+        pprint(self.store_ops)
+        print("Read Reg Port A:")
+        pprint(self.read_reg_a)
+        print("Read Reg Port B:")
+        pprint(self.read_reg_b)
+        print("Write Reg:")
+        pprint(self.write_reg)
+
+        print("\nALU Ops x Read Port A:")
+        self.output_cross_coverage(self.alu_ops_x_read_reg_a)
+        print("\nALU Ops x Read Port B:")
+        self.output_cross_coverage(self.alu_ops_x_read_reg_b)
+        print("\nALU Ops x Write:")
+        self.output_cross_coverage(self.alu_ops_x_write_reg)
+
+        print("\nALU Imm Ops x Read Port A:")
+        self.output_cross_coverage(self.alu_imm_ops_x_read_reg_a)
+        print("\nALU Imm Ops x Write:")
+        self.output_cross_coverage(self.alu_imm_ops_x_write_reg)
+
+        print("\nLoad Ops x Read Port A:")
+        self.output_cross_coverage(self.load_ops_x_read_reg_a)
+        print("\nLoad Ops x Write:")
+        self.output_cross_coverage(self.load_ops_x_write_reg)
+
+        print("\nStore Ops x Read Port A:")
+        self.output_cross_coverage(self.store_ops_x_read_reg_a)
+        print("\nStore Ops x Read Port B:")
+        self.output_cross_coverage(self.store_ops_x_read_reg_b)
