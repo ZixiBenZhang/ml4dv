@@ -78,7 +78,7 @@ def main():
     stimulus = 0
     g_dut_state = GlobalDUTState()
     g_coverage = GlobalCoverageDatabase()
-    with closing(StimulusSender("tcp://localhost:5555")) as stimulus_sender:
+    with closing(StimulusSender("tcp://128.232.65.218:5555")) as stimulus_sender:
         while not agent.end_simulation(g_dut_state, g_coverage):
             coverage = stimulus_sender.send_stimulus(stimulus)
             g_coverage.set(coverage)
