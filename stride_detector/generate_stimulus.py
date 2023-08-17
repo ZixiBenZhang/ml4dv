@@ -84,11 +84,10 @@ def main():
 
     with closing(StimulusSender("tcp://128.232.65.218:5555")) as stimulus_sender:
         while not agent.end_simulation(g_dut_state, g_coverage):
+            stimulus.value = agent.generate_next_value(g_dut_state, g_coverage)
             dut_state, coverage = stimulus_sender.send_stimulus(stimulus)
             g_dut_state.set(dut_state)
             g_coverage.set(coverage)
-
-            stimulus.value = agent.generate_next_value(g_dut_state, g_coverage)
 
         coverage_plan = {k: v for (k, v) in g_coverage.get_coverage_plan().items() if v > 0}
         print(f"Finished at dialog #{agent.dialog_index}, message #{agent.msg_index}, \n"

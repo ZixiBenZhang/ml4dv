@@ -80,10 +80,9 @@ def main():
     g_coverage = GlobalCoverageDatabase()
     with closing(StimulusSender("tcp://128.232.65.218:5555")) as stimulus_sender:
         while not agent.end_simulation(g_dut_state, g_coverage):
+            stimulus = agent.generate_next_value(g_dut_state, g_coverage)
             coverage = stimulus_sender.send_stimulus(stimulus)
             g_coverage.set(coverage)
-
-            stimulus = agent.generate_next_value(g_dut_state, g_coverage)
 
         coverage = stimulus_sender.send_stimulus(None)
         coverage.output_coverage()
