@@ -75,7 +75,6 @@ def main():
     agent = DumbAgent4ID()
 
     # run test
-    stimulus = 0
     g_dut_state = GlobalDUTState()
     g_coverage = GlobalCoverageDatabase()
     with closing(StimulusSender("tcp://128.232.65.218:5555")) as stimulus_sender:
@@ -85,11 +84,14 @@ def main():
             g_coverage.set(coverage)
 
         coverage = stimulus_sender.send_stimulus(None)
-        coverage.output_coverage()
+        # coverage.output_coverage()
 
         g_coverage.set(coverage)
-        print(f"Finished with hits: {coverage}")
-        # coverage_plan = {k: v for (k, v) in g_coverage.get_coverage_plan().items() if v > 0}
+        print(f"Full coverage plan: {g_coverage.get_coverage_plan()}\n")
+        coverage_plan = {k: v for (k, v) in g_coverage.get_coverage_plan().items() if v > 0}
+        print(f"Finished with hits: {coverage_plan}\n")
+        rate = g_coverage.get_coverage_rate()
+        print(f"Final coverage rate: {rate[0]} / {rate[1]}")
         # print(f"Finished, with dialog of length {agent.dialog_index}, hits: {coverage_plan}")
 
 

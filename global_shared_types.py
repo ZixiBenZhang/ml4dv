@@ -56,8 +56,67 @@ class GlobalCoverageDatabase:
         return coverage_plan
 
     def _get_coverage_plan_ID(self) -> Dict[str, int]:
-        # TODO: get_coverage_plan for Ibex Decoder
-        pass
+        coverage_plan = {}
+        op_bins = ['alu_ops', 'alu_imm_ops', 'misc', 'load_ops', 'store_ops']
+        reg_bins = ['read_reg_a', 'read_reg_b', 'write_reg']
+        cross_bins = ['alu_ops_x_read_reg_a', 'alu_ops_x_read_reg_b', 'alu_ops_x_write_reg', 'alu_imm_ops_x_read_reg_a',
+                      'alu_imm_ops_x_write_reg', 'load_ops_x_read_reg_a', 'load_ops_x_write_reg',
+                      'store_ops_x_read_reg_a', 'store_ops_x_read_reg_b']
+
+        for bins_type in op_bins:
+            bins: Dict[str, int] = getattr(self._coverage_database, bins_type)
+            for op, v in bins.items():
+                k = f'{bins_type}_{op}'
+                if bins_type == 'alu_ops':
+                    pass
+                elif bins_type == 'alu_imm_ops':
+                    k = f'{op}i'
+                elif bins_type == 'misc':
+                    pass
+                elif bins_type == 'load_ops':
+                    k = f'l{op[0]}'
+                elif bins_type == 'store_ops':
+                    k = f's{op[0]}'
+                coverage_plan[k] = v
+
+        for bins_type in reg_bins:
+            bins: List[int] = getattr(self._coverage_database, bins_type)
+            for i, v in enumerate(bins):
+                k = f'{bins_type}_{i}'
+                if bins_type == 'read_reg_a':
+                    k = f'read_A_reg_{i}'
+                elif bins_type == 'read_reg_b':
+                    k = f'read_B_reg_{i}'
+                elif bins_type == 'write_reg':
+                    k = f'write_reg_{i}'
+                coverage_plan[k] = v
+
+        for bins_type in cross_bins:
+            bins: Dict[str, List[int]] = getattr(self._coverage_database, bins_type)
+            for op, regs in bins.items():
+                for i, v in enumerate(regs):
+                    k = f"{bins_type}__{op}_{i}"
+                    if bins_type == 'alu_ops_x_read_reg_a':
+                        k = f'{op}_x_read_A_reg_{i}'
+                    elif bins_type == 'alu_ops_x_read_reg_b':
+                        k = f'{op}_x_read_B_reg_{i}'
+                    elif bins_type == 'alu_ops_x_write_reg':
+                        k = f'{op}_x_write_reg_{i}'
+                    elif bins_type == 'alu_imm_ops_x_read_reg_a':
+                        k = f'{op}i_x_read_A_reg_{i}'
+                    elif bins_type == 'alu_imm_ops_x_write_reg':
+                        k = f'{op}i_x_write_reg_{i}'
+                    elif bins_type == 'load_ops_x_read_reg_a':
+                        k = f'l{op[0]}_x_read_A_reg_{i}'
+                    elif bins_type == 'load_ops_x_write_reg':
+                        k = f'l{op[0]}_x_write_reg_{i}'
+                    elif bins_type == 'store_ops_x_read_reg_a':
+                        k = f's{op[0]}_x_read_A_reg_{i}'
+                    elif bins_type == 'store_ops_x_read_reg_b':
+                        k = f's{op[0]}_x_read_B_reg_{i}'
+                    coverage_plan[k] = v
+
+        return coverage_plan
 
     def get_coverage_rate(self) -> Tuple[int, int]:
         coverage = self.get_coverage_plan()
@@ -85,4 +144,3 @@ class GlobalDUTState:
             raise TypeError(f"DUT state of type {type(dut_state)} is not supported.")
 
         self._dut_state = dut_state
-
