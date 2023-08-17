@@ -82,7 +82,7 @@ def main():
     g_dut_state = GlobalDUTState()
     g_coverage = GlobalCoverageDatabase()
 
-    with closing(StimulusSender("tcp://128.232.65.218:5555")) as stimulus_sender:
+    with closing(StimulusSender("tcp://127.0.0.1:5050")) as stimulus_sender:
         while not agent.end_simulation(g_dut_state, g_coverage):
             stimulus.value = agent.generate_next_value(g_dut_state, g_coverage)
             dut_state, coverage = stimulus_sender.send_stimulus(stimulus)
