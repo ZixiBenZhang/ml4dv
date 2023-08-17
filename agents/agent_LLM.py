@@ -94,7 +94,7 @@ class LLMAgent(BaseAgent):
             self.log_append({'role': 'coverage', 'content': coverage})
             coverage_plan = {k: v for (k, v) in coverage.items() if v > 0}
             print(f"Dialog #{self.dialog_index} Message #{self.msg_index} done, \n"
-                  f"Total msg cnt: {self.total_msg_cnt}, \n"
+                  f"Total msg cnt: {self.total_msg_cnt} \n"
                   f"Hits: {coverage_plan}, \n"
                   f"Coverage rate: {coverage_database.get_coverage_rate()}")
             # Restart a dialog if low-efficient (nearly converged)
@@ -117,7 +117,7 @@ class LLMAgent(BaseAgent):
             if f_:
                 self.log_append({'role': 'coverage', 'content': coverage})
                 print(f"Dialog #{self.dialog_index} Message #{self.msg_index} done, \n"
-                      f"Total msg cnt: {self.total_msg_cnt}, \n"
+                      f"Total msg cnt: {self.total_msg_cnt} \n"
                       f"Gibberish response")
                 # Restart a dialog if low-efficient (nearly converged)
                 self.history_cov_rate.append(coverage_database.get_coverage_rate()[0])
@@ -142,6 +142,7 @@ class LLMAgent(BaseAgent):
 
             # Get response
             response = self.stimulus_generator(prompt)
+            self.total_msg_cnt += 1
             self.msg_index += 1
             self.log_append({'role': 'assistant', 'content': response})
 
