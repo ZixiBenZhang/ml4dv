@@ -71,13 +71,13 @@ class GlobalCoverageDatabase:
                 if bins_type == 'alu_ops':
                     k = op
                 elif bins_type == 'alu_imm_ops':
-                    k = f'{op}i'
+                    k = f'{op}I'
                 elif bins_type == 'misc':
                     k = op
                 elif bins_type == 'load_ops':
-                    k = f'l{op[0]}'
+                    k = f'L{op[0]}'
                 elif bins_type == 'store_ops':
-                    k = f's{op[0]}'
+                    k = f'S{op[0]}'
                 coverage_plan[k] = v
 
         for bins_type in reg_bins:
@@ -105,17 +105,17 @@ class GlobalCoverageDatabase:
                     elif bins_type == 'alu_ops_x_write_reg':
                         k = f'{op}_x_write_reg_{i}'
                     elif bins_type == 'alu_imm_ops_x_read_reg_a':
-                        k = f'{op}i_x_read_A_reg_{i}'
+                        k = f'{op}I_x_read_A_reg_{i}'
                     elif bins_type == 'alu_imm_ops_x_write_reg':
-                        k = f'{op}i_x_write_reg_{i}'
+                        k = f'{op}I_x_write_reg_{i}'
                     elif bins_type == 'load_ops_x_read_reg_a':
-                        k = f'l{op[0]}_x_read_A_reg_{i}'
+                        k = f'L{op[0]}_x_read_A_reg_{i}'
                     elif bins_type == 'load_ops_x_write_reg':
-                        k = f'l{op[0]}_x_write_reg_{i}'
+                        k = f'L{op[0]}_x_write_reg_{i}'
                     elif bins_type == 'store_ops_x_read_reg_a':
-                        k = f's{op[0]}_x_read_A_reg_{i}'
+                        k = f'S{op[0]}_x_read_A_reg_{i}'
                     elif bins_type == 'store_ops_x_read_reg_b':
-                        k = f's{op[0]}_x_read_B_reg_{i}'
+                        k = f'S{op[0]}_x_read_B_reg_{i}'
                     coverage_plan[k] = v
 
         return coverage_plan

@@ -59,8 +59,6 @@ class FixedPromptGenerator4SD1(BasePromptGenerator):
         return prompt
 
     def generate_iterative_prompt(self, coverage_database: GlobalCoverageDatabase, **kwargs) -> str:
-        assert coverage_database.get() is stride_detector.shared_types.CoverageDatabase
-
         if kwargs['response_invalid']:
             # TODO: tune gibberish prompt (or maybe it's limitation of fixed prompts?)
             gibberish_prompt = "Your response doesn't answer my query.\n" \
