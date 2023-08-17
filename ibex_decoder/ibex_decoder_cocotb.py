@@ -1,3 +1,10 @@
+import sys
+import os
+
+directory = os.path.dirname(os.path.abspath("__file__"))
+sys.path.insert(0, os.path.dirname(directory))
+# print(sys.path)
+
 import functools
 import zmq
 import pickle
@@ -10,47 +17,48 @@ from cocotb.triggers import Timer, ClockCycles, ReadWrite, ReadOnly, Event
 
 import ibex_consts
 
+
 class CoverageMonitor:
     alu_op_names = [
-            'add',
-            'sub',
-            'or',
-            'xor',
-            'and',
-            'sll',
-            'srl',
-            'sra',
-            'slt',
-            'sltu']
+        'add',
+        'sub',
+        'or',
+        'xor',
+        'and',
+        'sll',
+        'srl',
+        'sra',
+        'slt',
+        'sltu']
 
     mem_size_names = [
-            'word',
-            'half-word',
-            'byte']
+        'word',
+        'half-word',
+        'byte']
 
     def __init__(self, dut):
         self.coverage_database = CoverageDatabase.create(self.alu_op_names,
-                self.mem_size_names)
+                                                         self.mem_size_names)
 
         self.signals = {
-                'alu_operator': dut.u_decoder.alu_operator_o,
-                'imm_a_mux_sel': dut.u_decoder.imm_a_mux_sel_o,
-                'imm_b_mux_sel': dut.u_decoder.imm_b_mux_sel_o,
-                'alu_op_a_mux_sel': dut.u_decoder.alu_op_a_mux_sel_o,
-                'alu_op_b_mux_sel': dut.u_decoder.alu_op_b_mux_sel_o,
-                'rf_we': dut.u_decoder.rf_we_o,
-                'rf_waddr': dut.u_decoder.rf_waddr_o,
-                'rf_raddr_a': dut.u_decoder.rf_raddr_a_o,
-                'rf_raddr_b': dut.u_decoder.rf_raddr_b_o,
-                'rf_ren_a': dut.u_decoder.rf_ren_a_o,
-                'rf_ren_b': dut.u_decoder.rf_ren_b_o,
-                'rf_wdata_sel': dut.u_decoder.rf_wdata_sel_o,
-                'mult_sel': dut.u_decoder.mult_sel_o,
-                'div_sel': dut.u_decoder.div_sel_o,
-                'illegal_insn': dut.u_decoder.illegal_insn_o,
-                'data_req': dut.u_decoder.data_req_o,
-                'data_we': dut.u_decoder.data_we_o,
-                'data_type': dut.u_decoder.data_type_o
+            'alu_operator': dut.u_decoder.alu_operator_o,
+            'imm_a_mux_sel': dut.u_decoder.imm_a_mux_sel_o,
+            'imm_b_mux_sel': dut.u_decoder.imm_b_mux_sel_o,
+            'alu_op_a_mux_sel': dut.u_decoder.alu_op_a_mux_sel_o,
+            'alu_op_b_mux_sel': dut.u_decoder.alu_op_b_mux_sel_o,
+            'rf_we': dut.u_decoder.rf_we_o,
+            'rf_waddr': dut.u_decoder.rf_waddr_o,
+            'rf_raddr_a': dut.u_decoder.rf_raddr_a_o,
+            'rf_raddr_b': dut.u_decoder.rf_raddr_b_o,
+            'rf_ren_a': dut.u_decoder.rf_ren_a_o,
+            'rf_ren_b': dut.u_decoder.rf_ren_b_o,
+            'rf_wdata_sel': dut.u_decoder.rf_wdata_sel_o,
+            'mult_sel': dut.u_decoder.mult_sel_o,
+            'div_sel': dut.u_decoder.div_sel_o,
+            'illegal_insn': dut.u_decoder.illegal_insn_o,
+            'data_req': dut.u_decoder.data_req_o,
+            'data_we': dut.u_decoder.data_we_o,
+            'data_type': dut.u_decoder.data_type_o
         }
 
         self.write_reg_seen = None
@@ -60,7 +68,6 @@ class CoverageMonitor:
         self.alu_imm_op_seen = None
         self.store_seen = None
         self.load_seen = None
-
 
     def alu_op_str_from_val(self, alu_operator):
         if alu_operator == ibex_consts.ALU_ADD:
@@ -108,17 +115,17 @@ class CoverageMonitor:
     def sample_alu_ops(self):
 
         if (self.signals['rf_we'].value != 0 and
-            self.signals['mult_sel'].value == 0 and
-            self.signals['div_sel'].value == 0 and
-            self.signals['rf_ren_a'].value != 0 and
-            self.signals['alu_op_a_mux_sel'].value == ibex_consts.OP_A_REG_A and
-            self.signals['rf_wdata_sel'].value == ibex_consts.RF_WD_EX):
-                alu_op_str = self.alu_op_str_from_val(self.signals['alu_operator'])
-                if alu_op_str:
-                    if self.signals['alu_op_b_mux_sel'].value == ibex_consts.OP_B_IMM:
-                        self.alu_imm_op_seen = alu_op_str
-                    else:
-                        self.alu_op_seen = alu_op_str
+                self.signals['mult_sel'].value == 0 and
+                self.signals['div_sel'].value == 0 and
+                self.signals['rf_ren_a'].value != 0 and
+                self.signals['alu_op_a_mux_sel'].value == ibex_consts.OP_A_REG_A and
+                self.signals['rf_wdata_sel'].value == ibex_consts.RF_WD_EX):
+            alu_op_str = self.alu_op_str_from_val(self.signals['alu_operator'])
+            if alu_op_str:
+                if self.signals['alu_op_b_mux_sel'].value == ibex_consts.OP_B_IMM:
+                    self.alu_imm_op_seen = alu_op_str
+                else:
+                    self.alu_op_seen = alu_op_str
 
     def sample_mem_ops(self):
         if self.signals['data_req'].value != 0:
@@ -150,14 +157,15 @@ class CoverageMonitor:
         else:
             illegal_insn = True
 
-        self.coverage_database.update(alu_op_seen = self.alu_op_seen,
-                alu_imm_op_seen = self.alu_imm_op_seen,
-                illegal_insn_seen = illegal_insn,
-                write_reg_seen = self.write_reg_seen,
-                read_reg_a_seen = self.read_reg_a_seen,
-                read_reg_b_seen = self.read_reg_b_seen,
-                load_seen = self.load_seen,
-                store_seen = self.store_seen)
+        self.coverage_database.update(alu_op_seen=self.alu_op_seen,
+                                      alu_imm_op_seen=self.alu_imm_op_seen,
+                                      illegal_insn_seen=illegal_insn,
+                                      write_reg_seen=self.write_reg_seen,
+                                      read_reg_a_seen=self.read_reg_a_seen,
+                                      read_reg_b_seen=self.read_reg_b_seen,
+                                      load_seen=self.load_seen,
+                                      store_seen=self.store_seen)
+
 
 # Produces the stimulus for the testbench based on observed coverage
 class SimulationController:
@@ -176,7 +184,7 @@ class SimulationController:
             await Timer(5, units="ns")
             await ReadWrite()
 
-            while(True):
+            while (True):
                 stimulus_msg = socket.recv()
                 stimulus_obj = pickle.loads(stimulus_msg)
 
@@ -188,7 +196,7 @@ class SimulationController:
                 if not isinstance(stimulus_obj, int):
                     assert False, "Saw bad stimulus message"
 
-                if stimulus_obj > 2**32 or stimulus_obj < 0:
+                if stimulus_obj > 2 ** 32 or stimulus_obj < 0:
                     assert False, "Saw out of range stimulus message"
 
                 self.dut.insn_i.value = stimulus_obj
@@ -204,6 +212,7 @@ class SimulationController:
 
     def run_controller(self):
         cocotb.start_soon(self.controller_loop())
+
 
 @cocotb.test()
 async def basic_test(dut):
