@@ -68,11 +68,11 @@ class GlobalCoverageDatabase:
             for op, v in bins.items():
                 k = f'{bins_type}_{op}'
                 if bins_type == 'alu_ops':
-                    pass
+                    k = op
                 elif bins_type == 'alu_imm_ops':
                     k = f'{op}i'
                 elif bins_type == 'misc':
-                    pass
+                    k = op
                 elif bins_type == 'load_ops':
                     k = f'l{op[0]}'
                 elif bins_type == 'store_ops':
