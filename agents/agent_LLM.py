@@ -84,6 +84,9 @@ class LLMAgent(BaseAgent):
 
     def generate_next_value(self, dut_state: GlobalDUTState,
                             coverage_database: GlobalCoverageDatabase) -> Union[int, None]:
+        if coverage_database.get() is None:
+            return 0
+
         coverage = coverage_database.get_coverage_plan()
 
         # Restart a dialog if low-efficient (nearly converged)
@@ -113,8 +116,8 @@ class LLMAgent(BaseAgent):
         f_ = 0  # i.e. gibberish response
         while len(self.stimuli_buffer) == 0:
             if self.total_msg_cnt >= DIALOG_BOUND:
-                # return None (same as 0), so entering end_simulation and stops in next loop
-                return None
+                # return 0 (same as None), so entering end_simulation and stops in next loop
+                return 0
 
             # only for gibberish i.e. looped
             if f_:
