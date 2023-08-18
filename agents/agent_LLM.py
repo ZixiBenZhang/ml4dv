@@ -95,7 +95,7 @@ class LLMAgent(BaseAgent):
             coverage_plan = {k: v for (k, v) in coverage.items() if v > 0}
             print(f"Dialog #{self.dialog_index} Message #{self.msg_index} done, \n"
                   f"Total msg cnt: {self.total_msg_cnt} \n"
-                  f"Hits: {coverage_plan}, \n"
+                  f"Hits: {coverage_plan} \n" if coverage_database.get_coverage_rate()[0] <= 100 else ''
                   f"Coverage rate: {coverage_database.get_coverage_rate()}")
             # Restart a dialog if low-efficient (nearly converged)
             self.history_cov_rate.append(coverage_database.get_coverage_rate()[0])
