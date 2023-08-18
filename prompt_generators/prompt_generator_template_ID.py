@@ -100,32 +100,31 @@ class TemplatePromptGenerator4ID1(TemplatePromptGenerator):
                 f"Here are {'some of ' if self.sampling_missed_bins else ''}the unreached bins:\n"
         return result_summary
 
-    # TODO: template prompts for ID
     def _load_coverage_difference_prompts_dict(self) -> Dict[str, str]:
-        single_bins_difference = {f'single_{i}': f"- Single-stride pattern segment of stride width {i} is unreached.\n"
-                                  for i in range(-16, 16)}
-        double_bins_difference = {f'double_{i}_{j}': f"- Double-stride pattern segment of stride width pair "
-                                                     f"({i}, {j}) is unreached.\n"
-                                  for i in range(-16, 16) for j in range(-16, 16) if i != j}
-        misc_bins = ['single_stride_n_overflow',
-                     'single_stride_p_overflow',
-                     'double_stride_nn_overflow',
-                     'double_stride_np_overflow',
-                     'double_stride_pn_overflow',
-                     'double_stride_pp_overflow',
-                     'no_stride_to_double',
-                     'no_stride_to_single',
-                     'single_stride_to_double',
-                     'double_stride_to_single']
-        misc_bins_difference = {bin_name: f'- {bin_name} is unreached.\n' for bin_name in misc_bins}
+        alu = ['ADD', 'SUB', 'AND', 'OR', 'XOR', 'SLL', 'SRL', 'SRA', 'SLT', 'SLTU']
+        op_bins = alu + list(map(lambda s: f'{s}I', alu)) + ['LW', 'LH', 'LB', 'SW', 'SH', 'SB']
 
-        coverage_difference_template = {**single_bins_difference, **double_bins_difference, **misc_bins_difference}
+        ports = {'read_A_reg_': 'read_A', 'read_B_reg_': 'read_B', 'write_reg_': 'write'}
+        reg_bins = {f'{port}{i}': port_name for i in range(32) for port, port_name in ports.items()}
+
+        # may have invalid cross bin entries that will never be in missed bins
+        cross_bins = {f'{op}_x_{reg}': (op, port_name) for reg, port_name in reg_bins.items() for op in op_bins}
+
+        op_bins_difference = {op: f"{op}: there's no instruction that performs the operation {op}." for op in op_bins}
+        reg_bins_difference = {port: f"{port}: there's no instruction that uses the {port_name} port of "
+                                     f"register {port[-1]}."
+                               for port, port_name in reg_bins.items()}
+        cross_bins_difference = {bin_name: f"{bin_name}: there's no operation that performs the operation {op_name} "
+                                           f"using the {port_name} port of register {bin_name[-1]}."
+                                 for bin_name, (op_name, port_name) in cross_bins.items()}
+
+        coverage_difference_template = {**op_bins_difference, **reg_bins_difference, **cross_bins_difference}
         return coverage_difference_template
 
     def _load_iter_question(self, **kwargs) -> str:
         if kwargs['response_invalid']:
             iter_question = f"Please generate a list of 32-bit instructions (i.e. hex integers between " \
-                            f"0x0 and 0xffffffff) , with output format: [a, b, c, ...]"
+                            f"0x0 and 0xffffffff) , with output format: [a, b, c, ...]."
         else:
             iter_question = "Please regenerate a 32-bit instruction for each of these unreached bins " \
                             "according to the BINS DESCRIPTION."

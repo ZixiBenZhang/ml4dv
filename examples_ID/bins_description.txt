@@ -22,7 +22,7 @@ OPERATIONS
     - SLT: make comparison between two register files; if the first one is smaller, write 1 to a register file, otherwise write 0
     - SLTI: make comparison between a register file and an immediate; if the register file is smaller, write 1 to a register file, otherwise write 0
     - SLTU: make comparison between two unsigned register files; if the first one is smaller, write 1 to a register file, otherwise write 0
-    - SLTI: make comparison between an unsigned register file and an unsigned immediate; if the register file is smaller, write 1 to a register file, otherwise write 0
+    - SLTUI: make comparison between an unsigned register file and an unsigned immediate; if the register file is smaller, write 1 to a register file, otherwise write 0
     - LW: load a word (a 32-bit value) from memory at the address equal to a register file into a register file
     - LH: load a half-word (a 16-bit value) from memory at the address equal to a register file into a register file
     - LB: load a byte (an 8-bit value) from memory at the address equal to a register file into a register file

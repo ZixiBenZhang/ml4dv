@@ -125,7 +125,7 @@ class TemplatePromptGenerator4SD1(TemplatePromptGenerator):
     def _load_iter_question(self, **kwargs) -> str:
         if kwargs['response_invalid']:
             iter_question = f"Please generate a list of integers between -{BOUND} and {BOUND}, " \
-                            "with output format: [a, b, c, ...]"
+                            "with output format: [a, b, c, ...]."
         else:
             iter_question = "Please regenerate a segment of length 18 for each of these unreached bins " \
                             "according to the BINS DESCRIPTION."

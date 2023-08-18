@@ -49,6 +49,8 @@ class StimulusSender:
 
 
 def main():
+    server_ip_port = input("Please enter server's IP and port (e.g. 127.0.0.1:5050, 128.232.65.218:5555): ")
+
     # TODO: auto trials
     # build components
     prompt_generator = TemplatePromptGenerator4SD1()
@@ -81,8 +83,6 @@ def main():
     stimulus = Stimulus(value=0, finish=False)
     g_dut_state = GlobalDUTState()
     g_coverage = GlobalCoverageDatabase()
-
-    server_ip_port = input("Please enter server's IP and port (e.g. 127.0.0.1:5050, 128.232.65.218:5555): ")
 
     with closing(StimulusSender(f"tcp://{server_ip_port}")) as stimulus_sender:
         while not agent.end_simulation(g_dut_state, g_coverage):

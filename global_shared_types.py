@@ -73,7 +73,7 @@ class GlobalCoverageDatabase:
                 elif bins_type == 'alu_imm_ops':
                     k = f'{op}I'
                 elif bins_type == 'misc':
-                    k = op
+                    k = 'illegal_instruction'
                 elif bins_type == 'load_ops':
                     k = f'L{op[0]}'
                 elif bins_type == 'store_ops':
