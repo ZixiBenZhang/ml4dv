@@ -14,8 +14,8 @@ sys.path.insert(0, os.path.dirname(directory))
 from ibex_decoder.shared_types import *
 from global_shared_types import *
 from agents.agent_LLM import LLMAgent
-from prompt_generators.prompt_generator_fixed_SD import FixedPromptGenerator4SD1
-from prompt_generators.prompt_generator_template_SD import TemplatePromptGenerator4SD1
+from prompt_generators.prompt_generator_fixed_ID import FixedPromptGenerator4ID1
+from prompt_generators.prompt_generator_template_ID import TemplatePromptGenerator4ID1
 from models.llm_llama2 import Llama2
 from models.llm_chatgpt import ChatGPT
 from stimuli_extractor import DumbExtractor
@@ -46,9 +46,10 @@ class StimulusSender:
 
 
 def main():
+    server_ip_port = input("Please enter server's IP and port (e.g. 127.0.0.1:5050, 128.232.65.218:5555): ")
+
     # build components
-    # TODO: prompt generator for ID
-    prompt_generator = None
+    prompt_generator = FixedPromptGenerator4ID1()
     # if isinstance(prompt_generator, FixedPromptGenerator4SD1):
     #     prefix = './logs_ID_fixed/'
     # elif isinstance(prompt_generator, TemplatePromptGenerator4SD1):
@@ -78,7 +79,7 @@ def main():
     g_dut_state = GlobalDUTState()
     g_coverage = GlobalCoverageDatabase()
 
-    with closing(StimulusSender("tcp://128.232.65.218:5555")) as stimulus_sender:
+    with closing(StimulusSender(f"tcp://{server_ip_port}")) as stimulus_sender:
         while not agent.end_simulation(g_dut_state, g_coverage):
             stimulus = agent.generate_next_value(g_dut_state, g_coverage)
             coverage = stimulus_sender.send_stimulus(stimulus)
