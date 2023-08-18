@@ -102,7 +102,6 @@ class TemplatePromptGenerator4ID1(TemplatePromptGenerator):
 
     # TODO: template prompts for ID
     def _load_coverage_difference_prompts_dict(self) -> Dict[str, str]:
-        # TODO: improve difference prompts?
         single_bins_difference = {f'single_{i}': f"- Single-stride pattern segment of stride width {i} is unreached.\n"
                                   for i in range(-16, 16)}
         double_bins_difference = {f'double_{i}_{j}': f"- Double-stride pattern segment of stride width pair "
