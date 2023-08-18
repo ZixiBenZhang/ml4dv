@@ -67,8 +67,15 @@ class LLMAgent(BaseAgent):
             self.save_log()
             return True
 
+        if len(self.history_cov_rate) >= 25 and self.history_cov_rate[-1] == self.history_cov_rate[-25]:
+            self.state = 'DONE'
+            self.log_append({'role': 'coverage', 'content': coverage})
+            self.log_append({'role': 'stop', 'content': 'model converged'})
+            self.save_log()
+            return True
+
         if self.total_msg_cnt >= DIALOG_BOUND and len(self.stimuli_buffer) == 0:
-            coverage = coverage_database.get_coverage_plan()
+            self.state = 'DONE'
             self.log_append({'role': 'coverage', 'content': coverage})
             self.log_append({'role': 'stop', 'content': 'max dialog number'})
             self.save_log()
@@ -94,8 +101,8 @@ class LLMAgent(BaseAgent):
             self.log_append({'role': 'coverage', 'content': coverage})
             coverage_plan = {k: v for (k, v) in coverage.items() if v > 0}
             print(f"Dialog #{self.dialog_index} Message #{self.msg_index} done, \n"
-                  f"Total msg cnt: {self.total_msg_cnt} \n"
-                  f"Hits: {coverage_plan} \n" if coverage_database.get_coverage_rate()[0] <= 100 else ''
+                  f"Total msg cnt: {self.total_msg_cnt} \n" +
+                  f"Hits: {coverage_plan} \n" if coverage_database.get_coverage_rate()[0] <= 100 else '' +
                   f"Coverage rate: {coverage_database.get_coverage_rate()}")
             # Restart a dialog if low-efficient (nearly converged)
             self.history_cov_rate.append(coverage_database.get_coverage_rate()[0])
