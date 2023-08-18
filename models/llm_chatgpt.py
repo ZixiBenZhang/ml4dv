@@ -63,17 +63,20 @@ class ChatGPT(BaseLLM):
             else:
                 response_choices: List[Dict[str, str]] = [choice['message'] for choice in result['choices']]
                 self.messages.append(response_choices[0])
+                self.total_msg_cnt += 1
                 return response_choices[0]['content']
 
     def _compress_conversation(self):
-        REMAIN_ITER_NUM = 3
-        if len(self.messages) < 4 + 2 * REMAIN_ITER_NUM:
+        if len(self.messages) < 4 + 2 * ChatGPT.REMAIN_ITER_NUM:
             return
         if self.messages[-1]['role'] == 'system':
             init = self.messages[:3]
         else:
             init = self.messages[:2]
-        self.messages = init + self.messages[-2 * REMAIN_ITER_NUM:]
+        # self.messages = init + self.messages[-2 * ChatGPT.REMAIN_ITER_NUM:]
+
+        # Keep previous successful iter messages
+        self.messages = init + self._select_successful()
 
         # TODO: compress by summarization using Ada?
         return
@@ -82,6 +85,7 @@ class ChatGPT(BaseLLM):
         return num_tokens_from_messages(self.messages, self.model_name)
 
     def reset(self):
+        # TODO: restart with previous successful iters
         self.messages.clear()
         if self.system_prompt != "":
             self.messages.append({"role": "system", "content": self.system_prompt})

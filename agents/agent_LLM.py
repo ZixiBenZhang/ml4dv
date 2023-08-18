@@ -99,12 +99,17 @@ class LLMAgent(BaseAgent):
 
         # when not first stimulus & need to generate new response
         if len(self.stimuli_buffer) == 0 and self.state != 'INIT':
+            # Log coverage
             self.log_append({'role': 'coverage', 'content': coverage})
             coverage_plan = {k: v for (k, v) in coverage.items() if v > 0}
             print(f"Dialog #{self.dialog_index} Message #{self.msg_index} done, \n"
                   f"Total msg cnt: {self.total_msg_cnt} \n" +
                   (f"Hits: {coverage_plan} \n" if coverage_database.get_coverage_rate()[0] <= 100 else '') +
                   f"Coverage rate: {coverage_database.get_coverage_rate()}")
+
+            # Update best_message of LLM
+            self.stimulus_generator.update_successful(new_coverage=coverage_database.get_coverage_rate()[0])
+
             # Restart a dialog if low-efficient (nearly converged)
             self.history_cov_rate.append(coverage_database.get_coverage_rate()[0])
             self.all_history_cov_rate.append(coverage_database.get_coverage_rate()[0])
@@ -152,6 +157,9 @@ class LLMAgent(BaseAgent):
 
             # Get response
             response = self.stimulus_generator(prompt)
+            self.stimulus_generator.append_successful(prompt={'role': 'user', 'content': prompt},
+                                                      response={'role': 'assistant', 'content': response},
+                                                      cur_coverage=coverage_database.get_coverage_rate()[0])
             self.total_msg_cnt += 1
             self.msg_index += 1
             self.log_append({'role': 'assistant', 'content': response})
