@@ -39,6 +39,7 @@ class LLMAgent(BaseAgent):
         self.log_headers()
 
         self.history_cov_rate = []
+        self.all_history_cov_rate = []
 
     def reset(self):
         self.log_reset()
@@ -67,7 +68,7 @@ class LLMAgent(BaseAgent):
             self.save_log()
             return True
 
-        if len(self.history_cov_rate) >= 25 and self.history_cov_rate[-1] == self.history_cov_rate[-25]:
+        if len(self.all_history_cov_rate) >= 25 and self.all_history_cov_rate[-1] == self.all_history_cov_rate[-25]:
             self.state = 'DONE'
             self.log_append({'role': 'coverage', 'content': coverage})
             self.log_append({'role': 'stop', 'content': 'model converged'})
@@ -106,6 +107,7 @@ class LLMAgent(BaseAgent):
                   f"Coverage rate: {coverage_database.get_coverage_rate()}")
             # Restart a dialog if low-efficient (nearly converged)
             self.history_cov_rate.append(coverage_database.get_coverage_rate()[0])
+            self.all_history_cov_rate.append(coverage_database.get_coverage_rate()[0])
             if len(self.history_cov_rate) >= 7 and self.history_cov_rate[-1] - self.history_cov_rate[-7] < EPSILON:
                 self.reset()
                 print("\n>>>>> Agent reset <<<<<\n")
@@ -128,6 +130,7 @@ class LLMAgent(BaseAgent):
                       f"Gibberish response")
                 # Restart a dialog if low-efficient (nearly converged)
                 self.history_cov_rate.append(coverage_database.get_coverage_rate()[0])
+                self.all_history_cov_rate.append(coverage_database.get_coverage_rate()[0])
                 if len(self.history_cov_rate) >= 7 and self.history_cov_rate[-1] - self.history_cov_rate[-7] < EPSILON:
                     self.reset()
                     f_ = 0
