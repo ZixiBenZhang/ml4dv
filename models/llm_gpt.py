@@ -67,8 +67,8 @@ class ChatGPT(BaseLLM):
                 return response_choices[0]['content']
 
     def _compress_conversation(self):
-        if len(self.messages) < 4 + 2 * ChatGPT.REMAIN_ITER_NUM:
-            return
+        # if len(self.messages) < 4 + 2 * ChatGPT.REMAIN_ITER_NUM:
+        #     return
         if self.messages[-1]['role'] == 'system':
             init = self.messages[:3]
         else:

@@ -27,9 +27,10 @@ class BaseLLM:
 
     def update_successful(self, new_coverage: int):
         self.best_messages[-1]['hit'] = new_coverage - self.best_messages[-1]['hit']
-        self.best_messages = sorted(self.best_messages,
-                                    key=lambda d: (d['hit'], d['id']), reverse=True)[:BaseLLM.REMAIN_ITER_NUM]
+        self.best_messages = sorted(self.best_messages, key=lambda d: (d['hit'], d['id']),
+                                    reverse=True)[:BaseLLM.REMAIN_ITER_NUM]
 
+    # TODO: keep more best msgs & then sample 3 from them
     def _select_successful(self) -> List[Dict[str, str]]:
         self.best_messages.sort(key=lambda d: d['id'])
         return [msg for entry in self.best_messages for msg in entry['msg']]
