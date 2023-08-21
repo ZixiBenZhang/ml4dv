@@ -108,7 +108,7 @@ class LLMAgent(BaseAgent):
                   f"Coverage rate: {coverage_database.get_coverage_rate()}")
 
             # Update best_message of LLM
-            if self.msg_index == 1:
+            if self.msg_index != 1:
                 self.stimulus_generator.update_successful(new_coverage=coverage_database.get_coverage_rate()[0])
 
             # Restart a dialog if low-efficient (nearly converged)
