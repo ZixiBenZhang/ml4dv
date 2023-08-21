@@ -85,7 +85,7 @@ class ChatGPT(BaseLLM):
         return num_tokens_from_messages(self.messages, self.model_name)
 
     def reset(self):
-        # TODO: restart with previous successful iters
+        # TODO: restart with previous successful iters (unnecessary? otherwise why restart?)
         self.messages.clear()
         if self.system_prompt != "":
             self.messages.append({"role": "system", "content": self.system_prompt})
