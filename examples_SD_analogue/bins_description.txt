@@ -1,0 +1,11 @@
+Imagine a lock that can be unlocked with a particular sequence of numbers.  Your goal is to unlock as many locks as possible.  The numbers are integers and there are 16 in each sequence.  
+
+Here are some definitions:
+- A sequence follows a single-stride pattern with a stride width x if: the differences between two adjacent integers are always x.
+- A sequence follows a double-stride pattern with a stride width pair (x, y) if: the differences between two adjacent integers are alternating x and y, meanwhile x and y are different.
+- A sequence has no stride pattern if it neither follows a single-stride pattern nor a double-stride pattern.
+- The maximum stride width is 15, and the minimum stride width is -16.
+
+The locks can be unlocked with sequences that follow a single or double-stride pattern.
+
+Only output the sequences of numbers and nothing else. Generate 10 example sequences that would unlock the locks.
