@@ -36,6 +36,7 @@ class ChatGPT(BaseLLM):
     def __call__(self, prompt: str) -> str:
         self._compress_conversation()
         self.messages.append({"role": "user", "content": prompt})
+
         token_cnt = self._check_token_num()
         if self.model_max_context is None or token_cnt + self.max_gen_tokens <= self.model_max_context:
             model = self.model_name
