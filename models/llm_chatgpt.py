@@ -19,8 +19,8 @@ class ChatGPT(BaseLLM):
         openai_api_key = os.getenv("OPENAI_API_KEY")
         assert openai_api_key is not None, "OpenAI API key not found."
         openai.api_key = openai_api_key
-        self.model_name = model_name
-        self.long_context_model_name = model_name + '-16k'  # not in use
+        self.model_name = model_name + '-0613'
+        self.long_context_model_name = model_name + '-16k' + '-0613'
         self.model_max_context = 4096 if 'gpt-3.5-turbo' in model_name else 8192 if 'gpt-4' in model_name else None
         self.temperature = temperature
         self.top_p = top_p

@@ -124,9 +124,9 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
             else:  # harder bins
                 missed_bins = np.concatenate([missed_bins[:2],
                                               np.random.choice(missed_bins[2:], 5, replace=False)])
-        elif len(missed_bins) > 5:
+        elif len(missed_bins) > 7:
             missed_bins = np.concatenate([missed_bins[:2],
-                                          np.random.choice(missed_bins[2:], 3, replace=False)])
+                                          np.random.choice(missed_bins[2:], 5, replace=False)])
         else:
             np.random.shuffle(missed_bins)
 
