@@ -17,7 +17,7 @@ from agents.agent_LLM import LLMAgent
 from prompt_generators.prompt_generator_fixed_SD import FixedPromptGenerator4SD1
 from prompt_generators.prompt_generator_template_SD import TemplatePromptGenerator4SD1
 from models.llm_llama2 import Llama2
-from models.llm_chatgpt import ChatGPT
+from models.llm_gpt import ChatGPT
 from stimuli_extractor import DumbExtractor
 from stimuli_filter import Filter4SD
 from loggers.logger_csv import CSVLogger
