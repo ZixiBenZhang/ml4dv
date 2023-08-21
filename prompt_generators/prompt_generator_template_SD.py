@@ -236,7 +236,7 @@ class TemplatePromptGenerator4SD2(TemplatePromptGenerator):
         double_bins_difference = {f'double_{i}_{j}': f"- Double-stride pattern segment of stride width pair "
                                                      f"({i}, {j}) is unreached. This can be hit with a segment of "
                                                      f"double-stride pattern with stride width pair ({i}, {j}). "
-                                                     f"Don't generate a segment of [{i}, {j}, {i}, {j}, ...] "
+                                                     f"DO NOT generate a segment of [{i}, {j}, {i}, {j}, ...] "
                                                      f"because it can't cover this bin.\n"
                                   for i in range(-16, 16) for j in range(-16, 16) if i != j}
         misc_bins = ['single_stride_n_overflow',
