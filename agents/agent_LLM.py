@@ -7,7 +7,7 @@ from prompt_generators.prompt_generator_base import *
 from stimuli_extractor import *
 from stimuli_filter import *
 
-DIALOG_BOUND = 600
+DIALOG_BOUND = 650
 
 # threshold for restarting a dialog
 EPSILON = 3
