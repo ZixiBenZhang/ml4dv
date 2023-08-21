@@ -53,7 +53,7 @@ def main():
 
     # TODO: auto trials
     # build components
-    prompt_generator = TemplatePromptGenerator4SD2()  # w/ negative feedback
+    prompt_generator = TemplatePromptGenerator4SD1()
     # if isinstance(prompt_generator, FixedPromptGenerator4SD1):
     #     prefix = '../logs_SD_fixed/'
     # elif isinstance(prompt_generator, TemplatePromptGenerator4SD1):
