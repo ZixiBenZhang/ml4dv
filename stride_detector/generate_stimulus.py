@@ -15,7 +15,7 @@ from stride_detector.shared_types import *
 from global_shared_types import *
 from agents.agent_LLM import LLMAgent
 from prompt_generators.prompt_generator_fixed_SD import FixedPromptGenerator4SD1
-from prompt_generators.prompt_generator_template_SD import TemplatePromptGenerator4SD1
+from prompt_generators.prompt_generator_template_SD import *
 from models.llm_llama2 import Llama2
 from models.llm_gpt import ChatGPT
 from stimuli_extractor import DumbExtractor
@@ -53,7 +53,7 @@ def main():
 
     # TODO: auto trials
     # build components
-    prompt_generator = TemplatePromptGenerator4SD1()
+    prompt_generator = TemplatePromptGenerator4SD2()  # w/ negative feedback
     # if isinstance(prompt_generator, FixedPromptGenerator4SD1):
     #     prefix = '../logs_SD_fixed/'
     # elif isinstance(prompt_generator, TemplatePromptGenerator4SD1):
