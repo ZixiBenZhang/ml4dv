@@ -134,6 +134,10 @@ class LLMAgent(BaseAgent):
             if self.total_msg_cnt >= DIALOG_BOUND:
                 # return 0 (same as None), so entering end_simulation and stops in next loop
                 return 0
+            if len(self.all_history_cov_rate) >= 25 and self.all_history_cov_rate[-1] == self.all_history_cov_rate[
+                -25] or len(self.all_history_cov_rate) >= 50 and self.all_history_cov_rate[-1] - \
+                    self.all_history_cov_rate[-50] <= 2:
+                return 0
 
             # only for gibberish i.e. looped
             if f_:
