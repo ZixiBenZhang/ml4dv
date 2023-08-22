@@ -68,6 +68,13 @@ class LLMAgent(BaseAgent):
             self.save_log()
             return True
 
+        if len(self.all_history_cov_rate) >= 25 and self.all_history_cov_rate[-1] == self.all_history_cov_rate[-25]:
+            self.state = 'DONE'
+            self.log_append({'role': 'coverage', 'content': coverage})
+            self.log_append({'role': 'stop', 'content': 'model converged'})
+            self.save_log()
+            return True
+
         if len(self.all_history_cov_rate) >= 50 \
                 and self.all_history_cov_rate[-1] - self.all_history_cov_rate[-50] <= 2:
             self.state = 'DONE'
