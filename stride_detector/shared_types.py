@@ -6,10 +6,12 @@ NUM_STRIDES = 32
 STRIDE_MIN = -16
 STRIDE_MAX = 15
 
+
 @dataclass
 class Stimulus:
     value: Optional[int]
     finish: bool
+
 
 @dataclass
 class DUTState:
@@ -29,14 +31,17 @@ class DUTState:
     stride_2_confidence: list[int]
 
     def state_vector(self):
-        return [self.last_value,
-                self.stride_1,
-                self.stride_1_confidence,
-                self.stride_2[0],
-                self.stride_2[1],
-                self.stride_2_state,
-                self.stride_2_confidence[0],
-                self.stride_2_confidence[1]]
+        return [
+            self.last_value,
+            self.stride_1,
+            self.stride_1_confidence,
+            self.stride_2[0],
+            self.stride_2[1],
+            self.stride_2_state,
+            self.stride_2_confidence[0],
+            self.stride_2_confidence[1],
+        ]
+
 
 class CoverageDatabase:
     stride_1_seen: list[int]
@@ -44,16 +49,16 @@ class CoverageDatabase:
     misc_bins: dict[str, int]
 
     def output_coverage(self):
-        print ("****************** One Stride Bins *************")
+        print("****************** One Stride Bins *************")
         for i in range(STRIDE_MIN, STRIDE_MAX + 1):
             if i < 0:
                 stride_offset = NUM_STRIDES + i
             else:
                 stride_offset = i
 
-            print (i, self.stride_1_seen[stride_offset])
+            print(i, self.stride_1_seen[stride_offset])
 
-        print ("****************** Two Stride Bins *************")
+        print("****************** Two Stride Bins *************")
 
         for i in range(STRIDE_MIN, STRIDE_MAX + 1):
             if i < 0:
@@ -72,7 +77,7 @@ class CoverageDatabase:
                 else:
                     stride_offset_2 = j
 
-                print (i, j, self.stride_2_seen[stride_offset_1][stride_offset_2])
+                print(i, j, self.stride_2_seen[stride_offset_1][stride_offset_2])
 
         pprint(self.misc_bins)
 
@@ -85,7 +90,7 @@ class CoverageDatabase:
         # single strides).
         for i, bins in enumerate(self.stride_2_seen):
             for j, bin_val in enumerate(bins):
-                if (i != j):
+                if i != j:
                     coverage_vector.append(bin_val)
 
         coverage_vector += self.stride_1_seen

@@ -9,9 +9,13 @@ class BaseAgent:
         raise NotImplementedError
 
     @abstractmethod
-    def end_simulation(self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase):
+    def end_simulation(
+        self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase
+    ):
         raise NotImplementedError
 
     @abstractmethod
-    def generate_next_value(self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase):
+    def generate_next_value(
+        self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase
+    ):
         raise NotImplementedError

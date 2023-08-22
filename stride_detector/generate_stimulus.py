@@ -16,6 +16,7 @@ from global_shared_types import *
 from agents.agent_LLM import LLMAgent
 from prompt_generators.prompt_generator_fixed_SD import FixedPromptGenerator4SD1
 from prompt_generators.prompt_generator_template_SD import *
+
 # from models.llm_llama2 import Llama2
 from models.llm_gpt import ChatGPT
 from stimuli_extractor import DumbExtractor
@@ -49,35 +50,44 @@ class StimulusSender:
 
 
 def main():
-    server_ip_port = input("Please enter server's IP and port (e.g. 127.0.0.1:5050, 128.232.65.218:5555): ")
+    server_ip_port = input(
+        "Please enter server's IP and port (e.g. 127.0.0.1:5050, 128.232.65.218:5555): "
+    )
 
     # TODO: auto trials
     # build components
-    prompt_generator = TemplatePromptGenerator4SD1(sampling_missed_bins_method='NEWEST')
+    prompt_generator = TemplatePromptGenerator4SD1(sampling_missed_bins_method="NEWEST")
     # if isinstance(prompt_generator, FixedPromptGenerator4SD1):
     #     prefix = '../logs_SD_fixed/'
     # elif isinstance(prompt_generator, TemplatePromptGenerator4SD1):
     #     prefix = '../logs_SD_template/'
     # else:
     #     raise TypeError(f"Prompt generator of type {type(prompt_generator)} is not supported")
-    prefix = './logs/'
+    prefix = "./logs/"
 
     # stimulus_generator = Llama2(system_prompt=prompt_generator.generate_system_prompt())
     # print('Llama2 successfully built')
-    stimulus_generator = ChatGPT(system_prompt=prompt_generator.generate_system_prompt())
+    stimulus_generator = ChatGPT(
+        system_prompt=prompt_generator.generate_system_prompt()
+    )
     extractor = DumbExtractor()
     stimulus_filter = Filter(-10000, 10000)
 
     # build loggers
     t = datetime.now()
-    t = t.strftime('%Y%m%d_%H%M%S')
-    logger_txt = TXTLogger(f'{prefix}{t}.txt')
-    logger_csv = CSVLogger(f'{prefix}{t}.csv')
+    t = t.strftime("%Y%m%d_%H%M%S")
+    logger_txt = TXTLogger(f"{prefix}{t}.txt")
+    logger_csv = CSVLogger(f"{prefix}{t}.csv")
 
     # create agent
-    agent = LLMAgent(prompt_generator, stimulus_generator, extractor, stimulus_filter,
-                     [logger_txt, logger_csv])
-    print('Agent successfully built\n')
+    agent = LLMAgent(
+        prompt_generator,
+        stimulus_generator,
+        extractor,
+        stimulus_filter,
+        [logger_txt, logger_csv],
+    )
+    print("Agent successfully built\n")
 
     # run test
     stimulus = Stimulus(value=0, finish=False)
@@ -91,11 +101,15 @@ def main():
             g_dut_state.set(dut_state)
             g_coverage.set(coverage)
 
-        coverage_plan = {k: v for (k, v) in g_coverage.get_coverage_plan().items() if v > 0}
-        print(f"Finished at dialog #{agent.dialog_index}, message #{agent.msg_index}, \n"
-              f"with total {agent.total_msg_cnt} messages \n"
-              f"Hits: {coverage_plan} \n"
-              f"Coverage rate: {g_coverage.get_coverage_rate()}\n")
+        coverage_plan = {
+            k: v for (k, v) in g_coverage.get_coverage_plan().items() if v > 0
+        }
+        print(
+            f"Finished at dialog #{agent.dialog_index}, message #{agent.msg_index}, \n"
+            f"with total {agent.total_msg_cnt} messages \n"
+            f"Hits: {coverage_plan} \n"
+            f"Coverage rate: {g_coverage.get_coverage_rate()}\n"
+        )
 
         stimulus.value = None
         stimulus.finish = True

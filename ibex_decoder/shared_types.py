@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 from pprint import pprint
 
+
 @dataclass
 class CoverageDatabase:
     alu_ops: dict[str, int]
@@ -25,7 +26,6 @@ class CoverageDatabase:
 
     store_ops_x_read_reg_a: dict[str, list[int]]
     store_ops_x_read_reg_b: dict[str, list[int]]
-
 
     @classmethod
     def create(cls, alu_op_names, mem_size_names):
@@ -57,38 +57,40 @@ class CoverageDatabase:
             store_ops_x_read_reg_a[k] = [0] * 32
             store_ops_x_read_reg_b[k] = [0] * 32
 
-        return cls(alu_ops = dict.fromkeys(alu_op_names, 0),
-            alu_imm_ops = dict.fromkeys(alu_op_names, 0),
-
-            misc = {'illegal_insn': 0},
-
-            read_reg_a = [0] * 32,
-            read_reg_b = [0] * 32,
-            write_reg = [0] * 32,
-
-            load_ops = dict.fromkeys(mem_size_names, 0),
-            store_ops = dict.fromkeys(mem_size_names, 0),
-
-            alu_ops_x_read_reg_a = alu_ops_x_read_reg_a,
-            alu_ops_x_read_reg_b = alu_ops_x_read_reg_b,
-            alu_ops_x_write_reg = alu_ops_x_write_reg,
-
-            alu_imm_ops_x_read_reg_a = alu_imm_ops_x_read_reg_a,
-            alu_imm_ops_x_write_reg = alu_imm_ops_x_write_reg,
-
-            load_ops_x_read_reg_a = load_ops_x_read_reg_a,
-            load_ops_x_write_reg = load_ops_x_write_reg,
-
-            store_ops_x_read_reg_a = store_ops_x_read_reg_a,
-            store_ops_x_read_reg_b = store_ops_x_read_reg_b
+        return cls(
+            alu_ops=dict.fromkeys(alu_op_names, 0),
+            alu_imm_ops=dict.fromkeys(alu_op_names, 0),
+            misc={"illegal_insn": 0},
+            read_reg_a=[0] * 32,
+            read_reg_b=[0] * 32,
+            write_reg=[0] * 32,
+            load_ops=dict.fromkeys(mem_size_names, 0),
+            store_ops=dict.fromkeys(mem_size_names, 0),
+            alu_ops_x_read_reg_a=alu_ops_x_read_reg_a,
+            alu_ops_x_read_reg_b=alu_ops_x_read_reg_b,
+            alu_ops_x_write_reg=alu_ops_x_write_reg,
+            alu_imm_ops_x_read_reg_a=alu_imm_ops_x_read_reg_a,
+            alu_imm_ops_x_write_reg=alu_imm_ops_x_write_reg,
+            load_ops_x_read_reg_a=load_ops_x_read_reg_a,
+            load_ops_x_write_reg=load_ops_x_write_reg,
+            store_ops_x_read_reg_a=store_ops_x_read_reg_a,
+            store_ops_x_read_reg_b=store_ops_x_read_reg_b,
         )
 
-    def update(self, alu_op_seen, alu_imm_op_seen, illegal_insn_seen,
-            write_reg_seen, read_reg_a_seen, read_reg_b_seen, load_seen,
-            store_seen):
+    def update(
+        self,
+        alu_op_seen,
+        alu_imm_op_seen,
+        illegal_insn_seen,
+        write_reg_seen,
+        read_reg_a_seen,
+        read_reg_b_seen,
+        load_seen,
+        store_seen,
+    ):
 
         if illegal_insn_seen:
-            self.misc['illegal_insn'] += 1
+            self.misc["illegal_insn"] += 1
             return
 
         if read_reg_a_seen is not None:
@@ -142,9 +144,9 @@ class CoverageDatabase:
         op_str_width = max(map(lambda x: len(x), cross_coverage.keys()))
 
         for op, reg_hits in cross_coverage.items():
-            padding = ''.join([' '] * (op_str_width - len(op)))
-            print(f'{op}{padding}:', end='')
-            print(','.join(map(lambda x: f'{x:03d}', reg_hits)))
+            padding = "".join([" "] * (op_str_width - len(op)))
+            print(f"{op}{padding}:", end="")
+            print(",".join(map(lambda x: f"{x:03d}", reg_hits)))
 
     def output_coverage(self):
         print("ALU Ops:")
@@ -183,4 +185,3 @@ class CoverageDatabase:
         self.output_cross_coverage(self.store_ops_x_read_reg_a)
         print("\nStore Ops x Read Port B:")
         self.output_cross_coverage(self.store_ops_x_read_reg_b)
-

@@ -40,6 +40,7 @@ DOUBLE_STRIDE = 2
 #  - [single|double]_stride_[double|single] - A single/double repeating stride
 #    pattern has been observed followed by a double/single pattern
 
+
 class CoverageMonitor:
     def __init__(self, dut):
         self.coverage_database = CoverageDatabase()
@@ -51,26 +52,26 @@ class CoverageMonitor:
             self.coverage_database.stride_2_seen.append([0] * NUM_STRIDES)
 
         self.signals = {
-            'clk': dut.clk_i,
-            'valid': dut.valid_i,
-            'value': dut.value_i,
-            'stride_1': dut.stride_1_o,
-            'stride_1_valid': dut.stride_1_valid_o,
-            'stride_2': dut.stride_2_o,
-            'stride_2_valid': dut.stride_2_valid_o,
+            "clk": dut.clk_i,
+            "valid": dut.valid_i,
+            "value": dut.value_i,
+            "stride_1": dut.stride_1_o,
+            "stride_1_valid": dut.stride_1_valid_o,
+            "stride_2": dut.stride_2_o,
+            "stride_2_valid": dut.stride_2_valid_o,
         }
 
         self.coverage_database.misc_bins = {
-            'single_stride_n_overflow': 0,
-            'single_stride_p_overflow': 0,
-            'double_stride_nn_overflow': 0,
-            'double_stride_np_overflow': 0,
-            'double_stride_pn_overflow': 0,
-            'double_stride_pp_overflow': 0,
-            'no_stride_to_double': 0,
-            'no_stride_to_single': 0,
-            'single_stride_to_double': 0,
-            'double_stride_to_single': 0,
+            "single_stride_n_overflow": 0,
+            "single_stride_p_overflow": 0,
+            "double_stride_nn_overflow": 0,
+            "double_stride_np_overflow": 0,
+            "double_stride_pn_overflow": 0,
+            "double_stride_pp_overflow": 0,
+            "no_stride_to_double": 0,
+            "no_stride_to_single": 0,
+            "single_stride_to_double": 0,
+            "double_stride_to_single": 0,
         }
 
         self.stride_state = NO_STRIDE
@@ -81,18 +82,21 @@ class CoverageMonitor:
         self.coverage_sampled_event = Event()
 
     def sample_coverage(self):
-        if self.signals['valid'].value:
-            self.last_values.append(int(self.signals['value'].value))
+        if self.signals["valid"].value:
+            self.last_values.append(int(self.signals["value"].value))
 
             if len(self.last_values) > 16:
                 self.last_values = self.last_values[-16:]
 
-        if self.signals['stride_1_valid'].value:
-            if self.signals['stride_2_valid'].value:
-                self.coverage_database.stride_2_seen[self.signals['stride_1'].value][
-                    self.signals['stride_2'].value] += 1
+        if self.signals["stride_1_valid"].value:
+            if self.signals["stride_2_valid"].value:
+                self.coverage_database.stride_2_seen[self.signals["stride_1"].value][
+                    self.signals["stride_2"].value
+                ] += 1
             else:
-                self.coverage_database.stride_1_seen[self.signals['stride_1'].value] += 1
+                self.coverage_database.stride_1_seen[
+                    self.signals["stride_1"].value
+                ] += 1
 
         self.check_latest_strides()
         self.coverage_sampled_event.set()
@@ -101,16 +105,16 @@ class CoverageMonitor:
         no_stride = True
 
         if single_stride < STRIDE_MIN:
-            self.coverage_database.misc_bins['single_stride_n_overflow'] += 1
+            self.coverage_database.misc_bins["single_stride_n_overflow"] += 1
         elif single_stride > STRIDE_MAX:
-            self.coverage_database.misc_bins['single_stride_p_overflow'] += 1
+            self.coverage_database.misc_bins["single_stride_p_overflow"] += 1
         else:
             no_stride = False
 
             if self.stride_state == NO_STRIDE:
-                self.coverage_database.misc_bins['no_stride_to_single'] += 1
+                self.coverage_database.misc_bins["no_stride_to_single"] += 1
             elif self.stride_state == DOUBLE_STRIDE:
-                self.coverage_database.misc_bins['double_stride_to_single'] += 1
+                self.coverage_database.misc_bins["double_stride_to_single"] += 1
 
             self.stride_state = SINGLE_STRIDE
             self.no_strides_count = 0
@@ -122,19 +126,19 @@ class CoverageMonitor:
         no_stride = True
 
         if first_stride < STRIDE_MIN and second_stride < STRIDE_MIN:
-            self.coverage_database.misc_bins['double_stride_nn_overflow'] += 1
+            self.coverage_database.misc_bins["double_stride_nn_overflow"] += 1
         if first_stride < STRIDE_MIN and second_stride > STRIDE_MAX:
-            self.coverage_database.misc_bins['double_stride_np_overflow'] += 1
+            self.coverage_database.misc_bins["double_stride_np_overflow"] += 1
         if first_stride > STRIDE_MAX and second_stride < STRIDE_MIN:
-            self.coverage_database.misc_bins['double_stride_pn_overflow'] += 1
+            self.coverage_database.misc_bins["double_stride_pn_overflow"] += 1
         if first_stride > STRIDE_MAX and second_stride > STRIDE_MAX:
-            self.coverage_database.misc_bins['double_stride_pp_overflow'] += 1
+            self.coverage_database.misc_bins["double_stride_pp_overflow"] += 1
         else:
             no_stride = False
             if self.stride_state == NO_STRIDE:
-                self.coverage_database.misc_bins['no_stride_to_double'] += 1
+                self.coverage_database.misc_bins["no_stride_to_double"] += 1
             elif self.stride_state == SINGLE_STRIDE:
-                self.coverage_database.misc_bins['single_stride_to_double'] += 1
+                self.coverage_database.misc_bins["single_stride_to_double"] += 1
 
             self.stride_state = DOUBLE_STRIDE
             self.no_strides_count = 0
@@ -143,7 +147,7 @@ class CoverageMonitor:
             self.no_strides_count += 1
 
     def check_latest_strides(self):
-        if (len(self.last_values) < 16):
+        if len(self.last_values) < 16:
             return
 
         value_pairs = list(zip(self.last_values, [None] + self.last_values))
@@ -160,8 +164,9 @@ class CoverageMonitor:
             second_stride_set = set(second_strides)
 
             if len(first_stride_set) == 1 and len(second_stride_set) == 1:
-                self.sample_double_stride_coverage(next(iter(first_stride_set)),
-                                                   next(iter(second_stride_set)))
+                self.sample_double_stride_coverage(
+                    next(iter(first_stride_set)), next(iter(second_stride_set))
+                )
             else:
                 self.no_strides_count += 1
         else:
@@ -199,7 +204,7 @@ class SimulationController:
             await ClockCycles(self.dut.clk_i, 1)
             await ReadWrite()
 
-            while (True):
+            while True:
                 stimulus_msg = socket.recv()
                 stimulus_obj = pickle.loads(stimulus_msg)
 
@@ -210,7 +215,7 @@ class SimulationController:
 
                 if stimulus_obj.value is None:
                     self.dut.valid_i.value = 0
-                    self.dut.value_i.value = 0xbaaddead
+                    self.dut.value_i.value = 0xBAADDEAD
                 else:
                     self.dut.valid_i.value = 1
                     self.dut.value_i.value = stimulus_obj.value
@@ -219,8 +224,7 @@ class SimulationController:
                 await ReadWrite()
 
                 self.coverage_monitor.sample_coverage()
-                socket.send_pyobj((dut_state,
-                                   self.coverage_monitor.coverage_database))
+                socket.send_pyobj((dut_state, self.coverage_monitor.coverage_database))
 
                 if stimulus_obj.finish:
                     self.end_simulation_event.set()
@@ -229,14 +233,14 @@ class SimulationController:
     def sample_dut_state(self):
         return DUTState(
             last_value=self.dut.last_value.value,
-
             stride_1=self.dut.stride_1_q.value,
             stride_1_confidence=self.dut.stride_1_confidence_q.value,
-
             stride_2=self.dut.stride_2_q.value,
             stride_2_state=self.dut.stride_2_state_q.value,
-            stride_2_confidence=[self.dut.stride_2_confidence_q[0].value,
-                                 self.dut.stride_2_confidence_q[1].value]
+            stride_2_confidence=[
+                self.dut.stride_2_confidence_q[0].value,
+                self.dut.stride_2_confidence_q[1].value,
+            ],
         )
 
     def close(self):
@@ -256,7 +260,9 @@ async def basic_test(dut):
     cocotb.start_soon(Clock(dut.clk_i, 10, units="ns").start())
     await do_reset(dut)
 
-    with closing(SimulationController(dut, coverage_monitor, f"tcp://*:{server_port}")) as simulation_controller:
+    with closing(
+        SimulationController(dut, coverage_monitor, f"tcp://*:{server_port}")
+    ) as simulation_controller:
         simulation_controller.run_controller()
 
         # Wait for end of simulation to be signalled. Give the design a few more
@@ -266,5 +272,10 @@ async def basic_test(dut):
 
         # coverage_monitor.coverage_database.output_coverage()
         from global_shared_types import GlobalCoverageDatabase
+
         print("***** FINAL COVERAGE *****")
-        print(GlobalCoverageDatabase(coverage_monitor.coverage_database).get_coverage_plan())
+        print(
+            GlobalCoverageDatabase(
+                coverage_monitor.coverage_database
+            ).get_coverage_plan()
+        )

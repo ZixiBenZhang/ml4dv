@@ -4,19 +4,21 @@ from models.llm_base import *
 
 
 class Llama2(BaseLLM):
-    def __init__(self,
-                 system_prompt: str = "",
-                 model_path='llama-2-7b-chat/',
-                 tokenizer_path='tokenizer.model',
-                 path_predix='../../llama2/',
-                 # TODO: temperature tuning (high => random)
-                 temperature=0.4,
-                 top_p=0.9,
-                 max_seq_len=10000,
-                 max_batch_size=4,
-                 max_gen_len=800):
+    def __init__(
+        self,
+        system_prompt: str = "",
+        model_path="llama-2-7b-chat/",
+        tokenizer_path="tokenizer.model",
+        path_predix="../../llama2/",
+        # TODO: temperature tuning (high => random)
+        temperature=0.4,
+        top_p=0.9,
+        max_seq_len=10000,
+        max_batch_size=4,
+        max_gen_len=800,
+    ):
         super().__init__(system_prompt)
-        self.model_name = model_path.split('/')[0]
+        self.model_name = model_path.split("/")[0]
 
         self.generator = Llama.build(
             ckpt_dir=path_predix + model_path,
@@ -45,7 +47,7 @@ class Llama2(BaseLLM):
             temperature=self.temperature,
             top_p=self.top_p,
         )
-        response = results[-1]['generation']['content']
+        response = results[-1]["generation"]["content"]
 
         # print the new dialog
         # print(f"{self.messages[0][-1]['role'].capitalize()}: {self.messages[0][-1]['content']}\n")
@@ -59,7 +61,7 @@ class Llama2(BaseLLM):
         # STABLE RST & CLEAR RST
         if len(self.messages[-1]) < 4 + 2 * Llama2.REMAIN_ITER_NUM:
             return
-        if self.messages[-1][0]['role'] == 'system':
+        if self.messages[-1][0]["role"] == "system":
             init = self.messages[-1][:3]
         else:
             init = self.messages[-1][:2]

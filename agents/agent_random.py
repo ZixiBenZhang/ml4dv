@@ -10,12 +10,16 @@ class RandomAgent(BaseAgent):
         self.total_cycle = 1000000
         self.current_cycle = 0
 
-    def end_simulation(self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase):
+    def end_simulation(
+        self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase
+    ):
         return not self.current_cycle < self.total_cycle
 
     def reset(self):
         self.current_cycle = 0
 
-    def generate_next_value(self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase):
+    def generate_next_value(
+        self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase
+    ):
         self.current_cycle += 1
         return random.getrandbits(32)

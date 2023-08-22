@@ -24,26 +24,30 @@ class DumbAgent4ID(BaseAgent):
         #  sh x10, 16(x11)
         #  sb x10, 16(x11)
         self.test_instructions = [
-            0x003100b3,
+            0x003100B3,
             0x00418133,
-            0x007180b3,
-            0x001a0913,
-            0x003140b3,
-            0x011740b3,
-            0x0105a503,
+            0x007180B3,
+            0x001A0913,
+            0x003140B3,
+            0x011740B3,
+            0x0105A503,
             0x01059503,
             0x01058503,
-            0x00a5a823,
-            0x00a59823,
-            0x00a58823,
+            0x00A5A823,
+            0x00A59823,
+            0x00A58823,
         ]
 
     def reset(self):
         self.i = 0
 
-    def end_simulation(self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase):
+    def end_simulation(
+        self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase
+    ):
         return self.i >= len(self.test_instructions)
 
-    def generate_next_value(self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase):
+    def generate_next_value(
+        self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase
+    ):
         self.i += 1
         return self.test_instructions[self.i - 1]

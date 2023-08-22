@@ -15,19 +15,21 @@ PERIOD = 7
 
 
 class LLMAgent(BaseAgent):
-    def __init__(self,
-                 prompt_generator: BasePromptGenerator,
-                 stimulus_generator: BaseLLM,
-                 stimulus_extractor: BaseExtractor,
-                 stimulus_filter: BaseFilter,
-                 loggers: List[BaseLogger]):
+    def __init__(
+        self,
+        prompt_generator: BasePromptGenerator,
+        stimulus_generator: BaseLLM,
+        stimulus_extractor: BaseExtractor,
+        stimulus_filter: BaseFilter,
+        loggers: List[BaseLogger],
+    ):
         super().__init__()
         self.prompt_generator = prompt_generator
         self.stimulus_generator = stimulus_generator
         self.extractor = stimulus_extractor
         self.stimulus_filter = stimulus_filter
 
-        self.state = 'INIT'  # states: INIT, ITER, DONE
+        self.state = "INIT"  # states: INIT, ITER, DONE
         self.stimuli_buffer = []
         self.stimulus_cnt = 0
         self.total_msg_cnt = 0
@@ -46,7 +48,7 @@ class LLMAgent(BaseAgent):
 
         self.dialog_index += 1
         self.msg_index = 0
-        self.state = 'INIT'
+        self.state = "INIT"
         self.stimuli_buffer.clear()
         self.stimulus_cnt = 0
         self.history_cov_rate.clear()
@@ -55,38 +57,47 @@ class LLMAgent(BaseAgent):
         self.stimulus_generator.reset()
         self.extractor.reset()
 
-    def end_simulation(self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase):
+    def end_simulation(
+        self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase
+    ):
         if coverage_database.get() is None:
             return False
 
         coverage = coverage_database.get_coverage_plan()
-        missed_bins = list(map(lambda p: p[0], filter(lambda p: p[1] == 0, coverage.items())))
+        missed_bins = list(
+            map(lambda p: p[0], filter(lambda p: p[1] == 0, coverage.items()))
+        )
         if len(missed_bins) == 0:
-            self.state = 'DONE'
-            self.log_append({'role': 'coverage', 'content': coverage})
-            self.log_append({'role': 'stop', 'content': 'done'})
+            self.state = "DONE"
+            self.log_append({"role": "coverage", "content": coverage})
+            self.log_append({"role": "stop", "content": "done"})
             self.save_log()
             return True
 
-        if len(self.all_history_cov_rate) >= 25 and self.all_history_cov_rate[-1] == self.all_history_cov_rate[-25]:
-            self.state = 'DONE'
-            self.log_append({'role': 'coverage', 'content': coverage})
-            self.log_append({'role': 'stop', 'content': 'model converged'})
+        if (
+            len(self.all_history_cov_rate) >= 25
+            and self.all_history_cov_rate[-1] == self.all_history_cov_rate[-25]
+        ):
+            self.state = "DONE"
+            self.log_append({"role": "coverage", "content": coverage})
+            self.log_append({"role": "stop", "content": "model converged"})
             self.save_log()
             return True
 
-        if len(self.all_history_cov_rate) >= 50 \
-                and self.all_history_cov_rate[-1] - self.all_history_cov_rate[-50] <= 2:
-            self.state = 'DONE'
-            self.log_append({'role': 'coverage', 'content': coverage})
-            self.log_append({'role': 'stop', 'content': 'model converged'})
+        if (
+            len(self.all_history_cov_rate) >= 50
+            and self.all_history_cov_rate[-1] - self.all_history_cov_rate[-50] <= 2
+        ):
+            self.state = "DONE"
+            self.log_append({"role": "coverage", "content": coverage})
+            self.log_append({"role": "stop", "content": "model converged"})
             self.save_log()
             return True
 
         if self.total_msg_cnt >= DIALOG_BOUND and len(self.stimuli_buffer) == 0:
-            self.state = 'DONE'
-            self.log_append({'role': 'coverage', 'content': coverage})
-            self.log_append({'role': 'stop', 'content': 'max dialog number'})
+            self.state = "DONE"
+            self.log_append({"role": "coverage", "content": coverage})
+            self.log_append({"role": "stop", "content": "max dialog number"})
             self.save_log()
             return True
 
@@ -98,31 +109,43 @@ class LLMAgent(BaseAgent):
         self.stimulus_cnt += 1
         return stimulus
 
-    def generate_next_value(self, dut_state: GlobalDUTState,
-                            coverage_database: GlobalCoverageDatabase) -> Union[int, None]:
+    def generate_next_value(
+        self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase
+    ) -> Union[int, None]:
         if coverage_database.get() is None:
             return 0
 
         coverage = coverage_database.get_coverage_plan()
 
         # when not first stimulus & need to generate new response
-        if len(self.stimuli_buffer) == 0 and self.state != 'INIT':
+        if len(self.stimuli_buffer) == 0 and self.state != "INIT":
             # Log coverage
-            self.log_append({'role': 'coverage', 'content': coverage})
+            self.log_append({"role": "coverage", "content": coverage})
             coverage_plan = {k: v for (k, v) in coverage.items() if v > 0}
-            print(f"Dialog #{self.dialog_index} Message #{self.msg_index} done, \n"
-                  f"Total msg cnt: {self.total_msg_cnt} \n" +
-                  (f"Hits: {coverage_plan} \n" if coverage_database.get_coverage_rate()[0] <= 100 else '') +
-                  f"Coverage rate: {coverage_database.get_coverage_rate()}")
+            print(
+                f"Dialog #{self.dialog_index} Message #{self.msg_index} done, \n"
+                f"Total msg cnt: {self.total_msg_cnt} \n"
+                + (
+                    f"Hits: {coverage_plan} \n"
+                    if coverage_database.get_coverage_rate()[0] <= 100
+                    else ""
+                )
+                + f"Coverage rate: {coverage_database.get_coverage_rate()}"
+            )
 
             # Update best_message of LLM
             if self.msg_index != 1:  # not init
-                self.stimulus_generator.update_successful(new_coverage=coverage_database.get_coverage_rate()[0])
+                self.stimulus_generator.update_successful(
+                    new_coverage=coverage_database.get_coverage_rate()[0]
+                )
 
             # Restart a dialog if low-efficient (nearly converged)
             self.history_cov_rate.append(coverage_database.get_coverage_rate()[0])
             self.all_history_cov_rate.append(coverage_database.get_coverage_rate()[0])
-            if len(self.history_cov_rate) >= 7 and self.history_cov_rate[-1] - self.history_cov_rate[-7] < EPSILON:
+            if (
+                len(self.history_cov_rate) >= 7
+                and self.history_cov_rate[-1] - self.history_cov_rate[-7] < EPSILON
+            ):
                 self.reset()
                 print("\n>>>>> Agent reset <<<<<\n")
             else:
@@ -134,24 +157,36 @@ class LLMAgent(BaseAgent):
             if self.total_msg_cnt >= DIALOG_BOUND:
                 # return 0 (same as None), so entering end_simulation and stops in next loop
                 return 0
-            if len(self.all_history_cov_rate) >= 25 and self.all_history_cov_rate[-1] == self.all_history_cov_rate[
-                -25] or len(self.all_history_cov_rate) >= 50 and self.all_history_cov_rate[-1] - \
-                    self.all_history_cov_rate[-50] <= 2:
+            if (
+                len(self.all_history_cov_rate) >= 25
+                and self.all_history_cov_rate[-1] == self.all_history_cov_rate[-25]
+                or len(self.all_history_cov_rate) >= 50
+                and self.all_history_cov_rate[-1] - self.all_history_cov_rate[-50] <= 2
+            ):
                 return 0
 
             # only for gibberish i.e. looped
             if f_:
-                self.log_append({'role': 'coverage', 'content': coverage})
-                print(f"Dialog #{self.dialog_index} Message #{self.msg_index} done, \n"
-                      f"Total msg cnt: {self.total_msg_cnt} \n"
-                      f"Gibberish response")
+                self.log_append({"role": "coverage", "content": coverage})
+                print(
+                    f"Dialog #{self.dialog_index} Message #{self.msg_index} done, \n"
+                    f"Total msg cnt: {self.total_msg_cnt} \n"
+                    f"Gibberish response"
+                )
                 # Update best_message of LLM
                 if self.msg_index != 1:  # not init
-                    self.stimulus_generator.update_successful(new_coverage=coverage_database.get_coverage_rate()[0])
+                    self.stimulus_generator.update_successful(
+                        new_coverage=coverage_database.get_coverage_rate()[0]
+                    )
                 # Restart a dialog if low-efficient (nearly converged)
                 self.history_cov_rate.append(coverage_database.get_coverage_rate()[0])
-                self.all_history_cov_rate.append(coverage_database.get_coverage_rate()[0])
-                if len(self.history_cov_rate) >= 7 and self.history_cov_rate[-1] - self.history_cov_rate[-7] < EPSILON:
+                self.all_history_cov_rate.append(
+                    coverage_database.get_coverage_rate()[0]
+                )
+                if (
+                    len(self.history_cov_rate) >= 7
+                    and self.history_cov_rate[-1] - self.history_cov_rate[-7] < EPSILON
+                ):
                     self.reset()
                     f_ = 0
                     print("\n>>>>> Agent reset <<<<<\n")
@@ -161,26 +196,30 @@ class LLMAgent(BaseAgent):
 
             # Generate prompt
             prompt = ""
-            if self.state == 'INIT':
+            if self.state == "INIT":
                 prompt = self.prompt_generator.generate_initial_prompt()
-            elif self.state == 'ITER':
-                prompt = self.prompt_generator.generate_iterative_prompt(coverage_database, response_invalid=f_)
-            elif self.state == 'DONE':  # should never happen
+            elif self.state == "ITER":
+                prompt = self.prompt_generator.generate_iterative_prompt(
+                    coverage_database, response_invalid=f_
+                )
+            elif self.state == "DONE":  # should never happen
                 prompt = "Thank you."
-            self.log_append({'role': 'user', 'content': prompt})
+            self.log_append({"role": "user", "content": prompt})
 
             # Get response
             response = self.stimulus_generator(prompt)
-            if self.state == 'ITER':
-                self.stimulus_generator.append_successful(prompt={'role': 'user', 'content': prompt},
-                                                          response={'role': 'assistant', 'content': response},
-                                                          cur_coverage=coverage_database.get_coverage_rate()[0])
-            if self.state == 'INIT':
-                self.state = 'ITER'
+            if self.state == "ITER":
+                self.stimulus_generator.append_successful(
+                    prompt={"role": "user", "content": prompt},
+                    response={"role": "assistant", "content": response},
+                    cur_coverage=coverage_database.get_coverage_rate()[0],
+                )
+            if self.state == "INIT":
+                self.state = "ITER"
 
             self.total_msg_cnt += 1
             self.msg_index += 1
-            self.log_append({'role': 'assistant', 'content': response})
+            self.log_append({"role": "assistant", "content": response})
 
             gibberish = self._check_gibberish(response)
             if gibberish:
@@ -196,7 +235,7 @@ class LLMAgent(BaseAgent):
         stimuli = self.stimulus_filter(self.extractor(response))
         if len(stimuli) == 0:
             return True
-        lines = response.split('\n')
+        lines = response.split("\n")
         cnt = 0
         prev = -1
         for line in lines:
@@ -211,30 +250,50 @@ class LLMAgent(BaseAgent):
         for logger in self.loggers:
             if isinstance(logger, TXTLogger):
                 logger: TXTLogger
-                logger.log[-1].append({'role': 'info',
-                                       'content': {'Prompter': type(self.prompt_generator).__name__,
-                                                   'Generator': str(self.stimulus_generator),
-                                                   'Temperature': self.stimulus_generator.temperature,
-                                                   'Top_p': self.stimulus_generator.top_p,
-                                                   'Extractor': type(self.extractor).__name__}})
+                logger.log[-1].append(
+                    {
+                        "role": "info",
+                        "content": {
+                            "Prompter": type(self.prompt_generator).__name__,
+                            "Generator": str(self.stimulus_generator),
+                            "Temperature": self.stimulus_generator.temperature,
+                            "Top_p": self.stimulus_generator.top_p,
+                            "Extractor": type(self.extractor).__name__,
+                        },
+                    }
+                )
                 if self.stimulus_generator.system_prompt != "":
-                    logger.log[-1].append({'role': 'system',
-                                           'content': self.stimulus_generator.system_prompt})
+                    logger.log[-1].append(
+                        {
+                            "role": "system",
+                            "content": self.stimulus_generator.system_prompt,
+                        }
+                    )
 
             elif isinstance(logger, CSVLogger):
                 logger: CSVLogger
-                logger.save_info(['Model', str(self.stimulus_generator),
-                                  'SYSTEM', self.stimulus_generator.system_prompt,
-                                  'temperature', self.stimulus_generator.temperature,
-                                  'top_p', self.stimulus_generator.top_p,
-                                  'Prompter', type(self.prompt_generator).__name__,
-                                  'Extractor', type(self.extractor).__name__])
+                logger.save_info(
+                    [
+                        "Model",
+                        str(self.stimulus_generator),
+                        "SYSTEM",
+                        self.stimulus_generator.system_prompt,
+                        "temperature",
+                        self.stimulus_generator.temperature,
+                        "top_p",
+                        self.stimulus_generator.top_p,
+                        "Prompter",
+                        type(self.prompt_generator).__name__,
+                        "Extractor",
+                        type(self.extractor).__name__,
+                    ]
+                )
 
     def log_reset(self):
         for logger in self.loggers:
             if isinstance(logger, TXTLogger):
                 logger: TXTLogger
-                logger.log[-1].append({'role': 'reset'})
+                logger.log[-1].append({"role": "reset"})
                 logger.save_log()
 
                 logger.log.append([])
@@ -242,17 +301,10 @@ class LLMAgent(BaseAgent):
 
                 logger.logged_msg_index = 0
                 logger.logged_dialog_index += 1
-                # logger.log[-1].append({'role': 'info',
-                #                        'content': {'Prompter': type(self.prompt_generator).__name__,
-                #                                    'Generator': str(self.stimulus_generator),
-                #                                    'Extractor': type(self.extractor).__name__}})
-                # if self.stimulus_generator.system_prompt != "":
-                #     logger.log[-1].append({'role': 'system',
-                #                            'content': self.stimulus_generator.system_prompt})
 
             elif isinstance(logger, CSVLogger):
                 logger: CSVLogger
-                logger.log[-1]['Action'] = "reset"
+                logger.log[-1]["Action"] = "reset"
                 logger.save_log()
 
     # elements:
@@ -269,22 +321,24 @@ class LLMAgent(BaseAgent):
 
             elif isinstance(logger, CSVLogger):
                 logger: CSVLogger
-                if entry['role'] == 'user':
+                if entry["role"] == "user":
                     logger.log.append({})
-                    logger.log[-1]['USER'] = '"' + entry['content'] + '"'
-                    logger.log[-1]['Action'] = "none"
-                elif entry['role'] == 'assistant':
-                    logger.log[-1]['Message #'] = self.msg_index
-                    logger.log[-1]['Dialog #'] = self.dialog_index
-                    logger.log[-1]['ASSISTANT'] = '"' + entry['content'] + '"'
-                elif entry['role'] == 'coverage':
-                    coverage_plan = {k: v for (k, v) in entry['content'].items() if v > 0}
-                    logger.log[-1]['Coverage Rate'] = len(coverage_plan)
-                    logger.log[-1]['Coverage Plan'] = str(coverage_plan)
-                elif entry['role'] == 'stop':
-                    logger.log[-1]['Action'] = entry['content']
-                elif entry['role'] == 'reset':
-                    logger.log[-1]['Action'] = "reset"
+                    logger.log[-1]["USER"] = '"' + entry["content"] + '"'
+                    logger.log[-1]["Action"] = "none"
+                elif entry["role"] == "assistant":
+                    logger.log[-1]["Message #"] = self.msg_index
+                    logger.log[-1]["Dialog #"] = self.dialog_index
+                    logger.log[-1]["ASSISTANT"] = '"' + entry["content"] + '"'
+                elif entry["role"] == "coverage":
+                    coverage_plan = {
+                        k: v for (k, v) in entry["content"].items() if v > 0
+                    }
+                    logger.log[-1]["Coverage Rate"] = len(coverage_plan)
+                    logger.log[-1]["Coverage Plan"] = str(coverage_plan)
+                elif entry["role"] == "stop":
+                    logger.log[-1]["Action"] = entry["content"]
+                elif entry["role"] == "reset":
+                    logger.log[-1]["Action"] = "reset"
 
     def save_log(self):
         for logger in self.loggers:

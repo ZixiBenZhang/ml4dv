@@ -9,19 +9,27 @@ import tiktoken
 
 
 class ChatGPT(BaseLLM):
-    def __init__(self,
-                 system_prompt: str = "",
-                 model_name='gpt-3.5-turbo',
-                 temperature=0.4,
-                 top_p=1,
-                 max_gen_tokens=600):
+    def __init__(
+        self,
+        system_prompt: str = "",
+        model_name="gpt-3.5-turbo",
+        temperature=0.4,
+        top_p=1,
+        max_gen_tokens=600,
+    ):
         super().__init__(system_prompt)
         openai_api_key = os.getenv("OPENAI_API_KEY")
         assert openai_api_key is not None, "OpenAI API key not found."
         openai.api_key = openai_api_key
-        self.model_name = model_name + '-0613'
-        self.long_context_model_name = model_name + '-16k' + '-0613'
-        self.model_max_context = 4096 if 'gpt-3.5-turbo' in model_name else 8192 if 'gpt-4' in model_name else None
+        self.model_name = model_name + "-0613"
+        self.long_context_model_name = model_name + "-16k" + "-0613"
+        self.model_max_context = (
+            4096
+            if "gpt-3.5-turbo" in model_name
+            else 8192
+            if "gpt-4" in model_name
+            else None
+        )
         self.temperature = temperature
         self.top_p = top_p
         self.max_gen_tokens = max_gen_tokens
@@ -38,12 +46,15 @@ class ChatGPT(BaseLLM):
         self.messages.append({"role": "user", "content": prompt})
 
         token_cnt = self._check_token_num()
-        if self.model_max_context is None or token_cnt + self.max_gen_tokens <= self.model_max_context:
+        if (
+            self.model_max_context is None
+            or token_cnt + self.max_gen_tokens <= self.model_max_context
+        ):
             model = self.model_name
         else:
             model = self.long_context_model_name
 
-        for delay in [2 ** x for x in range(0, 6)]:
+        for delay in [2**x for x in range(0, 6)]:
             try:
                 result = openai.ChatCompletion.create(
                     model=model,
@@ -53,25 +64,29 @@ class ChatGPT(BaseLLM):
                     max_tokens=self.max_gen_tokens,
                     n=1,
                 )
-            except (openai.error.ServiceUnavailableError,
-                    openai.error.APIError,
-                    openai.error.Timeout) as e:
+            except (
+                openai.error.ServiceUnavailableError,
+                openai.error.APIError,
+                openai.error.Timeout,
+            ) as e:
                 randomness_collision_avoidance = random.randint(0, 1000) / 300.0
                 sleep_dur = delay + randomness_collision_avoidance
                 print(f"Error: {e}. Retrying in {round(sleep_dur, 2)} seconds.")
                 time.sleep(sleep_dur)
                 continue
             else:
-                response_choices: List[Dict[str, str]] = [choice['message'] for choice in result['choices']]
+                response_choices: List[Dict[str, str]] = [
+                    choice["message"] for choice in result["choices"]
+                ]
                 self.messages.append(response_choices[0])
                 self.total_msg_cnt += 1
-                return response_choices[0]['content']
+                return response_choices[0]["content"]
 
     def _compress_conversation(self):
         # STABLE RST & CLEAR RST
         if len(self.messages) < 4 + 2 * ChatGPT.REMAIN_ITER_NUM:
             return
-        if self.messages[0]['role'] == 'system':
+        if self.messages[0]["role"] == "system":
             init = self.messages[:3]
         else:
             init = self.messages[:2]
@@ -112,7 +127,9 @@ def num_tokens_from_messages(messages, model="gpt-3.5-turbo-0613") -> int:
         tokens_per_message = 3
         tokens_per_name = 1
     elif model == "gpt-3.5-turbo-0301":
-        tokens_per_message = 4  # every message follows <|start|>{role/name}\n{content}<|end|>\n
+        tokens_per_message = (
+            4  # every message follows <|start|>{role/name}\n{content}<|end|>\n
+        )
         tokens_per_name = -1  # if there's a name, the role is omitted
     elif "gpt-3.5-turbo" in model:
         # print("Warning: gpt-3.5-turbo may update over time. Returning num tokens assuming gpt-3.5-turbo-0613.")

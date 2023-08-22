@@ -15,8 +15,9 @@ class GlobalCoverageDatabase:
 
     def set(self, coverage):
         if self._coverage_database is not None:
-            assert isinstance(coverage, type(self._coverage_database)), \
-                "New coverage is of different type of self._coverage_database."
+            assert isinstance(
+                coverage, type(self._coverage_database)
+            ), "New coverage is of different type of self._coverage_database."
 
         if isinstance(coverage, SDCD):
             self._coverage_database: SDCD
@@ -35,14 +36,16 @@ class GlobalCoverageDatabase:
         elif isinstance(self._coverage_database, IDCD):
             return self._get_coverage_plan_ID()
         else:
-            raise TypeError(f"coverage_database of type {type(self._coverage_database)} not supported.")
+            raise TypeError(
+                f"coverage_database of type {type(self._coverage_database)} not supported."
+            )
 
     def _get_coverage_plan_SD(self) -> Dict[str, int]:
         coverage_plan = {}
         for i, bin_val in enumerate(self._coverage_database.stride_1_seen):
             if i >= 16:
                 i -= 32
-            coverage_plan[f'single_{i}'] = bin_val
+            coverage_plan[f"single_{i}"] = bin_val
         for i, bins in enumerate(self._coverage_database.stride_2_seen):
             for j, bin_val in enumerate(bins):
                 if i >= 16:
@@ -51,45 +54,53 @@ class GlobalCoverageDatabase:
                     j -= 32
                 if i == j:
                     continue
-                coverage_plan[f'double_{i}_{j}'] = bin_val
+                coverage_plan[f"double_{i}_{j}"] = bin_val
         coverage_plan = {**coverage_plan, **self._coverage_database.misc_bins}
         return coverage_plan
 
     def _get_coverage_plan_ID(self) -> Dict[str, int]:
         coverage_plan = {}
-        op_bins = ['alu_ops', 'alu_imm_ops', 'misc', 'load_ops', 'store_ops']
-        reg_bins = ['read_reg_a', 'read_reg_b', 'write_reg']
-        cross_bins = ['alu_ops_x_read_reg_a', 'alu_ops_x_read_reg_b', 'alu_ops_x_write_reg', 'alu_imm_ops_x_read_reg_a',
-                      'alu_imm_ops_x_write_reg', 'load_ops_x_read_reg_a', 'load_ops_x_write_reg',
-                      'store_ops_x_read_reg_a', 'store_ops_x_read_reg_b']
+        op_bins = ["alu_ops", "alu_imm_ops", "misc", "load_ops", "store_ops"]
+        reg_bins = ["read_reg_a", "read_reg_b", "write_reg"]
+        cross_bins = [
+            "alu_ops_x_read_reg_a",
+            "alu_ops_x_read_reg_b",
+            "alu_ops_x_write_reg",
+            "alu_imm_ops_x_read_reg_a",
+            "alu_imm_ops_x_write_reg",
+            "load_ops_x_read_reg_a",
+            "load_ops_x_write_reg",
+            "store_ops_x_read_reg_a",
+            "store_ops_x_read_reg_b",
+        ]
 
         for bins_type in op_bins:
             bins: Dict[str, int] = getattr(self._coverage_database, bins_type)
             for op, v in bins.items():
                 op = op.upper()
-                k = f'{bins_type}_{op}'
-                if bins_type == 'alu_ops':
+                k = f"{bins_type}_{op}"
+                if bins_type == "alu_ops":
                     k = op
-                elif bins_type == 'alu_imm_ops':
-                    k = f'{op}I'
-                elif bins_type == 'misc':
-                    k = 'illegal_instruction'
-                elif bins_type == 'load_ops':
-                    k = f'L{op[0]}'
-                elif bins_type == 'store_ops':
-                    k = f'S{op[0]}'
+                elif bins_type == "alu_imm_ops":
+                    k = f"{op}I"
+                elif bins_type == "misc":
+                    k = "illegal_instruction"
+                elif bins_type == "load_ops":
+                    k = f"L{op[0]}"
+                elif bins_type == "store_ops":
+                    k = f"S{op[0]}"
                 coverage_plan[k] = v
 
         for bins_type in reg_bins:
             bins: List[int] = getattr(self._coverage_database, bins_type)
             for i, v in enumerate(bins):
-                k = f'{bins_type}_{i}'
-                if bins_type == 'read_reg_a':
-                    k = f'read_A_reg_{i}'
-                elif bins_type == 'read_reg_b':
-                    k = f'read_B_reg_{i}'
-                elif bins_type == 'write_reg':
-                    k = f'write_reg_{i}'
+                k = f"{bins_type}_{i}"
+                if bins_type == "read_reg_a":
+                    k = f"read_A_reg_{i}"
+                elif bins_type == "read_reg_b":
+                    k = f"read_B_reg_{i}"
+                elif bins_type == "write_reg":
+                    k = f"write_reg_{i}"
                 coverage_plan[k] = v
 
         for bins_type in cross_bins:
@@ -98,24 +109,24 @@ class GlobalCoverageDatabase:
                 op = op.upper()
                 for i, v in enumerate(regs):
                     k = f"{bins_type}__{op}_{i}"
-                    if bins_type == 'alu_ops_x_read_reg_a':
-                        k = f'{op}_x_read_A_reg_{i}'
-                    elif bins_type == 'alu_ops_x_read_reg_b':
-                        k = f'{op}_x_read_B_reg_{i}'
-                    elif bins_type == 'alu_ops_x_write_reg':
-                        k = f'{op}_x_write_reg_{i}'
-                    elif bins_type == 'alu_imm_ops_x_read_reg_a':
-                        k = f'{op}I_x_read_A_reg_{i}'
-                    elif bins_type == 'alu_imm_ops_x_write_reg':
-                        k = f'{op}I_x_write_reg_{i}'
-                    elif bins_type == 'load_ops_x_read_reg_a':
-                        k = f'L{op[0]}_x_read_A_reg_{i}'
-                    elif bins_type == 'load_ops_x_write_reg':
-                        k = f'L{op[0]}_x_write_reg_{i}'
-                    elif bins_type == 'store_ops_x_read_reg_a':
-                        k = f'S{op[0]}_x_read_A_reg_{i}'
-                    elif bins_type == 'store_ops_x_read_reg_b':
-                        k = f'S{op[0]}_x_read_B_reg_{i}'
+                    if bins_type == "alu_ops_x_read_reg_a":
+                        k = f"{op}_x_read_A_reg_{i}"
+                    elif bins_type == "alu_ops_x_read_reg_b":
+                        k = f"{op}_x_read_B_reg_{i}"
+                    elif bins_type == "alu_ops_x_write_reg":
+                        k = f"{op}_x_write_reg_{i}"
+                    elif bins_type == "alu_imm_ops_x_read_reg_a":
+                        k = f"{op}I_x_read_A_reg_{i}"
+                    elif bins_type == "alu_imm_ops_x_write_reg":
+                        k = f"{op}I_x_write_reg_{i}"
+                    elif bins_type == "load_ops_x_read_reg_a":
+                        k = f"L{op[0]}_x_read_A_reg_{i}"
+                    elif bins_type == "load_ops_x_write_reg":
+                        k = f"L{op[0]}_x_write_reg_{i}"
+                    elif bins_type == "store_ops_x_read_reg_a":
+                        k = f"S{op[0]}_x_read_A_reg_{i}"
+                    elif bins_type == "store_ops_x_read_reg_b":
+                        k = f"S{op[0]}_x_read_B_reg_{i}"
                     coverage_plan[k] = v
 
         return coverage_plan
@@ -135,8 +146,9 @@ class GlobalDUTState:
 
     def set(self, dut_state):
         if self._dut_state is not None:
-            assert isinstance(dut_state, type(self._dut_state)), \
-                "New dut_state is of different type of self._dut_state."
+            assert isinstance(
+                dut_state, type(self._dut_state)
+            ), "New dut_state is of different type of self._dut_state."
 
         if isinstance(dut_state, SDDS):
             self._dut_state: SDDS

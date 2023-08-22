@@ -12,4 +12,6 @@ class Filter(BaseFilter):
         self.upper_bound = upper_bound
 
     def __call__(self, stimuli: List[int]):
-        return list(filter(lambda x: self.lower_bound <= x <= self.upper_bound, stimuli))
+        return list(
+            filter(lambda x: self.lower_bound <= x <= self.upper_bound, stimuli)
+        )

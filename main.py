@@ -5,11 +5,12 @@ import fire as fire
 import openai
 
 
-def testLlama(ckpt_dir='llama-2-7b-chat/', max_seq_len=4096, max_gen_len=None):
+def testLlama(ckpt_dir="llama-2-7b-chat/", max_seq_len=4096, max_gen_len=None):
     from llama import Llama
+
     generator = Llama.build(
         ckpt_dir=ckpt_dir,
-        tokenizer_path='tokenizer.model',
+        tokenizer_path="tokenizer.model",
         max_seq_len=max_seq_len,
         max_batch_size=4,
     )
@@ -18,14 +19,12 @@ def testLlama(ckpt_dir='llama-2-7b-chat/', max_seq_len=4096, max_gen_len=None):
     conversations = [[]]
 
     prompt = input("\nvvv Please enter SYSTEM prompt vvv\n")
-    if not prompt == '':
-        conversations[-1].append({
-            "role": "system",
-            "content": prompt})
+    if not prompt == "":
+        conversations[-1].append({"role": "system", "content": prompt})
 
     while True:
         prompt = input("\nvvv Please enter your query vvv\n")
-        if prompt == '--exit':
+        if prompt == "--exit":
             print("exiting...")
             break
         # NOT WORKING
@@ -47,9 +46,13 @@ def testLlama(ckpt_dir='llama-2-7b-chat/', max_seq_len=4096, max_gen_len=None):
 
         # print the new dialog
         # print(f"{conversations[-1][-1]['role'].capitalize()}: {conversations[-1][-1]['content']}\n")
-        print(f"> {results[-1]['generation']['role'].capitalize()}: {results[-1]['generation']['content']}")
+        print(
+            f"> {results[-1]['generation']['role'].capitalize()}: {results[-1]['generation']['content']}"
+        )
 
-        conversations[-1].append({"role": "assistant", "content": results[-1]['generation']['content']})
+        conversations[-1].append(
+            {"role": "assistant", "content": results[-1]["generation"]["content"]}
+        )
 
 
 def testGPT():
@@ -58,16 +61,16 @@ def testGPT():
     messages = [{"role": "user", "content": prompt}]
 
     result = openai.ChatCompletion.create(
-        model='gpt-3.5-turbo',
+        model="gpt-3.5-turbo",
         messages=messages,
         n=3,
     )
-    response_choices = [choice['message'] for choice in result['choices']]
+    response_choices = [choice["message"] for choice in result["choices"]]
 
     print("Responses:")
     for i, msg in enumerate(response_choices):
         print(f"Choice {i}:\n{msg}\n")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     fire.Fire(testGPT())

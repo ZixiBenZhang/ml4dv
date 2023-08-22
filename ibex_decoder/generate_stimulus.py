@@ -46,34 +46,45 @@ class StimulusSender:
 
 
 def main():
-    server_ip_port = input("Please enter server's IP and port (e.g. 127.0.0.1:5050, 128.232.65.218:5555): ")
+    server_ip_port = input(
+        "Please enter server's IP and port (e.g. 127.0.0.1:5050, 128.232.65.218:5555): "
+    )
 
     # build components
-    prompt_generator = TemplatePromptGenerator4ID1(sampling_missed_bins_method='IDNEWEST')
+    prompt_generator = TemplatePromptGenerator4ID1(
+        sampling_missed_bins_method="IDNEWEST"
+    )
     # if isinstance(prompt_generator, FixedPromptGenerator4SD1):
     #     prefix = './logs_ID_fixed/'
     # elif isinstance(prompt_generator, TemplatePromptGenerator4SD1):
     #     prefix = './logs_ID_template/'
     # else:
     #     raise TypeError(f"Prompt generator of type {type(prompt_generator)} is not supported")
-    prefix = './logs/'
+    prefix = "./logs/"
 
     # stimulus_generator = Llama2(system_prompt=prompt_generator.generate_system_prompt())
     # print('Llama2 successfully built')
-    stimulus_generator = ChatGPT(system_prompt=prompt_generator.generate_system_prompt())
+    stimulus_generator = ChatGPT(
+        system_prompt=prompt_generator.generate_system_prompt()
+    )
     extractor = DumbExtractor()
-    stimulus_filter = Filter(0x0, 0xffffffff)
+    stimulus_filter = Filter(0x0, 0xFFFFFFFF)
 
     # build loggers
     t = datetime.now()
-    t = t.strftime('%Y%m%d_%H%M%S')
-    logger_txt = TXTLogger(f'{prefix}{t}.txt')
-    logger_csv = CSVLogger(f'{prefix}{t}.csv')
+    t = t.strftime("%Y%m%d_%H%M%S")
+    logger_txt = TXTLogger(f"{prefix}{t}.txt")
+    logger_csv = CSVLogger(f"{prefix}{t}.csv")
 
     # create agent
-    agent = LLMAgent(prompt_generator, stimulus_generator, extractor, stimulus_filter,
-                     [logger_txt, logger_csv])
-    print('Agent successfully built\n')
+    agent = LLMAgent(
+        prompt_generator,
+        stimulus_generator,
+        extractor,
+        stimulus_filter,
+        [logger_txt, logger_csv],
+    )
+    print("Agent successfully built\n")
 
     # run test
     g_dut_state = GlobalDUTState()
@@ -90,12 +101,16 @@ def main():
 
         g_coverage.set(coverage)
         # print(f"Full coverage plan: {g_coverage.get_coverage_plan()}\n")
-        coverage_plan = {k: v for (k, v) in g_coverage.get_coverage_plan().items() if v > 0}
+        coverage_plan = {
+            k: v for (k, v) in g_coverage.get_coverage_plan().items() if v > 0
+        }
         # print(f"Finished with hits: {coverage_plan}\n")
-        print(f"Finished at dialog #{agent.dialog_index}, message #{agent.msg_index}, \n"
-              f"with total {agent.total_msg_cnt} messages \n"
-              f"Hits: {coverage_plan}, \n"
-              f"Coverage rate: {g_coverage.get_coverage_rate()}\n")
+        print(
+            f"Finished at dialog #{agent.dialog_index}, message #{agent.msg_index}, \n"
+            f"with total {agent.total_msg_cnt} messages \n"
+            f"Hits: {coverage_plan}, \n"
+            f"Coverage rate: {g_coverage.get_coverage_rate()}\n"
+        )
 
 
 if __name__ == "__main__":
