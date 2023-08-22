@@ -49,7 +49,7 @@ def main():
     server_ip_port = input("Please enter server's IP and port (e.g. 127.0.0.1:5050, 128.232.65.218:5555): ")
 
     # build components
-    prompt_generator = FixedPromptGenerator4ID1()
+    prompt_generator = TemplatePromptGenerator4ID1()
     # if isinstance(prompt_generator, FixedPromptGenerator4SD1):
     #     prefix = './logs_ID_fixed/'
     # elif isinstance(prompt_generator, TemplatePromptGenerator4SD1):
