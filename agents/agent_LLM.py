@@ -109,7 +109,7 @@ class LLMAgent(BaseAgent):
                   f"Coverage rate: {coverage_database.get_coverage_rate()}")
 
             # Update best_message of LLM
-            if self.msg_index != 1:
+            if self.msg_index != 1:  # not init
                 self.stimulus_generator.update_successful(new_coverage=coverage_database.get_coverage_rate()[0])
 
             # Restart a dialog if low-efficient (nearly converged)
@@ -135,6 +135,9 @@ class LLMAgent(BaseAgent):
                 print(f"Dialog #{self.dialog_index} Message #{self.msg_index} done, \n"
                       f"Total msg cnt: {self.total_msg_cnt} \n"
                       f"Gibberish response")
+                # Update best_message of LLM
+                if self.msg_index != 1:  # not init
+                    self.stimulus_generator.update_successful(new_coverage=coverage_database.get_coverage_rate()[0])
                 # Restart a dialog if low-efficient (nearly converged)
                 self.history_cov_rate.append(coverage_database.get_coverage_rate()[0])
                 self.all_history_cov_rate.append(coverage_database.get_coverage_rate()[0])
