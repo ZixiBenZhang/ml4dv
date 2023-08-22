@@ -16,7 +16,7 @@ from global_shared_types import *
 from agents.agent_LLM import LLMAgent
 from prompt_generators.prompt_generator_fixed_ID import FixedPromptGenerator4ID1
 from prompt_generators.prompt_generator_template_ID import *
-from models.llm_llama2 import Llama2
+# from models.llm_llama2 import Llama2
 from models.llm_gpt import ChatGPT
 from stimuli_extractor import DumbExtractor
 from stimuli_filter import Filter
