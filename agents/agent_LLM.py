@@ -129,7 +129,6 @@ class LLMAgent(BaseAgent):
                 self.save_log()
                 print("log saved\n")
 
-        # TODO: other ways to detect gibberish with numbers
         f_ = 0  # i.e. gibberish response
         while len(self.stimuli_buffer) == 0:
             if self.total_msg_cnt >= DIALOG_BOUND:

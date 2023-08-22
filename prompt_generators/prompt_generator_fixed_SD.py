@@ -13,7 +13,6 @@ class FixedPromptGenerator4SD1(BasePromptGenerator):
         self.prev_coverage = (0, -1)
 
     def generate_system_prompt(self) -> str:
-        # TODO: tune SYSTEM message
         return "Please output (positive or negative) a list of integers only, " \
                f"each integer between -{BOUND} and {BOUND}. \n" \
                f"Output format: [a, b, c, ...]."

@@ -11,7 +11,6 @@ class FixedPromptGenerator4ID1(BasePromptGenerator):
         self.prev_coverage = (0, -1)
 
     def generate_system_prompt(self) -> str:
-        # TODO: tune SYSTEM message
         return "Please output a list of hexadecimal integers only, " \
                f"each integer between 0x0 and 0xffffffff. \n" \
                f"Output format: [a, b, c, ...]."

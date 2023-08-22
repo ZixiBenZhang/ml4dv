@@ -110,12 +110,13 @@ class TemplatePromptGenerator4ID1(TemplatePromptGenerator):
         # may have invalid cross bin entries that will never be in missed bins
         cross_bins = {f'{op}_x_{reg}': (op, port_name) for reg, port_name in reg_bins.items() for op in op_bins}
 
-        op_bins_difference = {op: f"{op}: there's no instruction that performs the operation {op}." for op in op_bins}
-        reg_bins_difference = {port: f"{port}: there's no instruction that uses the {port_name} port of "
-                                     f"register {port[-1]}."
+        op_bins_difference = {op: f"- {op}: there's no instruction that performs the operation {op}.\n" for op in
+                              op_bins}
+        reg_bins_difference = {port: f"- {port}: there's no instruction that uses the {port_name} port of "
+                                     f"register {port[-1]}.\n"
                                for port, port_name in reg_bins.items()}
-        cross_bins_difference = {bin_name: f"{bin_name}: there's no operation that performs the operation {op_name} "
-                                           f"using the {port_name} port of register {bin_name[-1]}."
+        cross_bins_difference = {bin_name: f"- {bin_name}: there's no operation that performs the operation {op_name} "
+                                           f"using the {port_name} port of register {bin_name[-1]}.\n"
                                  for bin_name, (op_name, port_name) in cross_bins.items()}
 
         coverage_difference_template = {**op_bins_difference, **reg_bins_difference, **cross_bins_difference}
@@ -129,3 +130,29 @@ class TemplatePromptGenerator4ID1(TemplatePromptGenerator):
             iter_question = "Please regenerate a 32-bit instruction for each of these unreached bins " \
                             "according to the BINS DESCRIPTION."
         return iter_question
+
+
+# Init as FixedPrompt, Iter as TemplatePrompt
+class TemplatePromptGenerator4ID2(TemplatePromptGenerator4ID1):
+    def __init__(self,
+                 dut_code_path: str = '../examples_ID/dut_code.txt',
+                 tb_code_path: str = '../examples_ID/tb_code.txt',
+                 bin_descr_path: str = '../examples_ID/bins_description.txt',
+                 code_summary_type: int = 0,  # 0: no code, 1: code, 2: summary
+                 sampling_missed_bins_method: Union[str, None] = None,
+                 ):
+        super().__init__(dut_code_path, tb_code_path, bin_descr_path, code_summary_type, sampling_missed_bins_method)
+
+    def generate_initial_prompt(self) -> str:
+        with open('../examples_ID/bins_description.txt', 'r') as f:
+            bins_description = f.read()
+        prompt = \
+            "Please generate a list of 32-bit instructions (i.e. hex integers between 0x0 and 0xffffffff)" \
+            " for a RISC-V processor that satisfies these described bins (i.e. test cases):\n" \
+            "------\n" \
+            "BINS DESCRIPTION\n" \
+            f"{bins_description}" \
+            "------\n" \
+            "Please generate a list of 32-bit instructions (i.e. hex integers between 0x0 and 0xffffffff)" \
+            " that satisfies the above conditions."
+        return prompt
