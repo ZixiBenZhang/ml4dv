@@ -14,11 +14,15 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
                  sampling_missed_bins_method: Union[str, None] = None,
                  ):
         super().__init__()
-        self.prev_coverage = (0, -1)
         self.code_summary_type = code_summary_type
+
+        self.prev_coverage = (0, -1)
+        self.history_coverage: List[int] = []
+
         self.sampling_missed_bins_method: Union[Callable, None] = None
         self._resolve_sampling_method(sampling_missed_bins_method)
         self.sampling_missed_bins: bool = self.sampling_missed_bins_method is not None
+        self.cur_sampling_method: Union[Callable, None] = None  # for Adaptive Sampling
 
         self.intro = self._load_introduction()
         self.code_summary = self._load_code_summary(dut_code_path, tb_code_path)
@@ -27,20 +31,24 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
 
         self.coverage_difference_prompts_dict = self._load_coverage_difference_prompts_dict()
 
-    def _resolve_sampling_method(self,
-                                 sampling_missed_bins_method: Union[str, None]):
+    def _resolve_sampling_method(self, sampling_missed_bins_method: Union[str, None]):
+        methods = ["ORIGINAL", "NEWEST", "RANDOM", "IDNEWEST", "IDADAS"]
+        assert sampling_missed_bins_method in methods, \
+            f"Invalid sampling method {sampling_missed_bins_method}. " \
+            f"Please use one of the following methods: {methods}."
         if type(sampling_missed_bins_method) is str:
             if sampling_missed_bins_method.upper() == "ORIGINAL":
-                self.sampling_missed_bins_method = sample_missed_bins_ORIGINAL
+                self.sampling_missed_bins_method = self._sample_missed_bins_ORIGINAL
             elif sampling_missed_bins_method.upper() == "NEWEST":
-                self.sampling_missed_bins_method = sample_missed_bins_NEWEST
+                self.sampling_missed_bins_method = self._sample_missed_bins_NEWEST
             elif sampling_missed_bins_method.upper() == "RANDOM":
-                self.sampling_missed_bins_method = sample_missed_bins_RANDOM
+                self.sampling_missed_bins_method = self._sample_missed_bins_RANDOM
             elif sampling_missed_bins_method.upper() == "IDNEWEST":
-                self.sampling_missed_bins_method = sample_missed_bins_IDNEWEST
+                self.sampling_missed_bins_method = self._sample_missed_bins_IDNEWEST
+            elif sampling_missed_bins_method.upper() == "IDADAS":
+                self.sampling_missed_bins_method = self._sample_missed_bins_IDADAS
             else:
-                raise TypeError(f"Invalid sampling method {sampling_missed_bins_method}. "
-                                f"Please use one of the following methods: ORIGINAL, NEWEST, RANDOM, IDNEWEST.")
+                raise TypeError(f"Invalid sampling method {sampling_missed_bins_method}. ")
         else:
             self.sampling_missed_bins_method = None
 
@@ -104,7 +112,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
             pass
         # Sampling missed bins
         if self.sampling_missed_bins:
-            missed_bins = self.sampling_missed_bins_method(missed_bins, coverage_database.get_coverage_rate())
+            missed_bins = self.sampling_missed_bins_method(missed_bins, coverage_database.get_coverage_rate(), **kwargs)
 
         for bin_name in missed_bins:
             coverage_difference += self.coverage_difference_prompts_dict[bin_name]
@@ -120,63 +128,106 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
         self.prev_coverage = cur_coverage
         return iterative_prompt
 
-
-def sample_missed_bins_ORIGINAL(missed_bins: List[str], coverage_rate: Tuple[int, int]) -> List[str]:
-    # ORIGINAL
-    if len(missed_bins) >= 40:
-        missed_bins = np.concatenate([missed_bins[:2],
-                                      np.random.choice(missed_bins[2:min(25, len(missed_bins))], 3, replace=False),
-                                      np.random.choice(missed_bins[25:], 2, replace=False)])
-    elif len(missed_bins) >= 5:
-        missed_bins = np.concatenate([missed_bins[:2],
-                                      np.random.choice(missed_bins[2:], 3, replace=False)])
-    else:
-        np.random.shuffle(missed_bins)
-    return missed_bins
-
-
-def sample_missed_bins_NEWEST(missed_bins: List[str], coverage_rate: Tuple[int, int]) -> List[str]:
-    # NEWEST
-    if len(missed_bins) >= 40:
-        if coverage_rate[0] / coverage_rate[1] <= 1 / 20:  # easier bins
+    @staticmethod
+    def _sample_missed_bins_ORIGINAL(missed_bins: List[str], coverage_rate: Tuple[int, int]) -> List[str]:
+        # ORIGINAL
+        if len(missed_bins) >= 40:
             missed_bins = np.concatenate([missed_bins[:2],
-                                          np.random.choice(missed_bins[2:25], 3, replace=False),
+                                          np.random.choice(missed_bins[2:min(25, len(missed_bins))], 3, replace=False),
                                           np.random.choice(missed_bins[25:], 2, replace=False)])
-        else:  # harder bins
+        elif len(missed_bins) >= 5:
+            missed_bins = np.concatenate([missed_bins[:2],
+                                          np.random.choice(missed_bins[2:], 3, replace=False)])
+        else:
+            np.random.shuffle(missed_bins)
+        return missed_bins
+
+    @staticmethod
+    def _sample_missed_bins_NEWEST(missed_bins: List[str], coverage_rate: Tuple[int, int]) -> List[str]:
+        # NEWEST
+        if len(missed_bins) >= 40:
+            if coverage_rate[0] / coverage_rate[1] <= 1 / 20:  # easier bins
+                missed_bins = np.concatenate([missed_bins[:2],
+                                              np.random.choice(missed_bins[2:25], 3, replace=False),
+                                              np.random.choice(missed_bins[25:], 2, replace=False)])
+            else:  # harder bins
+                missed_bins = np.concatenate([missed_bins[:2],
+                                              np.random.choice(missed_bins[2:], 5, replace=False)])
+        elif len(missed_bins) > 7:
             missed_bins = np.concatenate([missed_bins[:2],
                                           np.random.choice(missed_bins[2:], 5, replace=False)])
-    elif len(missed_bins) > 7:
-        missed_bins = np.concatenate([missed_bins[:2],
-                                      np.random.choice(missed_bins[2:], 5, replace=False)])
-    else:
-        np.random.shuffle(missed_bins)
-    return missed_bins
+        else:
+            np.random.shuffle(missed_bins)
+        return missed_bins
 
+    @staticmethod
+    def _sample_missed_bins_RANDOM(missed_bins: List[str], coverage_rate: Tuple[int, int]) -> List[str]:
+        # RANDOM
+        if len(missed_bins) >= 40:
+            missed_bins = np.random.choice(missed_bins, 7, replace=False)
+        elif len(missed_bins) >= 5:
+            missed_bins = np.random.choice(missed_bins, 5, replace=False)
+        else:
+            np.random.shuffle(missed_bins)
+        return missed_bins
 
-def sample_missed_bins_RANDOM(missed_bins: List[str], coverage_rate: Tuple[int, int]) -> List[str]:
-    # RANDOM
-    if len(missed_bins) >= 40:
-        missed_bins = np.random.choice(missed_bins, 7, replace=False)
-    elif len(missed_bins) >= 5:
-        missed_bins = np.random.choice(missed_bins, 5, replace=False)
-    else:
-        np.random.shuffle(missed_bins)
-    return missed_bins
+    @staticmethod
+    def _sample_missed_bins_IDNEWEST(missed_bins: List[str], coverage_rate: Tuple[int, int]) -> List[str]:
+        # ID NEWEST
+        if len(missed_bins) >= 40:
+            if coverage_rate[0] / coverage_rate[1] <= 1 / 20:  # easier bins
+                missed_bins = np.concatenate(
+                    [missed_bins[:2], np.random.choice(missed_bins[2:100], 3, replace=False),
+                     np.random.choice(missed_bins[100:], 2, replace=False)]
+                )
+            else:  # harder bins
+                missed_bins = np.concatenate(
+                    [missed_bins[:2], np.random.choice(missed_bins[2:], 5, replace=False)]
+                )
+        elif len(missed_bins) > 7:
+            missed_bins = np.concatenate(
+                [missed_bins[:2], np.random.choice(missed_bins[2:], 5, replace=False)]
+            )
+        else:
+            np.random.shuffle(missed_bins)
+        return missed_bins
 
+    def _sample_missed_bins_IDADAS(self, missed_bins: List[str], coverage_rate: Tuple[int, int]) -> List[str]:
+        # ID Adaptive Sampling: switch sampling method when low efficiency
+        def sample_determ(_missed_bins):
+            return np.concatenate(
+                [_missed_bins[:2], np.random.choice(_missed_bins[2:], 5, replace=False)]
+            )
 
-def sample_missed_bins_IDNEWEST(missed_bins: List[str], coverage_rate: Tuple[int, int]) -> List[str]:
-    # ID NEWEST
-    if len(missed_bins) >= 40:
-        if coverage_rate[0] / coverage_rate[1] <= 1 / 20:  # easier bins
-            missed_bins = np.concatenate([missed_bins[:2],
-                                          np.random.choice(missed_bins[2:100], 3, replace=False),
-                                          np.random.choice(missed_bins[100:], 2, replace=False)])
-        else:  # harder bins
-            missed_bins = np.concatenate([missed_bins[:2],
-                                          np.random.choice(missed_bins[2:], 5, replace=False)])
-    elif len(missed_bins) > 7:
-        missed_bins = np.concatenate([missed_bins[:2],
-                                      np.random.choice(missed_bins[2:], 5, replace=False)])
-    else:
-        np.random.shuffle(missed_bins)
-    return missed_bins
+        def sample_mild_determ(_missed_bins):
+            return np.concatenate(
+                [_missed_bins[:2], np.random.choice(_missed_bins[:100], 3, replace=False),
+                 np.random.choice(_missed_bins[100:], 2, replace=False)]
+            )
+
+        def sample_random(_missed_bins):
+            return np.random.choice(_missed_bins, 7, replace=False)
+
+        epsilon = 3
+
+        def resolve_strategy() -> Callable:
+            if len(self.history_coverage) < 4:
+                return sample_mild_determ
+            if self.history_coverage[-1] - self.history_coverage[-4] < epsilon:
+                if self.cur_sampling_method is sample_mild_determ:
+                    return sample_random
+                if self.cur_sampling_method is sample_random:
+                    return sample_determ
+                if self.cur_sampling_method is sample_determ:
+                    return sample_random
+            else:
+                return self.cur_sampling_method
+
+        if len(missed_bins) >= 40:
+            self.cur_sampling_method = resolve_strategy()
+        elif len(missed_bins) >= 7:
+            self.cur_sampling_method = sample_random
+        else:
+            self.cur_sampling_method = np.random.shuffle
+
+        return self.cur_sampling_method(missed_bins)
