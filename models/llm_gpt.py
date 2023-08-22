@@ -71,7 +71,7 @@ class ChatGPT(BaseLLM):
         # STABLE RST & CLEAR RST
         if len(self.messages) < 4 + 2 * ChatGPT.REMAIN_ITER_NUM:
             return
-        if self.messages[-1]['role'] == 'system':
+        if self.messages[0]['role'] == 'system':
             init = self.messages[:3]
         else:
             init = self.messages[:2]

@@ -59,7 +59,7 @@ class Llama2(BaseLLM):
         # STABLE RST & CLEAR RST
         if len(self.messages[-1]) < 4 + 2 * Llama2.REMAIN_ITER_NUM:
             return
-        if self.messages[-1][-1]['role'] == 'system':
+        if self.messages[-1][0]['role'] == 'system':
             init = self.messages[-1][:3]
         else:
             init = self.messages[-1][:2]
