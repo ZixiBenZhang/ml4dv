@@ -9,9 +9,9 @@ class TemplatePromptGenerator4SD1(TemplatePromptGenerator):
                  tb_code_path: str = '../examples_SD/tb_code.txt',
                  bin_descr_path: str = '../examples_SD/bins_description.txt',
                  code_summary_type: int = 0,  # 0: no code, 1: code, 2: summary
-                 sampling_missed_bins: bool = True,
+                 sampling_missed_bins_method: Union[str, None] = None,
                  ):
-        super().__init__(dut_code_path, tb_code_path, bin_descr_path, code_summary_type, sampling_missed_bins)
+        super().__init__(dut_code_path, tb_code_path, bin_descr_path, code_summary_type, sampling_missed_bins_method)
 
     def generate_system_prompt(self) -> str:
         return "Please output a list of (positive or negative) integers only, " \
@@ -139,9 +139,9 @@ class TemplatePromptGenerator4SD2(TemplatePromptGenerator):
                  tb_code_path: str = '../examples_SD/tb_code.txt',
                  bin_descr_path: str = '../examples_SD/bins_description.txt',
                  code_summary_type: int = 0,  # 0: no code, 1: code, 2: summary
-                 sampling_missed_bins: bool = True,
+                 sampling_missed_bins_method: Union[str, None] = None,
                  ):
-        super().__init__(dut_code_path, tb_code_path, bin_descr_path, code_summary_type, sampling_missed_bins)
+        super().__init__(dut_code_path, tb_code_path, bin_descr_path, code_summary_type, sampling_missed_bins_method)
 
     def generate_system_prompt(self) -> str:
         return "Please output a list of (positive or negative) integers only, " \
@@ -271,9 +271,9 @@ class TemplatePromptGenerator4SDAnalog(TemplatePromptGenerator):
                  tb_code_path: str = '../examples_SD_analogue/tb_code.txt',
                  bin_descr_path: str = '../examples_SD_analogue/bins_description.txt',
                  code_summary_type: int = 0,  # 0: no code, 1: code, 2: summary
-                 sampling_missed_bins: bool = True,
+                 sampling_missed_bins_method: Union[str, None] = None,
                  ):
-        super().__init__(dut_code_path, tb_code_path, bin_descr_path, code_summary_type, sampling_missed_bins)
+        super().__init__(dut_code_path, tb_code_path, bin_descr_path, code_summary_type, sampling_missed_bins_method)
 
     def generate_system_prompt(self) -> str:
         return "Please output a list of (positive or negative) integers only."
@@ -328,7 +328,7 @@ class TemplatePromptGenerator4SDAnalog(TemplatePromptGenerator):
             pass
         # Sampling missed bins
         if self.sampling_missed_bins:
-            missed_bins = self._sample_missed_bins(missed_bins, coverage_database.get_coverage_rate())
+            missed_bins = self.sampling_missed_bins_method(missed_bins, coverage_database.get_coverage_rate())
 
         for bin_name in missed_bins:
             coverage_difference += self.coverage_difference_prompts_dict[bin_name]

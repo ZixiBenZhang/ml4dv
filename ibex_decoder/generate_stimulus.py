@@ -19,7 +19,7 @@ from prompt_generators.prompt_generator_template_ID import TemplatePromptGenerat
 from models.llm_llama2 import Llama2
 from models.llm_gpt import ChatGPT
 from stimuli_extractor import DumbExtractor
-from stimuli_filter import Filter4SD
+from stimuli_filter import Filter
 from loggers.logger_csv import CSVLogger
 from loggers.logger_txt import TXTLogger
 from agents.agent_ID_dumb import DumbAgent4ID
@@ -49,7 +49,7 @@ def main():
     server_ip_port = input("Please enter server's IP and port (e.g. 127.0.0.1:5050, 128.232.65.218:5555): ")
 
     # build components
-    prompt_generator = TemplatePromptGenerator4ID1()
+    prompt_generator = TemplatePromptGenerator4ID1(sampling_missed_bins_method='IDNEWEST')
     # if isinstance(prompt_generator, FixedPromptGenerator4SD1):
     #     prefix = './logs_ID_fixed/'
     # elif isinstance(prompt_generator, TemplatePromptGenerator4SD1):
@@ -62,7 +62,7 @@ def main():
     print('Llama2 successfully built')
     # stimulus_generator = ChatGPT(system_prompt=prompt_generator.generate_system_prompt())
     extractor = DumbExtractor()
-    stimulus_filter = Filter4SD(0x0, 0xffffffff)
+    stimulus_filter = Filter(0x0, 0xffffffff)
 
     # build loggers
     t = datetime.now()

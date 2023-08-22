@@ -7,9 +7,9 @@ class TemplatePromptGenerator4ID1(TemplatePromptGenerator):
                  tb_code_path: str = '../examples_ID/tb_code.txt',
                  bin_descr_path: str = '../examples_ID/bins_description.txt',
                  code_summary_type: int = 0,  # 0: no code, 1: code, 2: summary
-                 sampling_missed_bins: bool = True,
+                 sampling_missed_bins_method: Union[str, None] = None,
                  ):
-        super().__init__(dut_code_path, tb_code_path, bin_descr_path, code_summary_type, sampling_missed_bins)
+        super().__init__(dut_code_path, tb_code_path, bin_descr_path, code_summary_type, sampling_missed_bins_method)
 
     def generate_system_prompt(self) -> str:
         return "Please output a list of hexadecimal integers only, " \

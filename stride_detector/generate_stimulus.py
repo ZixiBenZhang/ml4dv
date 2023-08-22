@@ -19,7 +19,7 @@ from prompt_generators.prompt_generator_template_SD import *
 # from models.llm_llama2 import Llama2
 from models.llm_gpt import ChatGPT
 from stimuli_extractor import DumbExtractor
-from stimuli_filter import Filter4SD
+from stimuli_filter import Filter
 from loggers.logger_csv import CSVLogger
 from loggers.logger_txt import TXTLogger
 
@@ -53,7 +53,7 @@ def main():
 
     # TODO: auto trials
     # build components
-    prompt_generator = TemplatePromptGenerator4SD1()
+    prompt_generator = TemplatePromptGenerator4SD1(sampling_missed_bins_method='NEWEST')
     # if isinstance(prompt_generator, FixedPromptGenerator4SD1):
     #     prefix = '../logs_SD_fixed/'
     # elif isinstance(prompt_generator, TemplatePromptGenerator4SD1):
@@ -66,7 +66,7 @@ def main():
     # print('Llama2 successfully built')
     stimulus_generator = ChatGPT(system_prompt=prompt_generator.generate_system_prompt())
     extractor = DumbExtractor()
-    stimulus_filter = Filter4SD(-10000, 10000)
+    stimulus_filter = Filter(-10000, 10000)
 
     # build loggers
     t = datetime.now()

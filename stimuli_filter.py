@@ -6,7 +6,7 @@ class BaseFilter:
         raise NotImplementedError
 
 
-class Filter4SD(BaseFilter):
+class Filter(BaseFilter):
     def __init__(self, lower_bound: int, upper_bound: int):
         self.lower_bound = lower_bound
         self.upper_bound = upper_bound
