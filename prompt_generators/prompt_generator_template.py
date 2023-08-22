@@ -112,7 +112,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
             pass
         # Sampling missed bins
         if self.sampling_missed_bins:
-            missed_bins = self.sampling_missed_bins_method(missed_bins, coverage_database.get_coverage_rate(), **kwargs)
+            missed_bins = self.sampling_missed_bins_method(missed_bins, coverage_database.get_coverage_rate())
 
         for bin_name in missed_bins:
             coverage_difference += self.coverage_difference_prompts_dict[bin_name]
