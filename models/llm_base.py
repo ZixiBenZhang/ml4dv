@@ -1,6 +1,8 @@
 from abc import abstractmethod
 from typing import *
 
+import numpy as np
+
 
 class BaseLLM:
     REMAIN_ITER_NUM = 3
@@ -23,7 +25,7 @@ class BaseLLM:
         raise NotImplementedError
 
     def append_successful(
-        self, prompt: Dict[str, str], response: Dict[str, str], cur_coverage: int
+            self, prompt: Dict[str, str], response: Dict[str, str], cur_coverage: int
     ):
         self.best_messages.append(
             {"msg": (prompt, response), "hit": cur_coverage, "id": self.total_msg_cnt}
@@ -33,9 +35,19 @@ class BaseLLM:
         self.best_messages[-1]["hit"] = new_coverage - self.best_messages[-1]["hit"]
         self.best_messages = sorted(
             self.best_messages, key=lambda d: (d["hit"], d["id"]), reverse=True
-        )[: BaseLLM.REMAIN_ITER_NUM]
+        )
+        if len(self.best_messages) >= BaseLLM.REMAIN_ITER_NUM * 3 \
+                and self.best_messages[BaseLLM.REMAIN_ITER_NUM * 3 - 1]["hit"] == self.best_messages[0]["hit"]:
+            self.best_messages = list(filter(
+                lambda d: d["hit"] == self.best_messages[0]["hit"], self.best_messages
+            ))
+        else:
+            self.best_messages = self.best_messages[: BaseLLM.REMAIN_ITER_NUM * 3]
 
-    # TODO: keep more best msgs & then sample 3 from them
     def _select_successful(self) -> List[Dict[str, str]]:
-        self.best_messages.sort(key=lambda d: d["id"])
-        return [msg for entry in self.best_messages for msg in entry["msg"]]
+        if len(self.best_messages) < 3:
+            return [msg for entry in sorted(self.best_messages, key=lambda d: d["id"]) for msg in entry['msg']]
+
+        return [msg for entry in sorted(
+            list(np.random.choice(self.best_messages, 3, replace=False)), key=lambda d: d["id"]
+        ) for msg in entry["msg"]]
