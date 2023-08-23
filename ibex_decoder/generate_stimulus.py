@@ -78,15 +78,16 @@ def main():
     logger_csv = CSVLogger(f"{prefix}{t}.csv")
 
     # create agent
+    # Todo: Adaptive restart
     agent = LLMAgent(
         prompt_generator,
         stimulus_generator,
         extractor,
         stimulus_filter,
         [logger_txt, logger_csv],
-        dialog_bound=400,
+        dialog_bound=500,
         epsilon=3,
-        period=4,
+        period=7,
     )
     print("Agent successfully built\n")
 
