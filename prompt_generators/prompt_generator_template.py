@@ -237,6 +237,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
             np.random.shuffle(missed_bins)
         return missed_bins
 
+    # Can be extended to adapt all tasks
     def _sample_missed_bins_IDADAS(
         self, missed_bins: List[str], coverage_rate: Tuple[int, int]
     ) -> List[str]:
@@ -263,6 +264,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
         def resolve_strategy() -> Callable:
             if len(self.history_coverage) < 4:
                 return sample_mild_determ
+            print(f"Checking strategy... Current: {self.cur_sampling_method}")
             if self.history_coverage[-1] - self.history_coverage[-4] < epsilon:
                 if self.cur_sampling_method is sample_mild_determ:
                     print("Sampling: mild determ -> random\n")
