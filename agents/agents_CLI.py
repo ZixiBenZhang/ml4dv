@@ -9,7 +9,7 @@ class CLIAgent(BaseAgent):
         self.stimuli = input("Please enter stimuli list:\n")
         self.stimuli = list(map(
             lambda x: (int(x, 16) if x[:2] == "0x" else int(x)),
-            map(lambda s: s.strip(), self.stimuli[1:-1].split(","))
+            filter(lambda s: len(s) > 2, map(lambda s: s.strip(), self.stimuli[1:-1].split(",")))
         ))
 
     def end_simulation(
