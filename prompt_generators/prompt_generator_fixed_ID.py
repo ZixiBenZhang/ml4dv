@@ -14,6 +14,7 @@ class FixedPromptGenerator4ID1(BasePromptGenerator):
         return (
             "Please output a list of hexadecimal integers only, "
             f"each integer between 0x0 and 0xffffffff. \n"
+            f"Do not give any explanations. \n"
             f"Output format: [a, b, c, ...]."
         )
 
