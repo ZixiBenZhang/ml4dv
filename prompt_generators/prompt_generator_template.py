@@ -7,18 +7,18 @@ BOUND = 523
 
 class TemplatePromptGenerator(BasePromptGenerator, ABC):
     def __init__(
-        self,
-        dut_code_path: str,
-        tb_code_path: str,
-        bin_descr_path: str,
-        code_summary_type: int = 0,  # 0: no code, 1: code, 2: summary
-        sampling_missed_bins_method: Union[str, None] = None,
+            self,
+            dut_code_path: str,
+            tb_code_path: str,
+            bin_descr_path: str,
+            code_summary_type: int = 0,  # 0: no code, 1: code, 2: summary
+            sampling_missed_bins_method: Union[str, None] = None,
     ):
         super().__init__()
         self.code_summary_type = code_summary_type
 
         self.prev_coverage = (0, -1)
-        self.history_coverage: List[int] = []
+        self.adas_cov_hist: List[int] = []
 
         self.sampling_missed_bins_method: Union[Callable, None] = None
         self._resolve_sampling_method(sampling_missed_bins_method)
@@ -100,21 +100,21 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
     def generate_initial_prompt(self) -> str:
         # Initial Template: introduction + summaries + question
         initial_prompt = (
-            self.intro
-            + "\n----------\n"
-            + self.code_summary
-            + self.tb_summary
-            + "\n----------\n"
-            + self.init_question
+                self.intro
+                + "\n----------\n"
+                + self.code_summary
+                + self.tb_summary
+                + "\n----------\n"
+                + self.init_question
         )
         return initial_prompt
 
     def generate_iterative_prompt(
-        self, coverage_database: GlobalCoverageDatabase, **kwargs
+            self, coverage_database: GlobalCoverageDatabase, **kwargs
     ) -> str:
         # Iterative Template: result summary + difference + question
         cur_coverage = coverage_database.get_coverage_rate()
-        self.history_coverage.append(cur_coverage[0])
+        self.adas_cov_hist.append(cur_coverage[0])
         kwargs["no_new_hit"] = cur_coverage == self.prev_coverage
 
         # calculate difference
@@ -145,7 +145,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
 
     @staticmethod
     def _sample_missed_bins_ORIGINAL(
-        missed_bins: List[str], coverage_rate: Tuple[int, int]
+            missed_bins: List[str], coverage_rate: Tuple[int, int]
     ) -> List[str]:
         # ORIGINAL
         if len(missed_bins) >= 40:
@@ -153,7 +153,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
                 [
                     missed_bins[:2],
                     np.random.choice(
-                        missed_bins[2 : min(25, len(missed_bins))], 3, replace=False
+                        missed_bins[2: min(25, len(missed_bins))], 3, replace=False
                     ),
                     np.random.choice(missed_bins[25:], 2, replace=False),
                 ]
@@ -168,7 +168,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
 
     @staticmethod
     def _sample_missed_bins_NEWEST(
-        missed_bins: List[str], coverage_rate: Tuple[int, int]
+            missed_bins: List[str], coverage_rate: Tuple[int, int]
     ) -> List[str]:
         # NEWEST
         if len(missed_bins) >= 40:
@@ -197,7 +197,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
 
     @staticmethod
     def _sample_missed_bins_RANDOM(
-        missed_bins: List[str], coverage_rate: Tuple[int, int]
+            missed_bins: List[str], coverage_rate: Tuple[int, int]
     ) -> List[str]:
         # RANDOM
         if len(missed_bins) >= 40:
@@ -210,7 +210,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
 
     @staticmethod
     def _sample_missed_bins_IDNEWEST(
-        missed_bins: List[str], coverage_rate: Tuple[int, int]
+            missed_bins: List[str], coverage_rate: Tuple[int, int]
     ) -> List[str]:
         # ID NEWEST
         if len(missed_bins) >= 40:
@@ -239,7 +239,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
 
     # Can be extended to adapt all tasks
     def _sample_missed_bins_IDADAS(
-        self, missed_bins: List[str], coverage_rate: Tuple[int, int]
+            self, missed_bins: List[str], coverage_rate: Tuple[int, int]
     ) -> List[str]:
         # ID Adaptive Sampling: switch sampling method when low efficiency
         def sample_determ(_missed_bins):
@@ -262,10 +262,11 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
         epsilon = 3
 
         def resolve_strategy() -> Callable:
-            if len(self.history_coverage) < 4:
-                return sample_mild_determ
+            if len(self.adas_cov_hist) < 4:
+                return self.cur_sampling_method
             # print(f"Checking strategy... Current: {self.cur_sampling_method}")
-            if self.history_coverage[-1] - self.history_coverage[-4] < epsilon:
+            if self.adas_cov_hist[-1] - self.adas_cov_hist[-4] < epsilon:
+                self.adas_cov_hist.clear()
                 if self.cur_sampling_method.__name__ == sample_mild_determ.__name__:
                     print("Sampling: mild determ -> random\n")
                     return sample_random
@@ -278,7 +279,9 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
             else:
                 return self.cur_sampling_method
 
-        if len(missed_bins) >= 40:
+        if coverage_rate[0] <= 10:
+            self.cur_sampling_method = sample_mild_determ
+        elif len(missed_bins) >= 40:
             self.cur_sampling_method = resolve_strategy()
         elif len(missed_bins) >= 7:
             self.cur_sampling_method = sample_random
