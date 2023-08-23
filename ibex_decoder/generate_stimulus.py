@@ -84,7 +84,7 @@ def main():
         extractor,
         stimulus_filter,
         [logger_txt, logger_csv],
-        dialog_bound=650,
+        dialog_bound=400,
         epsilon=3,
         period=4,
     )
