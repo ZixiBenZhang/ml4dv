@@ -7,11 +7,11 @@ from prompt_generators.prompt_generator_base import *
 from stimuli_extractor import *
 from stimuli_filter import *
 
-DIALOG_BOUND = 650
-
-# threshold for restarting a dialog
-EPSILON = 3
-PERIOD = 7
+# DIALOG_BOUND = 650
+#
+# # threshold for restarting a dialog
+# EPSILON = 3
+# PERIOD = 7
 
 
 class LLMAgent(BaseAgent):
@@ -22,6 +22,9 @@ class LLMAgent(BaseAgent):
         stimulus_extractor: BaseExtractor,
         stimulus_filter: BaseFilter,
         loggers: List[BaseLogger],
+        dialog_bound=650,
+        epsilon=3,
+        period=7,
     ):
         super().__init__()
         self.prompt_generator = prompt_generator
@@ -32,6 +35,9 @@ class LLMAgent(BaseAgent):
         self.state = "INIT"  # states: INIT, ITER, DONE
         self.stimuli_buffer = []
         self.stimulus_cnt = 0
+        self.dialog_bound = dialog_bound
+        self.epsilon = epsilon
+        self.period = period
         self.total_msg_cnt = 0
         self.msg_index = 0  # message index for running
         self.dialog_index = 1  # dialog index for running
@@ -77,6 +83,8 @@ class LLMAgent(BaseAgent):
         if (
             len(self.all_history_cov_rate) >= 25
             and self.all_history_cov_rate[-1] == self.all_history_cov_rate[-25]
+            or len(self.all_history_cov_rate) >= 40
+            and self.all_history_cov_rate[-1] - self.all_history_cov_rate[-40] <= 2
         ):
             self.state = "DONE"
             self.log_append({"role": "coverage", "content": coverage})
@@ -84,17 +92,7 @@ class LLMAgent(BaseAgent):
             self.save_log()
             return True
 
-        if (
-            len(self.all_history_cov_rate) >= 50
-            and self.all_history_cov_rate[-1] - self.all_history_cov_rate[-50] <= 2
-        ):
-            self.state = "DONE"
-            self.log_append({"role": "coverage", "content": coverage})
-            self.log_append({"role": "stop", "content": "model converged"})
-            self.save_log()
-            return True
-
-        if self.total_msg_cnt >= DIALOG_BOUND and len(self.stimuli_buffer) == 0:
+        if self.total_msg_cnt >= self.dialog_bound and len(self.stimuli_buffer) == 0:
             self.state = "DONE"
             self.log_append({"role": "coverage", "content": coverage})
             self.log_append({"role": "stop", "content": "max dialog number"})
@@ -143,8 +141,8 @@ class LLMAgent(BaseAgent):
             self.history_cov_rate.append(coverage_database.get_coverage_rate()[0])
             self.all_history_cov_rate.append(coverage_database.get_coverage_rate()[0])
             if (
-                len(self.history_cov_rate) >= 7
-                and self.history_cov_rate[-1] - self.history_cov_rate[-7] < EPSILON
+                len(self.history_cov_rate) >= self.period
+                and self.history_cov_rate[-1] - self.history_cov_rate[-self.period] < self.epsilon
             ):
                 self.reset()
                 print("\n>>>>> Agent reset <<<<<\n")
@@ -154,14 +152,14 @@ class LLMAgent(BaseAgent):
 
         f_ = 0  # i.e. gibberish response
         while len(self.stimuli_buffer) == 0:
-            if self.total_msg_cnt >= DIALOG_BOUND:
+            if self.total_msg_cnt >= self.dialog_bound:
                 # return 0 (same as None), so entering end_simulation and stops in next loop
                 return 0
             if (
                 len(self.all_history_cov_rate) >= 25
                 and self.all_history_cov_rate[-1] == self.all_history_cov_rate[-25]
-                or len(self.all_history_cov_rate) >= 50
-                and self.all_history_cov_rate[-1] - self.all_history_cov_rate[-50] <= 2
+                or len(self.all_history_cov_rate) >= 40
+                and self.all_history_cov_rate[-1] - self.all_history_cov_rate[-40] <= 2
             ):
                 return 0
 
@@ -184,8 +182,8 @@ class LLMAgent(BaseAgent):
                     coverage_database.get_coverage_rate()[0]
                 )
                 if (
-                    len(self.history_cov_rate) >= 7
-                    and self.history_cov_rate[-1] - self.history_cov_rate[-7] < EPSILON
+                    len(self.history_cov_rate) >= self.period
+                    and self.history_cov_rate[-1] - self.history_cov_rate[-self.period] < self.epsilon
                 ):
                     self.reset()
                     f_ = 0

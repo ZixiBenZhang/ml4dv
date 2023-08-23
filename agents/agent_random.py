@@ -3,11 +3,11 @@ import random
 
 
 class RandomAgent(BaseAgent):
-    def __init__(self):
+    def __init__(self, total_cycle=1000000):
         super().__init__()
         self.seed = 0
         random.seed(self.seed)
-        self.total_cycle = 1000000
+        self.total_cycle = total_cycle
         self.current_cycle = 0
 
     def end_simulation(
