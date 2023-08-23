@@ -266,13 +266,13 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
                 return sample_mild_determ
             # print(f"Checking strategy... Current: {self.cur_sampling_method}")
             if self.history_coverage[-1] - self.history_coverage[-4] < epsilon:
-                if self.cur_sampling_method.__name__ is sample_mild_determ.__name__:
+                if self.cur_sampling_method.__name__ == sample_mild_determ.__name__:
                     print("Sampling: mild determ -> random\n")
                     return sample_random
-                if self.cur_sampling_method.__name__ is sample_random.__name__:
+                if self.cur_sampling_method.__name__ == sample_random.__name__:
                     print("Sampling: random -> determ\n")
                     return sample_determ
-                if self.cur_sampling_method.__name__ is sample_determ.__name__:
+                if self.cur_sampling_method.__name__ == sample_determ.__name__:
                     print("Sampling: determ -> random\n")
                     return sample_random
             else:
