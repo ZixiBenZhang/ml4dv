@@ -240,7 +240,7 @@ class LLMAgent(BaseAgent):
             if len(line) == 0 and prev == 0:
                 cnt += 1
             prev = len(line)
-        if cnt >= len(lines) // 2:
+        if cnt >= len(lines) // 3 * 2:
             return True
         return False
 
