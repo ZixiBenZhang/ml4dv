@@ -264,10 +264,13 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
                 return sample_mild_determ
             if self.history_coverage[-1] - self.history_coverage[-4] < epsilon:
                 if self.cur_sampling_method is sample_mild_determ:
+                    print("Sampling: mild determ -> random\n")
                     return sample_random
                 if self.cur_sampling_method is sample_random:
+                    print("Sampling: random -> determ\n")
                     return sample_determ
                 if self.cur_sampling_method is sample_determ:
+                    print("Sampling: determ -> random\n")
                     return sample_random
             else:
                 return self.cur_sampling_method
