@@ -1,0 +1,524 @@
+Model,gpt-3.5-turbo-0613,SYSTEM,"Please output a list of hexadecimal integers only, each integer between 0x0 and 0xffffffff. 
+Do not give any explanations. 
+Output format: [a, b, c, ...].",temperature,0.4,top_p,1,Prompter,TemplatePromptGenerator4ID1,Extractor,DumbExtractor
+Total Message#,Dialog #,Message #,USER,ASSISTANT,Action,Coverage Rate,Coverage Plan
+1,1,1,"""You will receive a description of bins (i.e. test cases) of a testbench for a hardware device under test (DUT), which is a RISC-V instruction decoder. Then, you are going to generate a list of 32-bit instructions (i.e. hex integers between 0x0 and 0xffffffff) to cover these test cases.
+
+----------
+Now, we want to test the instruction decoder with a list of 32-bit instructions as its input. We want the input to cover the bins (i.e. test cases) that we care about. Here's the description of the bins that we care about:
+------
+BINS DESCRIPTION
+- The list contains 32-bit hexadecimal integers, each represents a RISC-V instruction.
+- There are 32 register files available, with index from 0 to 31.
+- There are 26 available types of operations:
+---
+OPERATIONS
+    - ADD
+    - ADDI
+    - SUB
+    - SUBI
+    - AND
+    - ANDI
+    - OR
+    - ORI
+    - XOR
+    - XORI
+    - SLL
+    - SLLI
+    - SRL
+    - SRLI
+    - SRA
+    - SRAI
+    - SLT
+    - SLTI
+    - SLTU
+    - SLTUI
+    - LW
+    - LH
+    - LB
+    - SW
+    - SH
+    - SB
+---
+- BIN type 1: For each operation, the list contains at least one instruction that performs it.
+
+- Each of the 32 register files has two read ports (""read_A"" and ""read_B"") and a write port (""write"")
+    - ""read_A"" is used when the register file is taken as the first argument of an operation.
+    - ""read_B"" is used when the register file is taken as the second argument of an operation.
+    - ""write"" is used when the result of an operation is written to the register file.
+- BIN type 2: For each register file port, the list contains at least one instruction that uses it.
+
+- BIN type 3: For each operation and each register file port, the list contains at least one instruction that performs the operation and uses the port as the same time.
+
+------
+
+----------
+Following the bins description, generate a list of 32-bit instructions (i.e. hex integers between 0x0 and 0xffffffff) which covers the described bins as much as you can.
+""","""[0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093]""",none,21,"{'ADD': 8, 'ADDI': 10, 'illegal_instruction': 7, 'LB': 4, 'SB': 4, 'read_A_reg_0': 26, 'read_B_reg_0': 12, 'write_reg_0': 11, 'write_reg_1': 11, 'ADD_x_read_A_reg_0': 8, 'ADD_x_read_B_reg_0': 8, 'ADD_x_write_reg_0': 4, 'ADD_x_write_reg_1': 4, 'ADDI_x_read_A_reg_0': 10, 'ADDI_x_write_reg_0': 5, 'ADDI_x_write_reg_1': 5, 'LB_x_read_A_reg_0': 4, 'LB_x_write_reg_0': 2, 'LB_x_write_reg_1': 2, 'SB_x_read_A_reg_0': 4, 'SB_x_read_B_reg_0': 4}"
+2,1,2,"""The values you provided failed to cover all the bins.
+You will see the result coverage of your previous response(s), and then generate another list of 32-bit instructions to cover the unreached bins (i.e. test cases)
+Here are some of the unreached bins:
+------
+UNREACHED BINS
+- SUB: there's no instruction that performs the operation SUB.
+- OR: there's no instruction that performs the operation OR.
+- write_reg_7: there's no instruction that uses the write port of register 7.
+- read_A_reg_26: there's no instruction that uses the read_A port of register 6.
+- write_reg_9: there's no instruction that uses the write port of register 9.
+- AND_x_read_B_reg_28: there's no operation that performs the operation AND using the read_B port of register 8.
+- SLLI_x_write_reg_23: there's no operation that performs the operation SLLI using the write port of register 3.
+------
+Please regenerate a 32-bit instruction for each of these unreached bins according to the BINS DESCRIPTION.""","""[0x40000033, 0x00000033, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093]""",none,25,"{'ADD': 19, 'SUB': 1, 'ADDI': 22, 'illegal_instruction': 7, 'LB': 8, 'SB': 10, 'read_A_reg_0': 60, 'read_B_reg_0': 30, 'write_reg_0': 26, 'write_reg_1': 24, 'ADD_x_read_A_reg_0': 19, 'SUB_x_read_A_reg_0': 1, 'ADD_x_read_B_reg_0': 19, 'SUB_x_read_B_reg_0': 1, 'ADD_x_write_reg_0': 10, 'ADD_x_write_reg_1': 9, 'SUB_x_write_reg_0': 1, 'ADDI_x_read_A_reg_0': 22, 'ADDI_x_write_reg_0': 11, 'ADDI_x_write_reg_1': 11, 'LB_x_read_A_reg_0': 8, 'LB_x_write_reg_0': 4, 'LB_x_write_reg_1': 4, 'SB_x_read_A_reg_0': 10, 'SB_x_read_B_reg_0': 10}"
+3,1,3,"""The values you provided failed to cover all the bins.
+You will see the result coverage of your previous response(s), and then generate another list of 32-bit instructions to cover the unreached bins (i.e. test cases)
+Here are some of the unreached bins:
+------
+UNREACHED BINS
+- OR: there's no instruction that performs the operation OR.
+- XOR: there's no instruction that performs the operation XOR.
+- SRA: there's no instruction that performs the operation SRA.
+- read_B_reg_9: there's no instruction that uses the read_B port of register 9.
+- write_reg_5: there's no instruction that uses the write port of register 5.
+- SLTI_x_write_reg_9: there's no operation that performs the operation SLTI using the write port of register 9.
+- XORI_x_write_reg_16: there's no operation that performs the operation XORI using the write port of register 6.
+------
+Please regenerate a 32-bit instruction for each of these unreached bins according to the BINS DESCRIPTION.""","""[0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093]""",none,25,"{'ADD': 31, 'SUB': 1, 'ADDI': 34, 'illegal_instruction': 7, 'LB': 12, 'SB': 16, 'read_A_reg_0': 94, 'read_B_reg_0': 48, 'write_reg_0': 40, 'write_reg_1': 38, 'ADD_x_read_A_reg_0': 31, 'SUB_x_read_A_reg_0': 1, 'ADD_x_read_B_reg_0': 31, 'SUB_x_read_B_reg_0': 1, 'ADD_x_write_reg_0': 16, 'ADD_x_write_reg_1': 15, 'SUB_x_write_reg_0': 1, 'ADDI_x_read_A_reg_0': 34, 'ADDI_x_write_reg_0': 17, 'ADDI_x_write_reg_1': 17, 'LB_x_read_A_reg_0': 12, 'LB_x_write_reg_0': 6, 'LB_x_write_reg_1': 6, 'SB_x_read_A_reg_0': 16, 'SB_x_read_B_reg_0': 16}"
+4,1,4,"""The new values you just provided didn't cover any new bins. You need to try to cover as much of the described bins as you can.
+You will see the result coverage of your previous response(s), and then generate another list of 32-bit instructions to cover the unreached bins (i.e. test cases)
+Here are some of  the unreached bins:
+------
+UNREACHED BINS
+- OR: there's no instruction that performs the operation OR.
+- XOR: there's no instruction that performs the operation XOR.
+- write_reg_2: there's no instruction that uses the write port of register 2.
+- read_A_reg_14: there's no instruction that uses the read_A port of register 4.
+- read_A_reg_31: there's no instruction that uses the read_A port of register 1.
+- SLLI_x_read_A_reg_1: there's no operation that performs the operation SLLI using the read_A port of register 1.
+- OR_x_write_reg_29: there's no operation that performs the operation OR using the write port of register 9.
+------
+Please regenerate a 32-bit instruction for each of these unreached bins according to the BINS DESCRIPTION.""","""[0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093]""",none,25,"{'ADD': 43, 'SUB': 1, 'ADDI': 46, 'illegal_instruction': 7, 'LB': 16, 'SB': 22, 'read_A_reg_0': 128, 'read_B_reg_0': 66, 'write_reg_0': 54, 'write_reg_1': 52, 'ADD_x_read_A_reg_0': 43, 'SUB_x_read_A_reg_0': 1, 'ADD_x_read_B_reg_0': 43, 'SUB_x_read_B_reg_0': 1, 'ADD_x_write_reg_0': 22, 'ADD_x_write_reg_1': 21, 'SUB_x_write_reg_0': 1, 'ADDI_x_read_A_reg_0': 46, 'ADDI_x_write_reg_0': 23, 'ADDI_x_write_reg_1': 23, 'LB_x_read_A_reg_0': 16, 'LB_x_write_reg_0': 8, 'LB_x_write_reg_1': 8, 'SB_x_read_A_reg_0': 22, 'SB_x_read_B_reg_0': 22}"
+5,1,5,"""The new values you just provided didn't cover any new bins. You need to try to cover as much of the described bins as you can.
+You will see the result coverage of your previous response(s), and then generate another list of 32-bit instructions to cover the unreached bins (i.e. test cases)
+Here are some of  the unreached bins:
+------
+UNREACHED BINS
+- OR: there's no instruction that performs the operation OR.
+- XOR: there's no instruction that performs the operation XOR.
+- read_A_reg_5: there's no instruction that uses the read_A port of register 5.
+- read_B_reg_17: there's no instruction that uses the read_B port of register 7.
+- read_B_reg_20: there's no instruction that uses the read_B port of register 0.
+- SLT_x_write_reg_11: there's no operation that performs the operation SLT using the write port of register 1.
+- LH_x_write_reg_30: there's no operation that performs the operation LH using the write port of register 0.
+------
+Please regenerate a 32-bit instruction for each of these unreached bins according to the BINS DESCRIPTION.""","""[0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093]""",none,25,"{'ADD': 55, 'SUB': 1, 'ADDI': 58, 'illegal_instruction': 7, 'LB': 20, 'SB': 28, 'read_A_reg_0': 162, 'read_B_reg_0': 84, 'write_reg_0': 68, 'write_reg_1': 66, 'ADD_x_read_A_reg_0': 55, 'SUB_x_read_A_reg_0': 1, 'ADD_x_read_B_reg_0': 55, 'SUB_x_read_B_reg_0': 1, 'ADD_x_write_reg_0': 28, 'ADD_x_write_reg_1': 27, 'SUB_x_write_reg_0': 1, 'ADDI_x_read_A_reg_0': 58, 'ADDI_x_write_reg_0': 29, 'ADDI_x_write_reg_1': 29, 'LB_x_read_A_reg_0': 20, 'LB_x_write_reg_0': 10, 'LB_x_write_reg_1': 10, 'SB_x_read_A_reg_0': 28, 'SB_x_read_B_reg_0': 28}"
+6,1,6,"""The new values you just provided didn't cover any new bins. You need to try to cover as much of the described bins as you can.
+You will see the result coverage of your previous response(s), and then generate another list of 32-bit instructions to cover the unreached bins (i.e. test cases)
+Here are some of  the unreached bins:
+------
+UNREACHED BINS
+- OR: there's no instruction that performs the operation OR.
+- XOR: there's no instruction that performs the operation XOR.
+- read_B_reg_29: there's no instruction that uses the read_B port of register 9.
+- SUBI: there's no instruction that performs the operation SUBI.
+- read_B_reg_27: there's no instruction that uses the read_B port of register 7.
+- SH_x_read_B_reg_21: there's no operation that performs the operation SH using the read_B port of register 1.
+- SW_x_read_B_reg_14: there's no operation that performs the operation SW using the read_B port of register 4.
+------
+Please regenerate a 32-bit instruction for each of these unreached bins according to the BINS DESCRIPTION.""","""[0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093]""",none,25,"{'ADD': 67, 'SUB': 1, 'ADDI': 70, 'illegal_instruction': 7, 'LB': 24, 'SB': 34, 'read_A_reg_0': 196, 'read_B_reg_0': 102, 'write_reg_0': 82, 'write_reg_1': 80, 'ADD_x_read_A_reg_0': 67, 'SUB_x_read_A_reg_0': 1, 'ADD_x_read_B_reg_0': 67, 'SUB_x_read_B_reg_0': 1, 'ADD_x_write_reg_0': 34, 'ADD_x_write_reg_1': 33, 'SUB_x_write_reg_0': 1, 'ADDI_x_read_A_reg_0': 70, 'ADDI_x_write_reg_0': 35, 'ADDI_x_write_reg_1': 35, 'LB_x_read_A_reg_0': 24, 'LB_x_write_reg_0': 12, 'LB_x_write_reg_1': 12, 'SB_x_read_A_reg_0': 34, 'SB_x_read_B_reg_0': 34}"
+7,1,7,"""The new values you just provided didn't cover any new bins. You need to try to cover as much of the described bins as you can.
+You will see the result coverage of your previous response(s), and then generate another list of 32-bit instructions to cover the unreached bins (i.e. test cases)
+Here are some of  the unreached bins:
+------
+UNREACHED BINS
+- OR: there's no instruction that performs the operation OR.
+- XOR: there's no instruction that performs the operation XOR.
+- read_B_reg_23: there's no instruction that uses the read_B port of register 3.
+- read_B_reg_7: there's no instruction that uses the read_B port of register 7.
+- SUBI: there's no instruction that performs the operation SUBI.
+- SLTUI_x_read_A_reg_7: there's no operation that performs the operation SLTUI using the read_A port of register 7.
+- XOR_x_read_A_reg_5: there's no operation that performs the operation XOR using the read_A port of register 5.
+------
+Please regenerate a 32-bit instruction for each of these unreached bins according to the BINS DESCRIPTION.""","""[0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093]""",none,25,"{'ADD': 79, 'SUB': 1, 'ADDI': 82, 'illegal_instruction': 7, 'LB': 28, 'SB': 40, 'read_A_reg_0': 230, 'read_B_reg_0': 120, 'write_reg_0': 96, 'write_reg_1': 94, 'ADD_x_read_A_reg_0': 79, 'SUB_x_read_A_reg_0': 1, 'ADD_x_read_B_reg_0': 79, 'SUB_x_read_B_reg_0': 1, 'ADD_x_write_reg_0': 40, 'ADD_x_write_reg_1': 39, 'SUB_x_write_reg_0': 1, 'ADDI_x_read_A_reg_0': 82, 'ADDI_x_write_reg_0': 41, 'ADDI_x_write_reg_1': 41, 'LB_x_read_A_reg_0': 28, 'LB_x_write_reg_0': 14, 'LB_x_write_reg_1': 14, 'SB_x_read_A_reg_0': 40, 'SB_x_read_B_reg_0': 40}"
+8,1,8,"""The new values you just provided didn't cover any new bins. You need to try to cover as much of the described bins as you can.
+You will see the result coverage of your previous response(s), and then generate another list of 32-bit instructions to cover the unreached bins (i.e. test cases)
+Here are some of  the unreached bins:
+------
+UNREACHED BINS
+- OR: there's no instruction that performs the operation OR.
+- XOR: there's no instruction that performs the operation XOR.
+- read_A_reg_3: there's no instruction that uses the read_A port of register 3.
+- read_B_reg_6: there's no instruction that uses the read_B port of register 6.
+- read_B_reg_25: there's no instruction that uses the read_B port of register 5.
+- AND_x_write_reg_14: there's no operation that performs the operation AND using the write port of register 4.
+- SLTI_x_write_reg_2: there's no operation that performs the operation SLTI using the write port of register 2.
+------
+Please regenerate a 32-bit instruction for each of these unreached bins according to the BINS DESCRIPTION.""","""[0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093]""",reset,25,"{'ADD': 91, 'SUB': 1, 'ADDI': 94, 'illegal_instruction': 7, 'LB': 32, 'SB': 46, 'read_A_reg_0': 264, 'read_B_reg_0': 138, 'write_reg_0': 110, 'write_reg_1': 108, 'ADD_x_read_A_reg_0': 91, 'SUB_x_read_A_reg_0': 1, 'ADD_x_read_B_reg_0': 91, 'SUB_x_read_B_reg_0': 1, 'ADD_x_write_reg_0': 46, 'ADD_x_write_reg_1': 45, 'SUB_x_write_reg_0': 1, 'ADDI_x_read_A_reg_0': 94, 'ADDI_x_write_reg_0': 47, 'ADDI_x_write_reg_1': 47, 'LB_x_read_A_reg_0': 32, 'LB_x_write_reg_0': 16, 'LB_x_write_reg_1': 16, 'SB_x_read_A_reg_0': 46, 'SB_x_read_B_reg_0': 46}"
+9,2,1,"""You will receive a description of bins (i.e. test cases) of a testbench for a hardware device under test (DUT), which is a RISC-V instruction decoder. Then, you are going to generate a list of 32-bit instructions (i.e. hex integers between 0x0 and 0xffffffff) to cover these test cases.
+
+----------
+Now, we want to test the instruction decoder with a list of 32-bit instructions as its input. We want the input to cover the bins (i.e. test cases) that we care about. Here's the description of the bins that we care about:
+------
+BINS DESCRIPTION
+- The list contains 32-bit hexadecimal integers, each represents a RISC-V instruction.
+- There are 32 register files available, with index from 0 to 31.
+- There are 26 available types of operations:
+---
+OPERATIONS
+    - ADD
+    - ADDI
+    - SUB
+    - SUBI
+    - AND
+    - ANDI
+    - OR
+    - ORI
+    - XOR
+    - XORI
+    - SLL
+    - SLLI
+    - SRL
+    - SRLI
+    - SRA
+    - SRAI
+    - SLT
+    - SLTI
+    - SLTU
+    - SLTUI
+    - LW
+    - LH
+    - LB
+    - SW
+    - SH
+    - SB
+---
+- BIN type 1: For each operation, the list contains at least one instruction that performs it.
+
+- Each of the 32 register files has two read ports (""read_A"" and ""read_B"") and a write port (""write"")
+    - ""read_A"" is used when the register file is taken as the first argument of an operation.
+    - ""read_B"" is used when the register file is taken as the second argument of an operation.
+    - ""write"" is used when the result of an operation is written to the register file.
+- BIN type 2: For each register file port, the list contains at least one instruction that uses it.
+
+- BIN type 3: For each operation and each register file port, the list contains at least one instruction that performs the operation and uses the port as the same time.
+
+------
+
+----------
+Following the bins description, generate a list of 32-bit instructions (i.e. hex integers between 0x0 and 0xffffffff) which covers the described bins as much as you can.
+""","""[0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000003, 0x00000083, 0x00000023, 0x000000a3, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b]""",none,25,"{'ADD': 97, 'SUB': 1, 'ADDI': 100, 'illegal_instruction': 23, 'LB': 34, 'SB': 48, 'read_A_reg_0': 280, 'read_B_reg_0': 146, 'write_reg_0': 117, 'write_reg_1': 115, 'ADD_x_read_A_reg_0': 97, 'SUB_x_read_A_reg_0': 1, 'ADD_x_read_B_reg_0': 97, 'SUB_x_read_B_reg_0': 1, 'ADD_x_write_reg_0': 49, 'ADD_x_write_reg_1': 48, 'SUB_x_write_reg_0': 1, 'ADDI_x_read_A_reg_0': 100, 'ADDI_x_write_reg_0': 50, 'ADDI_x_write_reg_1': 50, 'LB_x_read_A_reg_0': 34, 'LB_x_write_reg_0': 17, 'LB_x_write_reg_1': 17, 'SB_x_read_A_reg_0': 48, 'SB_x_read_B_reg_0': 48}"
+10,2,2,"""The values you provided failed to cover all the bins.
+You will see the result coverage of your previous response(s), and then generate another list of 32-bit instructions to cover the unreached bins (i.e. test cases)
+Here are some of the unreached bins:
+------
+UNREACHED BINS
+- OR: there's no instruction that performs the operation OR.
+- XOR: there's no instruction that performs the operation XOR.
+- read_B_reg_23: there's no instruction that uses the read_B port of register 3.
+- read_B_reg_26: there's no instruction that uses the read_B port of register 6.
+- read_B_reg_11: there's no instruction that uses the read_B port of register 1.
+- ORI_x_write_reg_4: there's no operation that performs the operation ORI using the write port of register 4.
+- SLL_x_read_B_reg_29: there's no operation that performs the operation SLL using the read_B port of register 9.
+------
+Please regenerate a 32-bit instruction for each of these unreached bins according to the BINS DESCRIPTION.""","""[0x00000033, 0x0000004b, 0x0000000b, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000003, 0x00000083, 0x00000023, 0x000000a3, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0""",none,25,"{'ADD': 114, 'SUB': 1, 'ADDI': 116, 'illegal_instruction': 66, 'LB': 36, 'SB': 50, 'read_A_reg_0': 317, 'read_B_reg_0': 165, 'write_reg_0': 135, 'write_reg_1': 132, 'ADD_x_read_A_reg_0': 114, 'SUB_x_read_A_reg_0': 1, 'ADD_x_read_B_reg_0': 114, 'SUB_x_read_B_reg_0': 1, 'ADD_x_write_reg_0': 58, 'ADD_x_write_reg_1': 56, 'SUB_x_write_reg_0': 1, 'ADDI_x_read_A_reg_0': 116, 'ADDI_x_write_reg_0': 58, 'ADDI_x_write_reg_1': 58, 'LB_x_read_A_reg_0': 36, 'LB_x_write_reg_0': 18, 'LB_x_write_reg_1': 18, 'SB_x_read_A_reg_0': 50, 'SB_x_read_B_reg_0': 50}"
+11,2,3,"""The new values you just provided didn't cover any new bins. You need to try to cover as much of the described bins as you can.
+You will see the result coverage of your previous response(s), and then generate another list of 32-bit instructions to cover the unreached bins (i.e. test cases)
+Here are some of  the unreached bins:
+------
+UNREACHED BINS
+- OR: there's no instruction that performs the operation OR.
+- XOR: there's no instruction that performs the operation XOR.
+- SRAI: there's no instruction that performs the operation SRAI.
+- write_reg_6: there's no instruction that uses the write port of register 6.
+- write_reg_14: there's no instruction that uses the write port of register 4.
+- SRL_x_read_A_reg_0: there's no operation that performs the operation SRL using the read_A port of register 0.
+- OR_x_read_B_reg_26: there's no operation that performs the operation OR using the read_B port of register 6.
+------
+Please regenerate a 32-bit instruction for each of these unreached bins according to the BINS DESCRIPTION.""","""[0x00000033, 0x0000004b, 0x0000000b, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000003, 0x00000083, 0x00000023, 0x000000a3, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0""",none,25,"{'ADD': 131, 'SUB': 1, 'ADDI': 132, 'illegal_instruction': 109, 'LB': 38, 'SB': 52, 'read_A_reg_0': 354, 'read_B_reg_0': 184, 'write_reg_0': 153, 'write_reg_1': 149, 'ADD_x_read_A_reg_0': 131, 'SUB_x_read_A_reg_0': 1, 'ADD_x_read_B_reg_0': 131, 'SUB_x_read_B_reg_0': 1, 'ADD_x_write_reg_0': 67, 'ADD_x_write_reg_1': 64, 'SUB_x_write_reg_0': 1, 'ADDI_x_read_A_reg_0': 132, 'ADDI_x_write_reg_0': 66, 'ADDI_x_write_reg_1': 66, 'LB_x_read_A_reg_0': 38, 'LB_x_write_reg_0': 19, 'LB_x_write_reg_1': 19, 'SB_x_read_A_reg_0': 52, 'SB_x_read_B_reg_0': 52}"
+12,2,4,"""The new values you just provided didn't cover any new bins. You need to try to cover as much of the described bins as you can.
+You will see the result coverage of your previous response(s), and then generate another list of 32-bit instructions to cover the unreached bins (i.e. test cases)
+Here are some of  the unreached bins:
+------
+UNREACHED BINS
+- OR: there's no instruction that performs the operation OR.
+- XOR: there's no instruction that performs the operation XOR.
+- SW: there's no instruction that performs the operation SW.
+- SH: there's no instruction that performs the operation SH.
+- write_reg_5: there's no instruction that uses the write port of register 5.
+- SRA_x_write_reg_24: there's no operation that performs the operation SRA using the write port of register 4.
+- SRLI_x_read_A_reg_16: there's no operation that performs the operation SRLI using the read_A port of register 6.
+------
+Please regenerate a 32-bit instruction for each of these unreached bins according to the BINS DESCRIPTION.""","""[0x00000033, 0x0000004b, 0x0000000b, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000003, 0x00000083, 0x00000023, 0x000000a3, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0""",none,25,"{'ADD': 148, 'SUB': 1, 'ADDI': 148, 'illegal_instruction': 152, 'LB': 40, 'SB': 54, 'read_A_reg_0': 391, 'read_B_reg_0': 203, 'write_reg_0': 171, 'write_reg_1': 166, 'ADD_x_read_A_reg_0': 148, 'SUB_x_read_A_reg_0': 1, 'ADD_x_read_B_reg_0': 148, 'SUB_x_read_B_reg_0': 1, 'ADD_x_write_reg_0': 76, 'ADD_x_write_reg_1': 72, 'SUB_x_write_reg_0': 1, 'ADDI_x_read_A_reg_0': 148, 'ADDI_x_write_reg_0': 74, 'ADDI_x_write_reg_1': 74, 'LB_x_read_A_reg_0': 40, 'LB_x_write_reg_0': 20, 'LB_x_write_reg_1': 20, 'SB_x_read_A_reg_0': 54, 'SB_x_read_B_reg_0': 54}"
+13,2,5,"""The new values you just provided didn't cover any new bins. You need to try to cover as much of the described bins as you can.
+You will see the result coverage of your previous response(s), and then generate another list of 32-bit instructions to cover the unreached bins (i.e. test cases)
+Here are some of  the unreached bins:
+------
+UNREACHED BINS
+- OR: there's no instruction that performs the operation OR.
+- XOR: there's no instruction that performs the operation XOR.
+- SW: there's no instruction that performs the operation SW.
+- read_B_reg_27: there's no instruction that uses the read_B port of register 7.
+- read_B_reg_19: there's no instruction that uses the read_B port of register 9.
+- SRL_x_write_reg_18: there's no operation that performs the operation SRL using the write port of register 8.
+- LB_x_write_reg_31: there's no operation that performs the operation LB using the write port of register 1.
+------
+Please regenerate a 32-bit instruction for each of these unreached bins according to the BINS DESCRIPTION.""","""[0x00000033, 0x0000004b, 0x0000000b, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000003, 0x00000083, 0x00000023, 0x000000a3, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0""",none,25,"{'ADD': 165, 'SUB': 1, 'ADDI': 164, 'illegal_instruction': 195, 'LB': 42, 'SB': 56, 'read_A_reg_0': 428, 'read_B_reg_0': 222, 'write_reg_0': 189, 'write_reg_1': 183, 'ADD_x_read_A_reg_0': 165, 'SUB_x_read_A_reg_0': 1, 'ADD_x_read_B_reg_0': 165, 'SUB_x_read_B_reg_0': 1, 'ADD_x_write_reg_0': 85, 'ADD_x_write_reg_1': 80, 'SUB_x_write_reg_0': 1, 'ADDI_x_read_A_reg_0': 164, 'ADDI_x_write_reg_0': 82, 'ADDI_x_write_reg_1': 82, 'LB_x_read_A_reg_0': 42, 'LB_x_write_reg_0': 21, 'LB_x_write_reg_1': 21, 'SB_x_read_A_reg_0': 56, 'SB_x_read_B_reg_0': 56}"
+14,2,6,"""The new values you just provided didn't cover any new bins. You need to try to cover as much of the described bins as you can.
+You will see the result coverage of your previous response(s), and then generate another list of 32-bit instructions to cover the unreached bins (i.e. test cases)
+Here are some of  the unreached bins:
+------
+UNREACHED BINS
+- OR: there's no instruction that performs the operation OR.
+- XOR: there's no instruction that performs the operation XOR.
+- read_B_reg_8: there's no instruction that uses the read_B port of register 8.
+- SRA: there's no instruction that performs the operation SRA.
+- read_B_reg_27: there's no instruction that uses the read_B port of register 7.
+- SH_x_read_B_reg_26: there's no operation that performs the operation SH using the read_B port of register 6.
+- SRAI_x_read_A_reg_26: there's no operation that performs the operation SRAI using the read_A port of register 6.
+------
+Please regenerate a 32-bit instruction for each of these unreached bins according to the BINS DESCRIPTION.""","""[0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x000000""",none,25,"{'ADD': 193, 'SUB': 1, 'ADDI': 192, 'illegal_instruction': 196, 'LB': 54, 'SB': 70, 'read_A_reg_0': 510, 'read_B_reg_0': 264, 'write_reg_0': 223, 'write_reg_1': 217, 'ADD_x_read_A_reg_0': 193, 'SUB_x_read_A_reg_0': 1, 'ADD_x_read_B_reg_0': 193, 'SUB_x_read_B_reg_0': 1, 'ADD_x_write_reg_0': 99, 'ADD_x_write_reg_1': 94, 'SUB_x_write_reg_0': 1, 'ADDI_x_read_A_reg_0': 192, 'ADDI_x_write_reg_0': 96, 'ADDI_x_write_reg_1': 96, 'LB_x_read_A_reg_0': 54, 'LB_x_write_reg_0': 27, 'LB_x_write_reg_1': 27, 'SB_x_read_A_reg_0': 70, 'SB_x_read_B_reg_0': 70}"
+15,2,7,"""The new values you just provided didn't cover any new bins. You need to try to cover as much of the described bins as you can.
+You will see the result coverage of your previous response(s), and then generate another list of 32-bit instructions to cover the unreached bins (i.e. test cases)
+Here are some of  the unreached bins:
+------
+UNREACHED BINS
+- OR: there's no instruction that performs the operation OR.
+- XOR: there's no instruction that performs the operation XOR.
+- SLTU: there's no instruction that performs the operation SLTU.
+- read_B_reg_31: there's no instruction that uses the read_B port of register 1.
+- SLTUI: there's no instruction that performs the operation SLTUI.
+- ORI_x_write_reg_24: there's no operation that performs the operation ORI using the write port of register 4.
+- ANDI_x_write_reg_4: there's no operation that performs the operation ANDI using the write port of register 4.
+------
+Please regenerate a 32-bit instruction for each of these unreached bins according to the BINS DESCRIPTION.""","""[0x00000033, 0x0000004b, 0x0000000b, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000003, 0x00000083, 0x00000023, 0x000000a3, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000004b, 0x000000cb, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0""",reset,25,"{'ADD': 210, 'SUB': 1, 'ADDI': 208, 'illegal_instruction': 239, 'LB': 56, 'SB': 72, 'read_A_reg_0': 547, 'read_B_reg_0': 283, 'write_reg_0': 241, 'write_reg_1': 234, 'ADD_x_read_A_reg_0': 210, 'SUB_x_read_A_reg_0': 1, 'ADD_x_read_B_reg_0': 210, 'SUB_x_read_B_reg_0': 1, 'ADD_x_write_reg_0': 108, 'ADD_x_write_reg_1': 102, 'SUB_x_write_reg_0': 1, 'ADDI_x_read_A_reg_0': 208, 'ADDI_x_write_reg_0': 104, 'ADDI_x_write_reg_1': 104, 'LB_x_read_A_reg_0': 56, 'LB_x_write_reg_0': 28, 'LB_x_write_reg_1': 28, 'SB_x_read_A_reg_0': 72, 'SB_x_read_B_reg_0': 72}"
+16,3,1,"""You will receive a description of bins (i.e. test cases) of a testbench for a hardware device under test (DUT), which is a RISC-V instruction decoder. Then, you are going to generate a list of 32-bit instructions (i.e. hex integers between 0x0 and 0xffffffff) to cover these test cases.
+
+----------
+Now, we want to test the instruction decoder with a list of 32-bit instructions as its input. We want the input to cover the bins (i.e. test cases) that we care about. Here's the description of the bins that we care about:
+------
+BINS DESCRIPTION
+- The list contains 32-bit hexadecimal integers, each represents a RISC-V instruction.
+- There are 32 register files available, with index from 0 to 31.
+- There are 26 available types of operations:
+---
+OPERATIONS
+    - ADD
+    - ADDI
+    - SUB
+    - SUBI
+    - AND
+    - ANDI
+    - OR
+    - ORI
+    - XOR
+    - XORI
+    - SLL
+    - SLLI
+    - SRL
+    - SRLI
+    - SRA
+    - SRAI
+    - SLT
+    - SLTI
+    - SLTU
+    - SLTUI
+    - LW
+    - LH
+    - LB
+    - SW
+    - SH
+    - SB
+---
+- BIN type 1: For each operation, the list contains at least one instruction that performs it.
+
+- Each of the 32 register files has two read ports (""read_A"" and ""read_B"") and a write port (""write"")
+    - ""read_A"" is used when the register file is taken as the first argument of an operation.
+    - ""read_B"" is used when the register file is taken as the second argument of an operation.
+    - ""write"" is used when the result of an operation is written to the register file.
+- BIN type 2: For each register file port, the list contains at least one instruction that uses it.
+
+- BIN type 3: For each operation and each register file port, the list contains at least one instruction that performs the operation and uses the port as the same time.
+
+------
+
+----------
+Following the bins description, generate a list of 32-bit instructions (i.e. hex integers between 0x0 and 0xffffffff) which covers the described bins as much as you can.
+""","""[0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000013, 0x00000093, 0x00000003, 0x00000083, 0x00000023, 0x000000a3, 0x0000002b, 0x000000ab, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000013, 0x00000093, 0x00000003, 0x00000083, 0x00000023, 0x000000a3, 0x0000002b, 0x000000ab, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000013, 0x00000093, 0x00000003, 0x00000083, 0x00000023, 0x000000a3, 0x0000002b, 0x000000ab, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000013, 0x00000093, 0x00000003, 0x00000083, 0x00000023, 0x000000a3, 0x0000002b, 0x000000ab, 0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x""",none,25,"{'ADD': 220, 'SUB': 1, 'ADDI': 226, 'illegal_instruction': 268, 'LB': 64, 'SB': 80, 'read_A_reg_0': 599, 'read_B_reg_0': 309, 'write_reg_0': 259, 'write_reg_1': 252, 'ADD_x_read_A_reg_0': 220, 'SUB_x_read_A_reg_0': 1, 'ADD_x_read_B_reg_0': 220, 'SUB_x_read_B_reg_0': 1, 'ADD_x_write_reg_0': 113, 'ADD_x_write_reg_1': 107, 'SUB_x_write_reg_0': 1, 'ADDI_x_read_A_reg_0': 226, 'ADDI_x_write_reg_0': 113, 'ADDI_x_write_reg_1': 113, 'LB_x_read_A_reg_0': 64, 'LB_x_write_reg_0': 32, 'LB_x_write_reg_1': 32, 'SB_x_read_A_reg_0': 80, 'SB_x_read_B_reg_0': 80}"
+17,3,2,"""The values you provided failed to cover all the bins.
+You will see the result coverage of your previous response(s), and then generate another list of 32-bit instructions to cover the unreached bins (i.e. test cases)
+Here are some of the unreached bins:
+------
+UNREACHED BINS
+- OR: there's no instruction that performs the operation OR.
+- XOR: there's no instruction that performs the operation XOR.
+- read_B_reg_1: there's no instruction that uses the read_B port of register 1.
+- read_A_reg_22: there's no instruction that uses the read_A port of register 2.
+- read_A_reg_3: there's no instruction that uses the read_A port of register 3.
+- ADDI_x_write_reg_31: there's no operation that performs the operation ADDI using the write port of register 1.
+- SRA_x_read_A_reg_27: there's no operation that performs the operation SRA using the read_A port of register 7.
+------
+Please regenerate a 32-bit instruction for each of these unreached bins according to the BINS DESCRIPTION.""","""[0x00000033, 0x00000063, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x000""",none,25,"{'ADD': 239, 'SUB': 1, 'ADDI': 226, 'illegal_instruction': 308, 'LB': 64, 'SB': 80, 'read_A_reg_0': 637, 'read_B_reg_0': 347, 'write_reg_0': 269, 'write_reg_1': 261, 'ADD_x_read_A_reg_0': 239, 'SUB_x_read_A_reg_0': 1, 'ADD_x_read_B_reg_0': 239, 'SUB_x_read_B_reg_0': 1, 'ADD_x_write_reg_0': 123, 'ADD_x_write_reg_1': 116, 'SUB_x_write_reg_0': 1, 'ADDI_x_read_A_reg_0': 226, 'ADDI_x_write_reg_0': 113, 'ADDI_x_write_reg_1': 113, 'LB_x_read_A_reg_0': 64, 'LB_x_write_reg_0': 32, 'LB_x_write_reg_1': 32, 'SB_x_read_A_reg_0': 80, 'SB_x_read_B_reg_0': 80}"
+18,3,3,"""The new values you just provided didn't cover any new bins. You need to try to cover as much of the described bins as you can.
+You will see the result coverage of your previous response(s), and then generate another list of 32-bit instructions to cover the unreached bins (i.e. test cases)
+Here are some of  the unreached bins:
+------
+UNREACHED BINS
+- OR: there's no instruction that performs the operation OR.
+- XOR: there's no instruction that performs the operation XOR.
+- write_reg_11: there's no instruction that uses the write port of register 1.
+- write_reg_18: there's no instruction that uses the write port of register 8.
+- read_B_reg_13: there's no instruction that uses the read_B port of register 3.
+- XOR_x_read_A_reg_9: there's no operation that performs the operation XOR using the read_A port of register 9.
+- SLLI_x_read_A_reg_17: there's no operation that performs the operation SLLI using the read_A port of register 7.
+------
+Please regenerate a 32-bit instruction for each of these unreached bins according to the BINS DESCRIPTION.""","""[0x00000033, 0x00000063, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x000""",none,25,"{'ADD': 258, 'SUB': 1, 'ADDI': 226, 'illegal_instruction': 348, 'LB': 64, 'SB': 80, 'read_A_reg_0': 675, 'read_B_reg_0': 385, 'write_reg_0': 279, 'write_reg_1': 270, 'ADD_x_read_A_reg_0': 258, 'SUB_x_read_A_reg_0': 1, 'ADD_x_read_B_reg_0': 258, 'SUB_x_read_B_reg_0': 1, 'ADD_x_write_reg_0': 133, 'ADD_x_write_reg_1': 125, 'SUB_x_write_reg_0': 1, 'ADDI_x_read_A_reg_0': 226, 'ADDI_x_write_reg_0': 113, 'ADDI_x_write_reg_1': 113, 'LB_x_read_A_reg_0': 64, 'LB_x_write_reg_0': 32, 'LB_x_write_reg_1': 32, 'SB_x_read_A_reg_0': 80, 'SB_x_read_B_reg_0': 80}"
+19,3,4,"""The new values you just provided didn't cover any new bins. You need to try to cover as much of the described bins as you can.
+You will see the result coverage of your previous response(s), and then generate another list of 32-bit instructions to cover the unreached bins (i.e. test cases)
+Here are some of  the unreached bins:
+------
+UNREACHED BINS
+- OR: there's no instruction that performs the operation OR.
+- XOR: there's no instruction that performs the operation XOR.
+- read_B_reg_25: there's no instruction that uses the read_B port of register 5.
+- read_B_reg_13: there's no instruction that uses the read_B port of register 3.
+- read_B_reg_6: there's no instruction that uses the read_B port of register 6.
+- ADDI_x_read_A_reg_13: there's no operation that performs the operation ADDI using the read_A port of register 3.
+- SRL_x_read_B_reg_1: there's no operation that performs the operation SRL using the read_B port of register 1.
+------
+Please regenerate a 32-bit instruction for each of these unreached bins according to the BINS DESCRIPTION.""","""[0x00000033, 0x00000063, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x000""",none,25,"{'ADD': 277, 'SUB': 1, 'ADDI': 226, 'illegal_instruction': 388, 'LB': 64, 'SB': 80, 'read_A_reg_0': 713, 'read_B_reg_0': 423, 'write_reg_0': 289, 'write_reg_1': 279, 'ADD_x_read_A_reg_0': 277, 'SUB_x_read_A_reg_0': 1, 'ADD_x_read_B_reg_0': 277, 'SUB_x_read_B_reg_0': 1, 'ADD_x_write_reg_0': 143, 'ADD_x_write_reg_1': 134, 'SUB_x_write_reg_0': 1, 'ADDI_x_read_A_reg_0': 226, 'ADDI_x_write_reg_0': 113, 'ADDI_x_write_reg_1': 113, 'LB_x_read_A_reg_0': 64, 'LB_x_write_reg_0': 32, 'LB_x_write_reg_1': 32, 'SB_x_read_A_reg_0': 80, 'SB_x_read_B_reg_0': 80}"
+20,3,5,"""The new values you just provided didn't cover any new bins. You need to try to cover as much of the described bins as you can.
+You will see the result coverage of your previous response(s), and then generate another list of 32-bit instructions to cover the unreached bins (i.e. test cases)
+Here are some of  the unreached bins:
+------
+UNREACHED BINS
+- OR: there's no instruction that performs the operation OR.
+- XOR: there's no instruction that performs the operation XOR.
+- read_B_reg_28: there's no instruction that uses the read_B port of register 8.
+- read_B_reg_14: there's no instruction that uses the read_B port of register 4.
+- read_A_reg_16: there's no instruction that uses the read_A port of register 6.
+- SW_x_read_B_reg_4: there's no operation that performs the operation SW using the read_B port of register 4.
+- SRL_x_read_B_reg_4: there's no operation that performs the operation SRL using the read_B port of register 4.
+------
+Please regenerate a 32-bit instruction for each of these unreached bins according to the BINS DESCRIPTION.""","""[0x00000033, 0x00000063, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x000""",none,25,"{'ADD': 296, 'SUB': 1, 'ADDI': 226, 'illegal_instruction': 428, 'LB': 64, 'SB': 80, 'read_A_reg_0': 751, 'read_B_reg_0': 461, 'write_reg_0': 299, 'write_reg_1': 288, 'ADD_x_read_A_reg_0': 296, 'SUB_x_read_A_reg_0': 1, 'ADD_x_read_B_reg_0': 296, 'SUB_x_read_B_reg_0': 1, 'ADD_x_write_reg_0': 153, 'ADD_x_write_reg_1': 143, 'SUB_x_write_reg_0': 1, 'ADDI_x_read_A_reg_0': 226, 'ADDI_x_write_reg_0': 113, 'ADDI_x_write_reg_1': 113, 'LB_x_read_A_reg_0': 64, 'LB_x_write_reg_0': 32, 'LB_x_write_reg_1': 32, 'SB_x_read_A_reg_0': 80, 'SB_x_read_B_reg_0': 80}"
+21,3,6,"""The new values you just provided didn't cover any new bins. You need to try to cover as much of the described bins as you can.
+You will see the result coverage of your previous response(s), and then generate another list of 32-bit instructions to cover the unreached bins (i.e. test cases)
+Here are some of  the unreached bins:
+------
+UNREACHED BINS
+- OR: there's no instruction that performs the operation OR.
+- XOR: there's no instruction that performs the operation XOR.
+- SLL: there's no instruction that performs the operation SLL.
+- read_A_reg_12: there's no instruction that uses the read_A port of register 2.
+- SLTU: there's no instruction that performs the operation SLTU.
+- SLTI_x_read_A_reg_24: there's no operation that performs the operation SLTI using the read_A port of register 4.
+- SRL_x_read_B_reg_24: there's no operation that performs the operation SRL using the read_B port of register 4.
+------
+Please regenerate a 32-bit instruction for each of these unreached bins according to the BINS DESCRIPTION.""","""[0x00000033, 0x00000063, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x000""",none,25,"{'ADD': 315, 'SUB': 1, 'ADDI': 226, 'illegal_instruction': 468, 'LB': 64, 'SB': 80, 'read_A_reg_0': 789, 'read_B_reg_0': 499, 'write_reg_0': 309, 'write_reg_1': 297, 'ADD_x_read_A_reg_0': 315, 'SUB_x_read_A_reg_0': 1, 'ADD_x_read_B_reg_0': 315, 'SUB_x_read_B_reg_0': 1, 'ADD_x_write_reg_0': 163, 'ADD_x_write_reg_1': 152, 'SUB_x_write_reg_0': 1, 'ADDI_x_read_A_reg_0': 226, 'ADDI_x_write_reg_0': 113, 'ADDI_x_write_reg_1': 113, 'LB_x_read_A_reg_0': 64, 'LB_x_write_reg_0': 32, 'LB_x_write_reg_1': 32, 'SB_x_read_A_reg_0': 80, 'SB_x_read_B_reg_0': 80}"
+22,3,7,"""The new values you just provided didn't cover any new bins. You need to try to cover as much of the described bins as you can.
+You will see the result coverage of your previous response(s), and then generate another list of 32-bit instructions to cover the unreached bins (i.e. test cases)
+Here are some of  the unreached bins:
+------
+UNREACHED BINS
+- OR: there's no instruction that performs the operation OR.
+- XOR: there's no instruction that performs the operation XOR.
+- write_reg_3: there's no instruction that uses the write port of register 3.
+- write_reg_10: there's no instruction that uses the write port of register 0.
+- SLLI: there's no instruction that performs the operation SLLI.
+- SLL_x_write_reg_30: there's no operation that performs the operation SLL using the write port of register 0.
+- SH_x_read_B_reg_19: there's no operation that performs the operation SH using the read_B port of register 9.
+------
+Please regenerate a 32-bit instruction for each of these unreached bins according to the BINS DESCRIPTION.""","""[0x00000033, 0x00000063, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x00000063, 0x000000e3, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x000""",reset,25,"{'ADD': 334, 'SUB': 1, 'ADDI': 226, 'illegal_instruction': 508, 'LB': 64, 'SB': 80, 'read_A_reg_0': 827, 'read_B_reg_0': 537, 'write_reg_0': 319, 'write_reg_1': 306, 'ADD_x_read_A_reg_0': 334, 'SUB_x_read_A_reg_0': 1, 'ADD_x_read_B_reg_0': 334, 'SUB_x_read_B_reg_0': 1, 'ADD_x_write_reg_0': 173, 'ADD_x_write_reg_1': 161, 'SUB_x_write_reg_0': 1, 'ADDI_x_read_A_reg_0': 226, 'ADDI_x_write_reg_0': 113, 'ADDI_x_write_reg_1': 113, 'LB_x_read_A_reg_0': 64, 'LB_x_write_reg_0': 32, 'LB_x_write_reg_1': 32, 'SB_x_read_A_reg_0': 80, 'SB_x_read_B_reg_0': 80}"
+23,4,1,"""You will receive a description of bins (i.e. test cases) of a testbench for a hardware device under test (DUT), which is a RISC-V instruction decoder. Then, you are going to generate a list of 32-bit instructions (i.e. hex integers between 0x0 and 0xffffffff) to cover these test cases.
+
+----------
+Now, we want to test the instruction decoder with a list of 32-bit instructions as its input. We want the input to cover the bins (i.e. test cases) that we care about. Here's the description of the bins that we care about:
+------
+BINS DESCRIPTION
+- The list contains 32-bit hexadecimal integers, each represents a RISC-V instruction.
+- There are 32 register files available, with index from 0 to 31.
+- There are 26 available types of operations:
+---
+OPERATIONS
+    - ADD
+    - ADDI
+    - SUB
+    - SUBI
+    - AND
+    - ANDI
+    - OR
+    - ORI
+    - XOR
+    - XORI
+    - SLL
+    - SLLI
+    - SRL
+    - SRLI
+    - SRA
+    - SRAI
+    - SLT
+    - SLTI
+    - SLTU
+    - SLTUI
+    - LW
+    - LH
+    - LB
+    - SW
+    - SH
+    - SB
+---
+- BIN type 1: For each operation, the list contains at least one instruction that performs it.
+
+- Each of the 32 register files has two read ports (""read_A"" and ""read_B"") and a write port (""write"")
+    - ""read_A"" is used when the register file is taken as the first argument of an operation.
+    - ""read_B"" is used when the register file is taken as the second argument of an operation.
+    - ""write"" is used when the result of an operation is written to the register file.
+- BIN type 2: For each register file port, the list contains at least one instruction that uses it.
+
+- BIN type 3: For each operation and each register file port, the list contains at least one instruction that performs the operation and uses the port as the same time.
+
+------
+
+----------
+Following the bins description, generate a list of 32-bit instructions (i.e. hex integers between 0x0 and 0xffffffff) which covers the described bins as much as you can.
+""","""[0x00000013, 0x00000093, 0x00000033, 0x000000b3, 0x0000001b, 0x0000009b, 0x0000000b, 0x0000008b, 0x0000000d, 0x0000008d, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3]""",none,25,"{'ADD': 342, 'SUB': 1, 'ADDI': 234, 'illegal_instruction': 514, 'LB': 68, 'SB': 86, 'read_A_reg_0': 853, 'read_B_reg_0': 551, 'write_reg_0': 329, 'write_reg_1': 316, 'ADD_x_read_A_reg_0': 342, 'SUB_x_read_A_reg_0': 1, 'ADD_x_read_B_reg_0': 342, 'SUB_x_read_B_reg_0': 1, 'ADD_x_write_reg_0': 177, 'ADD_x_write_reg_1': 165, 'SUB_x_write_reg_0': 1, 'ADDI_x_read_A_reg_0': 234, 'ADDI_x_write_reg_0': 117, 'ADDI_x_write_reg_1': 117, 'LB_x_read_A_reg_0': 68, 'LB_x_write_reg_0': 34, 'LB_x_write_reg_1': 34, 'SB_x_read_A_reg_0': 86, 'SB_x_read_B_reg_0': 86}"
+24,4,2,"""The values you provided failed to cover all the bins.
+You will see the result coverage of your previous response(s), and then generate another list of 32-bit instructions to cover the unreached bins (i.e. test cases)
+Here are some of the unreached bins:
+------
+UNREACHED BINS
+- OR: there's no instruction that performs the operation OR.
+- XOR: there's no instruction that performs the operation XOR.
+- read_A_reg_8: there's no instruction that uses the read_A port of register 8.
+- SRL: there's no instruction that performs the operation SRL.
+- SLTU: there's no instruction that performs the operation SLTU.
+- SLT_x_write_reg_30: there's no operation that performs the operation SLT using the write port of register 0.
+- ADD_x_write_reg_28: there's no operation that performs the operation ADD using the write port of register 8.
+------
+Please regenerate a 32-bit instruction for each of these unreached bins according to the BINS DESCRIPTION.""","""[0x00000033, 0x000000b3, 0x0000000b, 0x0000008b, 0x0000000d, 0x0000008d, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x0000000b, 0x0000008b, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a""",none,25,"{'ADD': 364, 'SUB': 1, 'ADDI': 256, 'illegal_instruction': 521, 'LB': 78, 'SB': 107, 'read_A_reg_0': 928, 'read_B_reg_0': 594, 'write_reg_0': 356, 'write_reg_1': 343, 'ADD_x_read_A_reg_0': 364, 'SUB_x_read_A_reg_0': 1, 'ADD_x_read_B_reg_0': 364, 'SUB_x_read_B_reg_0': 1, 'ADD_x_write_reg_0': 188, 'ADD_x_write_reg_1': 176, 'SUB_x_write_reg_0': 1, 'ADDI_x_read_A_reg_0': 256, 'ADDI_x_write_reg_0': 128, 'ADDI_x_write_reg_1': 128, 'LB_x_read_A_reg_0': 78, 'LB_x_write_reg_0': 39, 'LB_x_write_reg_1': 39, 'SB_x_read_A_reg_0': 107, 'SB_x_read_B_reg_0': 107}"
+25,4,3,"""The new values you just provided didn't cover any new bins. You need to try to cover as much of the described bins as you can.
+You will see the result coverage of your previous response(s), and then generate another list of 32-bit instructions to cover the unreached bins (i.e. test cases)
+Here are some of  the unreached bins:
+------
+UNREACHED BINS
+- OR: there's no instruction that performs the operation OR.
+- XOR: there's no instruction that performs the operation XOR.
+- read_B_reg_7: there's no instruction that uses the read_B port of register 7.
+- read_B_reg_24: there's no instruction that uses the read_B port of register 4.
+- ANDI: there's no instruction that performs the operation ANDI.
+- OR_x_read_B_reg_8: there's no operation that performs the operation OR using the read_B port of register 8.
+- SUB_x_read_A_reg_1: there's no operation that performs the operation SUB using the read_A port of register 1.
+------
+Please regenerate a 32-bit instruction for each of these unreached bins according to the BINS DESCRIPTION.""","""[0x00000033, 0x000000b3, 0x0000000b, 0x0000008b, 0x0000000d, 0x0000008d, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x0000000b, 0x0000008b, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a""",none,25,"{'ADD': 386, 'SUB': 1, 'ADDI': 278, 'illegal_instruction': 528, 'LB': 88, 'SB': 128, 'read_A_reg_0': 1003, 'read_B_reg_0': 637, 'write_reg_0': 383, 'write_reg_1': 370, 'ADD_x_read_A_reg_0': 386, 'SUB_x_read_A_reg_0': 1, 'ADD_x_read_B_reg_0': 386, 'SUB_x_read_B_reg_0': 1, 'ADD_x_write_reg_0': 199, 'ADD_x_write_reg_1': 187, 'SUB_x_write_reg_0': 1, 'ADDI_x_read_A_reg_0': 278, 'ADDI_x_write_reg_0': 139, 'ADDI_x_write_reg_1': 139, 'LB_x_read_A_reg_0': 88, 'LB_x_write_reg_0': 44, 'LB_x_write_reg_1': 44, 'SB_x_read_A_reg_0': 128, 'SB_x_read_B_reg_0': 128}"
+26,4,4,"""The new values you just provided didn't cover any new bins. You need to try to cover as much of the described bins as you can.
+You will see the result coverage of your previous response(s), and then generate another list of 32-bit instructions to cover the unreached bins (i.e. test cases)
+Here are some of  the unreached bins:
+------
+UNREACHED BINS
+- OR: there's no instruction that performs the operation OR.
+- XOR: there's no instruction that performs the operation XOR.
+- read_A_reg_12: there's no instruction that uses the read_A port of register 2.
+- write_reg_2: there's no instruction that uses the write port of register 2.
+- read_A_reg_14: there's no instruction that uses the read_A port of register 4.
+- SLTUI_x_write_reg_29: there's no operation that performs the operation SLTUI using the write port of register 9.
+- SRAI_x_write_reg_26: there's no operation that performs the operation SRAI using the write port of register 6.
+------
+Please regenerate a 32-bit instruction for each of these unreached bins according to the BINS DESCRIPTION.""","""[0x00000033, 0x000000b3, 0x0000000b, 0x0000008b, 0x0000000d, 0x0000008d, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x0000000b, 0x0000008b, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000013, 0x00000093, 0x00000023, 0x000000a3, 0x00000033, 0x000000b3, 0x00000003, 0x00000083, 0x00000013, 0x00000093, 0x00000023, 0x000000a""",none,25,"{'ADD': 408, 'SUB': 1, 'ADDI': 300, 'illegal_instruction': 535, 'LB': 98, 'SB': 149, 'read_A_reg_0': 1078, 'read_B_reg_0': 680, 'write_reg_0': 410, 'write_reg_1': 397, 'ADD_x_read_A_reg_0': 408, 'SUB_x_read_A_reg_0': 1, 'ADD_x_read_B_reg_0': 408, 'SUB_x_read_B_reg_0': 1, 'ADD_x_write_reg_0': 210, 'ADD_x_write_reg_1': 198, 'SUB_x_write_reg_0': 1, 'ADDI_x_read_A_reg_0': 300, 'ADDI_x_write_reg_0': 150, 'ADDI_x_write_reg_1': 150, 'LB_x_read_A_reg_0': 98, 'LB_x_write_reg_0': 49, 'LB_x_write_reg_1': 49, 'SB_x_read_A_reg_0': 149, 'SB_x_read_B_reg_0': 149}"
