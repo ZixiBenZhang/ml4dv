@@ -7,6 +7,7 @@ from prompt_generators.prompt_generator_base import *
 from stimuli_extractor import *
 from stimuli_filter import *
 
+
 # DIALOG_BOUND = 650
 #
 # # threshold for restarting a dialog
@@ -16,15 +17,14 @@ from stimuli_filter import *
 
 class LLMAgent(BaseAgent):
     def __init__(
-        self,
-        prompt_generator: BasePromptGenerator,
-        stimulus_generator: BaseLLM,
-        stimulus_extractor: BaseExtractor,
-        stimulus_filter: BaseFilter,
-        loggers: List[BaseLogger],
-        dialog_bound=650,
-        epsilon=3,
-        period=7,
+            self,
+            prompt_generator: BasePromptGenerator,
+            stimulus_generator: BaseLLM,
+            stimulus_extractor: BaseExtractor,
+            stimulus_filter: BaseFilter,
+            loggers: List[BaseLogger],
+            dialog_bound=650,
+            rst_plan: Callable[..., bool] = None,
     ):
         super().__init__()
         self.prompt_generator = prompt_generator
@@ -36,8 +36,7 @@ class LLMAgent(BaseAgent):
         self.stimuli_buffer = []
         self.stimulus_cnt = 0
         self.dialog_bound = dialog_bound
-        self.epsilon = epsilon
-        self.period = period
+        self.rst_plan: Callable[..., bool] = rst_plan
         self.total_msg_cnt = 0
         self.msg_index = 0  # message index for running
         self.dialog_index = 1  # dialog index for running
@@ -46,7 +45,7 @@ class LLMAgent(BaseAgent):
         self.loggers = loggers
         self.log_headers()
 
-        self.history_cov_rate = []
+        self.history_cov_rate: List[int] = []
         self.all_history_cov_rate = []
 
     def reset(self):
@@ -64,7 +63,7 @@ class LLMAgent(BaseAgent):
         self.extractor.reset()
 
     def end_simulation(
-        self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase
+            self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase
     ):
         if coverage_database.get() is None:
             return False
@@ -81,10 +80,10 @@ class LLMAgent(BaseAgent):
             return True
 
         if (
-            len(self.all_history_cov_rate) >= 25
-            and self.all_history_cov_rate[-1] == self.all_history_cov_rate[-25]
-            or len(self.all_history_cov_rate) >= 40
-            and self.all_history_cov_rate[-1] - self.all_history_cov_rate[-40] <= 2
+                len(self.all_history_cov_rate) >= 25
+                and self.all_history_cov_rate[-1] == self.all_history_cov_rate[-25]
+                or len(self.all_history_cov_rate) >= 40
+                and self.all_history_cov_rate[-1] - self.all_history_cov_rate[-40] <= 2
         ):
             self.state = "DONE"
             self.log_append({"role": "coverage", "content": coverage})
@@ -108,7 +107,7 @@ class LLMAgent(BaseAgent):
         return stimulus
 
     def generate_next_value(
-        self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase
+            self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase
     ) -> Union[int, None]:
         if coverage_database.get() is None:
             return 0
@@ -140,10 +139,7 @@ class LLMAgent(BaseAgent):
             # Restart a dialog if low-efficient (nearly converged)
             self.history_cov_rate.append(coverage_database.get_coverage_rate()[0])
             self.all_history_cov_rate.append(coverage_database.get_coverage_rate()[0])
-            if (
-                len(self.history_cov_rate) >= self.period
-                and self.history_cov_rate[-1] - self.history_cov_rate[-self.period] < self.epsilon
-            ):
+            if self.rst_plan(self.history_cov_rate, self.all_history_cov_rate):
                 self.reset()
                 print("\n>>>>> Agent reset <<<<<\n")
             else:
@@ -156,10 +152,10 @@ class LLMAgent(BaseAgent):
                 # return 0 (same as None), so entering end_simulation and stops in next loop
                 return 0
             if (
-                len(self.all_history_cov_rate) >= 25
-                and self.all_history_cov_rate[-1] == self.all_history_cov_rate[-25]
-                or len(self.all_history_cov_rate) >= 40
-                and self.all_history_cov_rate[-1] - self.all_history_cov_rate[-40] <= 2
+                    len(self.all_history_cov_rate) >= 25
+                    and self.all_history_cov_rate[-1] == self.all_history_cov_rate[-25]
+                    or len(self.all_history_cov_rate) >= 40
+                    and self.all_history_cov_rate[-1] - self.all_history_cov_rate[-40] <= 2
             ):
                 return 0
 
@@ -178,13 +174,8 @@ class LLMAgent(BaseAgent):
                     )
                 # Restart a dialog if low-efficient (nearly converged)
                 self.history_cov_rate.append(coverage_database.get_coverage_rate()[0])
-                self.all_history_cov_rate.append(
-                    coverage_database.get_coverage_rate()[0]
-                )
-                if (
-                    len(self.history_cov_rate) >= self.period
-                    and self.history_cov_rate[-1] - self.history_cov_rate[-self.period] < self.epsilon
-                ):
+                self.all_history_cov_rate.append(coverage_database.get_coverage_rate()[0])
+                if self.rst_plan(self.history_cov_rate, self.all_history_cov_rate):
                     self.reset()
                     f_ = 0
                     print("\n>>>>> Agent reset <<<<<\n")
@@ -341,3 +332,18 @@ class LLMAgent(BaseAgent):
     def save_log(self):
         for logger in self.loggers:
             logger.save_log()
+
+
+def rst_plan_ORDINARY(cov_hist: List[int], all_cov_hist: List[int]) -> bool:
+    epsilon = 3
+    period = 7
+    return len(cov_hist) >= period and cov_hist[-1] - cov_hist[-period] < epsilon
+
+
+def rst_plan_IDADAR(cov_hist: List[int], all_cov_hist: List[int]) -> bool:
+    epsilon = 3
+    if all_cov_hist[-1] < 300:
+        period = 4
+    else:
+        period = 7
+    return len(cov_hist) >= period and cov_hist[-1] - cov_hist[-period] < epsilon

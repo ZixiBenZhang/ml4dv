@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.dirname(directory))
 from ibex_decoder.shared_types import *
 from global_shared_types import *
 from agents.agents_CLI import *
-from agents.agent_LLM import LLMAgent
+from agents.agent_LLM import *
 from prompt_generators.prompt_generator_fixed_ID import FixedPromptGenerator4ID1
 from prompt_generators.prompt_generator_template_ID import *
 # from models.llm_llama2 import Llama2
@@ -78,16 +78,14 @@ def main():
     logger_csv = CSVLogger(f"{prefix}{t}.csv")
 
     # create agent
-    # Todo: Adaptive restart
     agent = LLMAgent(
         prompt_generator,
         stimulus_generator,
         extractor,
         stimulus_filter,
         [logger_txt, logger_csv],
-        dialog_bound=500,
-        epsilon=3,
-        period=7,
+        dialog_bound=300,
+        rst_plan=rst_plan_ORDINARY
     )
     print("Agent successfully built\n")
 
