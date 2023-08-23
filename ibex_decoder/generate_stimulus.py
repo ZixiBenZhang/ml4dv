@@ -52,7 +52,7 @@ def main():
     )
 
     # build components
-    prompt_generator = TemplatePromptGenerator4ID2(
+    prompt_generator = TemplatePromptGenerator4ID1(
         sampling_missed_bins_method="IDNEWEST"
     )
     # if isinstance(prompt_generator, FixedPromptGenerator4SD1):
