@@ -7,7 +7,10 @@ class CLIAgent(BaseAgent):
         super().__init__()
         self.i = 0
         self.stimuli = input("Please enter stimuli list:\n")
-        self.stimuli = list(map(int, self.stimuli[1:-1].split(",")))
+        self.stimuli = list(map(
+            lambda x: (int(x, 16) if x[:2] == "0x" else int(x)),
+            self.stimuli[1:-1].split(",")
+        ))
 
     def end_simulation(
         self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase
