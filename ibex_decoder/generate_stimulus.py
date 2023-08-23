@@ -110,13 +110,16 @@ def main():
         coverage_plan = {
             k: v for (k, v) in g_coverage.get_coverage_plan().items() if v > 0
         }
-        # print(f"Finished with hits: {coverage_plan}\n")
         print(
-            f"Finished at dialog #{agent.dialog_index}, message #{agent.msg_index}, \n"
-            f"with total {agent.total_msg_cnt} messages \n"
-            f"Hits: {coverage_plan}, \n"
-            f"Coverage rate: {g_coverage.get_coverage_rate()}\n"
+            f"Finished with hits: {coverage_plan}\n"
+            f"Coverage: {g_coverage.get_coverage_rate()}\n"
         )
+        # print(
+        #     f"Finished at dialog #{agent.dialog_index}, message #{agent.msg_index}, \n"
+        #     f"with total {agent.total_msg_cnt} messages \n"
+        #     f"Hits: {coverage_plan}, \n"
+        #     f"Coverage rate: {g_coverage.get_coverage_rate()}\n"
+        # )
 
 
 if __name__ == "__main__":
