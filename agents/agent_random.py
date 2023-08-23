@@ -21,5 +21,7 @@ class RandomAgent(BaseAgent):
     def generate_next_value(
         self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase
     ):
+        if self.current_cycle % 10000:
+            print(f"Generating {self.current_cycle + 1} stimulus\n")
         self.current_cycle += 1
         return random.getrandbits(32)
