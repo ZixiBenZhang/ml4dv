@@ -53,7 +53,7 @@ def main():
 
     # build components
     prompt_generator = TemplatePromptGenerator4ID1(
-        sampling_missed_bins_method="IDADAS"
+        sampling_missed_bins_method="IDNEWEST"
     )
     # if isinstance(prompt_generator, FixedPromptGenerator4SD1):
     #     prefix = './logs_ID_fixed/'
@@ -86,7 +86,7 @@ def main():
         [logger_txt, logger_csv],
         dialog_bound=650,
         epsilon=3,
-        period=10,
+        period=4,
     )
     print("Agent successfully built\n")
 

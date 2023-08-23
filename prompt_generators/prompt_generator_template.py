@@ -251,7 +251,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
             return np.concatenate(
                 [
                     _missed_bins[:2],
-                    np.random.choice(_missed_bins[:100], 3, replace=False),
+                    np.random.choice(_missed_bins[2:100], 3, replace=False),
                     np.random.choice(_missed_bins[100:], 2, replace=False),
                 ]
             )
@@ -268,8 +268,8 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
             if self.adas_cov_hist[-1] - self.adas_cov_hist[-4] < epsilon:
                 self.adas_cov_hist.clear()
                 if self.cur_sampling_method.__name__ == sample_mild_determ.__name__:
-                    print("Sampling: mild determ -> random\n")
-                    return sample_random
+                    print("Sampling: mild determ -> determ\n")
+                    return sample_determ
                 if self.cur_sampling_method.__name__ == sample_random.__name__:
                     print("Sampling: random -> determ\n")
                     return sample_determ
