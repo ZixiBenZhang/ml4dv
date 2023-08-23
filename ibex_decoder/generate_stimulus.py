@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.dirname(directory))
 
 from ibex_decoder.shared_types import *
 from global_shared_types import *
-from agents.agent_random import RandomAgent
+from agents.agents_CLI import *
 from agents.agent_LLM import LLMAgent
 from prompt_generators.prompt_generator_fixed_ID import FixedPromptGenerator4ID1
 from prompt_generators.prompt_generator_template_ID import *
@@ -51,44 +51,46 @@ def main():
         "Please enter server's IP and port (e.g. 127.0.0.1:5050, 128.232.65.218:5555): "
     )
 
-    # build components
-    prompt_generator = TemplatePromptGenerator4ID1(
-        sampling_missed_bins_method="IDADAS"
-    )
-    # if isinstance(prompt_generator, FixedPromptGenerator4SD1):
-    #     prefix = './logs_ID_fixed/'
-    # elif isinstance(prompt_generator, TemplatePromptGenerator4SD1):
-    #     prefix = './logs_ID_template/'
-    # else:
-    #     raise TypeError(f"Prompt generator of type {type(prompt_generator)} is not supported")
-    prefix = "./logs/"
+    # # build components
+    # prompt_generator = TemplatePromptGenerator4ID1(
+    #     sampling_missed_bins_method="IDADAS"
+    # )
+    # # if isinstance(prompt_generator, FixedPromptGenerator4SD1):
+    # #     prefix = './logs_ID_fixed/'
+    # # elif isinstance(prompt_generator, TemplatePromptGenerator4SD1):
+    # #     prefix = './logs_ID_template/'
+    # # else:
+    # #     raise TypeError(f"Prompt generator of type {type(prompt_generator)} is not supported")
+    # prefix = "./logs/"
+    #
+    # # stimulus_generator = Llama2(system_prompt=prompt_generator.generate_system_prompt())
+    # # print('Llama2 successfully built')
+    # stimulus_generator = ChatGPT(
+    #     system_prompt=prompt_generator.generate_system_prompt()
+    # )
+    # extractor = DumbExtractor()
+    # stimulus_filter = Filter(0x0, 0xFFFFFFFF)
+    #
+    # # build loggers
+    # t = datetime.now()
+    # t = t.strftime("%Y%m%d_%H%M%S")
+    # logger_txt = TXTLogger(f"{prefix}{t}.txt")
+    # logger_csv = CSVLogger(f"{prefix}{t}.csv")
+    #
+    # # create agent
+    # agent = LLMAgent(
+    #     prompt_generator,
+    #     stimulus_generator,
+    #     extractor,
+    #     stimulus_filter,
+    #     [logger_txt, logger_csv],
+    #     dialog_bound=650,
+    #     epsilon=3,
+    #     period=10,
+    # )
+    # print("Agent successfully built\n")
 
-    # stimulus_generator = Llama2(system_prompt=prompt_generator.generate_system_prompt())
-    # print('Llama2 successfully built')
-    stimulus_generator = ChatGPT(
-        system_prompt=prompt_generator.generate_system_prompt()
-    )
-    extractor = DumbExtractor()
-    stimulus_filter = Filter(0x0, 0xFFFFFFFF)
-
-    # build loggers
-    t = datetime.now()
-    t = t.strftime("%Y%m%d_%H%M%S")
-    logger_txt = TXTLogger(f"{prefix}{t}.txt")
-    logger_csv = CSVLogger(f"{prefix}{t}.csv")
-
-    # create agent
-    agent = LLMAgent(
-        prompt_generator,
-        stimulus_generator,
-        extractor,
-        stimulus_filter,
-        [logger_txt, logger_csv],
-        dialog_bound=650,
-        epsilon=3,
-        period=10,
-    )
-    print("Agent successfully built\n")
+    agent = CLIAgent()
 
     # run test
     g_dut_state = GlobalDUTState()
