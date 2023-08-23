@@ -114,6 +114,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
     ) -> str:
         # Iterative Template: result summary + difference + question
         cur_coverage = coverage_database.get_coverage_rate()
+        self.history_coverage.append(cur_coverage[0])
         kwargs["no_new_hit"] = cur_coverage == self.prev_coverage
 
         # calculate difference
