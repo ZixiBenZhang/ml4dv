@@ -22,6 +22,6 @@ class RandomAgent(BaseAgent):
         self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase
     ):
         if self.current_cycle % 10000 == 0:
-            print(f"Generating {self.current_cycle + 1} stimulus\n")
+            print(f"Generated {self.current_cycle} stimuli\n")
         self.current_cycle += 1
         return random.getrandbits(32)
