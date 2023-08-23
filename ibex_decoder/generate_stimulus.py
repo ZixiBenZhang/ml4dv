@@ -53,15 +53,9 @@ def main():
 
     # build components
     prompt_generator = TemplatePromptGenerator4ID1(
-        sampling_missed_bins_method="IDNEWEST"
+        bin_descr_path="../examples_ID/bins_description.txt",
+        sampling_missed_bins_method="IDNEWEST",
     )
-    # if isinstance(prompt_generator, FixedPromptGenerator4SD1):
-    #     prefix = './logs_ID_fixed/'
-    # elif isinstance(prompt_generator, TemplatePromptGenerator4SD1):
-    #     prefix = './logs_ID_template/'
-    # else:
-    #     raise TypeError(f"Prompt generator of type {type(prompt_generator)} is not supported")
-    prefix = "./logs/"
 
     # stimulus_generator = Llama2(system_prompt=prompt_generator.generate_system_prompt())
     # print('Llama2 successfully built')
@@ -72,6 +66,7 @@ def main():
     stimulus_filter = Filter(0x0, 0xFFFFFFFF)
 
     # build loggers
+    prefix = "./logs/"
     t = datetime.now()
     t = t.strftime("%Y%m%d_%H%M%S")
     logger_txt = TXTLogger(f"{prefix}{t}.txt")
@@ -85,7 +80,7 @@ def main():
         stimulus_filter,
         [logger_txt, logger_csv],
         dialog_bound=300,
-        rst_plan=rst_plan_ORDINARY
+        rst_plan=rst_plan_IDADAR
     )
     print("Agent successfully built\n")
 

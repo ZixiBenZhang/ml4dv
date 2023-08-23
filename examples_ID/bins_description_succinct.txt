@@ -1,0 +1,41 @@
+- The list contains 32-bit hexadecimal integers, each represents a RISC-V instruction.
+- There are 32 register files available, with index from 0 to 31.
+- There are 26 available types of operations:
+---
+OPERATIONS
+    - ADD
+    - ADDI
+    - SUB
+    - SUBI
+    - AND
+    - ANDI
+    - OR
+    - ORI
+    - XOR
+    - XORI
+    - SLL
+    - SLLI
+    - SRL
+    - SRLI
+    - SRA
+    - SRAI
+    - SLT
+    - SLTI
+    - SLTU
+    - SLTUI
+    - LW
+    - LH
+    - LB
+    - SW
+    - SH
+    - SB
+---
+- BIN type 1: For each operation, the list contains at least one instruction that performs it.
+
+- Each of the 32 register files has two read ports ("read_A" and "read_B") and a write port ("write")
+    - "read_A" is used when the register file is taken as the first argument of an operation.
+    - "read_B" is used when the register file is taken as the second argument of an operation.
+    - "write" is used when the result of an operation is written to the register file.
+- BIN type 2: For each register file port, the list contains at least one instruction that uses it.
+
+- BIN type 3: For each operation and each register file port, the list contains at least one instruction that performs the operation and uses the port as the same time.
