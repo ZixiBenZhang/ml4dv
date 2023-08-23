@@ -199,9 +199,10 @@ class TemplatePromptGenerator4ID2(TemplatePromptGenerator4ID1):
             code_summary_type,
             sampling_missed_bins_method,
         )
+        self.bin_descr_path = bin_descr_path
 
     def generate_initial_prompt(self) -> str:
-        with open("../examples_ID/bins_description.txt", "r") as f:
+        with open(self.bin_descr_path, "r") as f:
             bins_description = f.read()
         prompt = (
             "Please generate a list of 32-bit instructions (i.e. hex integers between 0x0 and 0xffffffff)"
