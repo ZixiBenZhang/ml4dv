@@ -62,7 +62,7 @@ def main():
     # print('Llama2 successfully built')
     stimulus_generator = ChatGPT(
         system_prompt=prompt_generator.generate_system_prompt(),
-        compress_msg_algo='best 3',
+        compress_msg_algo='best 2 recent 1',
     )
     extractor = DumbExtractor()
     stimulus_filter = Filter(0x0, 0xFFFFFFFF)
