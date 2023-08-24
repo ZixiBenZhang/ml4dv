@@ -52,40 +52,41 @@ def main():
         "Please enter server's IP and port (e.g. 127.0.0.1:5050, 128.232.65.218:5555): "
     )
 
-    # # build components
-    # prompt_generator = TemplatePromptGenerator4ID1(
-    #     bin_descr_path="../examples_ID/bins_description.txt",
-    #     sampling_missed_bins_method="IDNEWEST",
-    # )
-    #
-    # # stimulus_generator = Llama2(system_prompt=prompt_generator.generate_system_prompt())
-    # # print('Llama2 successfully built')
-    # stimulus_generator = ChatGPT(
-    #     system_prompt=prompt_generator.generate_system_prompt()
-    # )
-    # extractor = DumbExtractor()
-    # stimulus_filter = Filter(0x0, 0xFFFFFFFF)
-    #
-    # # build loggers
-    # prefix = "./logs/"
-    # t = datetime.now()
-    # t = t.strftime("%Y%m%d_%H%M%S")
-    # logger_txt = TXTLogger(f"{prefix}{t}.txt")
-    # logger_csv = CSVLogger(f"{prefix}{t}.csv")
-    #
-    # # create agent
-    # agent = LLMAgent(
-    #     prompt_generator,
-    #     stimulus_generator,
-    #     extractor,
-    #     stimulus_filter,
-    #     [logger_txt, logger_csv],
-    #     dialog_bound=300,
-    #     rst_plan=rst_plan_IDADAR
-    # )
-    # print("Agent successfully built\n")
+    # build components
+    prompt_generator = TemplatePromptGenerator4ID1(
+        bin_descr_path="../examples_ID/bins_description.txt",
+        sampling_missed_bins_method="IDNEWEST",
+    )
 
-    agent = RandomAgent(3000000)
+    # stimulus_generator = Llama2(system_prompt=prompt_generator.generate_system_prompt())
+    # print('Llama2 successfully built')
+    stimulus_generator = ChatGPT(
+        system_prompt=prompt_generator.generate_system_prompt(),
+        compress_msg_algo='best 3',
+    )
+    extractor = DumbExtractor()
+    stimulus_filter = Filter(0x0, 0xFFFFFFFF)
+
+    # build loggers
+    prefix = "./logs/"
+    t = datetime.now()
+    t = t.strftime("%Y%m%d_%H%M%S")
+    logger_txt = TXTLogger(f"{prefix}{t}.txt")
+    logger_csv = CSVLogger(f"{prefix}{t}.csv")
+
+    # create agent
+    agent = LLMAgent(
+        prompt_generator,
+        stimulus_generator,
+        extractor,
+        stimulus_filter,
+        [logger_txt, logger_csv],
+        dialog_bound=300,
+        rst_plan=rst_plan_ORDINARY
+    )
+    print("Agent successfully built\n")
+
+    # agent = RandomAgent(3000000)
 
     # run test
     g_dut_state = GlobalDUTState()

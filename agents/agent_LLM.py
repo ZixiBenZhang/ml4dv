@@ -17,14 +17,14 @@ from stimuli_filter import *
 
 class LLMAgent(BaseAgent):
     def __init__(
-            self,
-            prompt_generator: BasePromptGenerator,
-            stimulus_generator: BaseLLM,
-            stimulus_extractor: BaseExtractor,
-            stimulus_filter: BaseFilter,
-            loggers: List[BaseLogger],
-            dialog_bound=650,
-            rst_plan: Callable[..., bool] = None,
+        self,
+        prompt_generator: BasePromptGenerator,
+        stimulus_generator: BaseLLM,
+        stimulus_extractor: BaseExtractor,
+        stimulus_filter: BaseFilter,
+        loggers: List[BaseLogger],
+        dialog_bound=650,
+        rst_plan: Callable[..., bool] = None,
     ):
         super().__init__()
         self.prompt_generator = prompt_generator
@@ -63,7 +63,7 @@ class LLMAgent(BaseAgent):
         self.extractor.reset()
 
     def end_simulation(
-            self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase
+        self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase
     ):
         if coverage_database.get() is None:
             return False
@@ -80,10 +80,10 @@ class LLMAgent(BaseAgent):
             return True
 
         if (
-                len(self.all_history_cov_rate) >= 25
-                and self.all_history_cov_rate[-1] == self.all_history_cov_rate[-25]
-                or len(self.all_history_cov_rate) >= 40
-                and self.all_history_cov_rate[-1] - self.all_history_cov_rate[-40] <= 2
+            len(self.all_history_cov_rate) >= 25
+            and self.all_history_cov_rate[-1] == self.all_history_cov_rate[-25]
+            or len(self.all_history_cov_rate) >= 40
+            and self.all_history_cov_rate[-1] - self.all_history_cov_rate[-40] <= 2
         ):
             self.state = "DONE"
             self.log_append({"role": "coverage", "content": coverage})
@@ -107,7 +107,7 @@ class LLMAgent(BaseAgent):
         return stimulus
 
     def generate_next_value(
-            self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase
+        self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase
     ) -> Union[int, None]:
         if coverage_database.get() is None:
             return 0
@@ -152,10 +152,10 @@ class LLMAgent(BaseAgent):
                 # return 0 (same as None), so entering end_simulation and stops in next loop
                 return 0
             if (
-                    len(self.all_history_cov_rate) >= 25
-                    and self.all_history_cov_rate[-1] == self.all_history_cov_rate[-25]
-                    or len(self.all_history_cov_rate) >= 40
-                    and self.all_history_cov_rate[-1] - self.all_history_cov_rate[-40] <= 2
+                len(self.all_history_cov_rate) >= 25
+                and self.all_history_cov_rate[-1] == self.all_history_cov_rate[-25]
+                or len(self.all_history_cov_rate) >= 40
+                and self.all_history_cov_rate[-1] - self.all_history_cov_rate[-40] <= 2
             ):
                 return 0
 
@@ -174,7 +174,9 @@ class LLMAgent(BaseAgent):
                     )
                 # Restart a dialog if low-efficient (nearly converged)
                 self.history_cov_rate.append(coverage_database.get_coverage_rate()[0])
-                self.all_history_cov_rate.append(coverage_database.get_coverage_rate()[0])
+                self.all_history_cov_rate.append(
+                    coverage_database.get_coverage_rate()[0]
+                )
                 if self.rst_plan(self.history_cov_rate, self.all_history_cov_rate):
                     self.reset()
                     f_ = 0

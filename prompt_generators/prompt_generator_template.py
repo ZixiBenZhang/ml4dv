@@ -7,12 +7,12 @@ BOUND = 523
 
 class TemplatePromptGenerator(BasePromptGenerator, ABC):
     def __init__(
-            self,
-            dut_code_path: str,
-            tb_code_path: str,
-            bin_descr_path: str,
-            code_summary_type: int = 0,  # 0: no code, 1: code, 2: summary
-            sampling_missed_bins_method: Union[str, None] = None,
+        self,
+        dut_code_path: str,
+        tb_code_path: str,
+        bin_descr_path: str,
+        code_summary_type: int = 0,  # 0: no code, 1: code, 2: summary
+        sampling_missed_bins_method: Union[str, None] = None,
     ):
         super().__init__()
         self.code_summary_type = code_summary_type
@@ -100,17 +100,17 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
     def generate_initial_prompt(self) -> str:
         # Initial Template: introduction + summaries + question
         initial_prompt = (
-                self.intro
-                + "\n----------\n"
-                + self.code_summary
-                + self.tb_summary
-                + "\n----------\n"
-                + self.init_question
+            self.intro
+            + "\n----------\n"
+            + self.code_summary
+            + self.tb_summary
+            + "\n----------\n"
+            + self.init_question
         )
         return initial_prompt
 
     def generate_iterative_prompt(
-            self, coverage_database: GlobalCoverageDatabase, **kwargs
+        self, coverage_database: GlobalCoverageDatabase, **kwargs
     ) -> str:
         # Iterative Template: result summary + difference + question
         cur_coverage = coverage_database.get_coverage_rate()
@@ -145,7 +145,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
 
     @staticmethod
     def _sample_missed_bins_ORIGINAL(
-            missed_bins: List[str], coverage_rate: Tuple[int, int]
+        missed_bins: List[str], coverage_rate: Tuple[int, int]
     ) -> List[str]:
         # ORIGINAL
         if len(missed_bins) >= 40:
@@ -153,7 +153,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
                 [
                     missed_bins[:2],
                     np.random.choice(
-                        missed_bins[2: min(25, len(missed_bins))], 3, replace=False
+                        missed_bins[2 : min(25, len(missed_bins))], 3, replace=False
                     ),
                     np.random.choice(missed_bins[25:], 2, replace=False),
                 ]
@@ -168,7 +168,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
 
     @staticmethod
     def _sample_missed_bins_NEWEST(
-            missed_bins: List[str], coverage_rate: Tuple[int, int]
+        missed_bins: List[str], coverage_rate: Tuple[int, int]
     ) -> List[str]:
         # NEWEST
         if len(missed_bins) >= 40:
@@ -197,7 +197,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
 
     @staticmethod
     def _sample_missed_bins_RANDOM(
-            missed_bins: List[str], coverage_rate: Tuple[int, int]
+        missed_bins: List[str], coverage_rate: Tuple[int, int]
     ) -> List[str]:
         # RANDOM
         if len(missed_bins) >= 40:
@@ -210,7 +210,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
 
     @staticmethod
     def _sample_missed_bins_IDNEWEST(
-            missed_bins: List[str], coverage_rate: Tuple[int, int]
+        missed_bins: List[str], coverage_rate: Tuple[int, int]
     ) -> List[str]:
         # ID NEWEST
         if len(missed_bins) >= 40:
@@ -239,7 +239,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
 
     # Can be extended to adapt all tasks
     def _sample_missed_bins_IDADAS(
-            self, missed_bins: List[str], coverage_rate: Tuple[int, int]
+        self, missed_bins: List[str], coverage_rate: Tuple[int, int]
     ) -> List[str]:
         # ID Adaptive Sampling: switch sampling method when low efficiency
         def sample_determ(_missed_bins):

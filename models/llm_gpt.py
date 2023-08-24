@@ -16,6 +16,7 @@ class ChatGPT(BaseLLM):
         temperature=0.4,
         top_p=1,
         max_gen_tokens=600,
+        compress_msg_algo: str = 'best 3',
     ):
         super().__init__(system_prompt)
         openai_api_key = os.getenv("OPENAI_API_KEY")
@@ -35,8 +36,19 @@ class ChatGPT(BaseLLM):
         self.max_gen_tokens = max_gen_tokens
 
         self.messages = []
+        self.recent_msgs = []
         if self.system_prompt != "":
             self.messages.append({"role": "system", "content": self.system_prompt})
+
+        self.compress_msg_algo: Callable[[], List[Dict[str, str]]] = self.__resolve_msg_compress_algo(compress_msg_algo)
+
+    def __resolve_msg_compress_algo(self, compress_msg_algo) -> Callable:
+        if compress_msg_algo == 'best 3':
+            return self.__best_3
+        elif compress_msg_algo == 'best 2 recent 1':
+            return self.__best_2_recent_1
+        else:
+            raise TypeError(f"Invalid conversation compression algorithm {compress_msg_algo}.")
 
     def __str__(self):
         return self.model_name
@@ -44,6 +56,7 @@ class ChatGPT(BaseLLM):
     def __call__(self, prompt: str) -> str:
         self._compress_conversation()
         self.messages.append({"role": "user", "content": prompt})
+        self.recent_msgs.append({"role": "user", "content": prompt})
 
         token_cnt = self._check_token_num()
         if (
@@ -79,6 +92,7 @@ class ChatGPT(BaseLLM):
                     choice["message"] for choice in result["choices"]
                 ]
                 self.messages.append(response_choices[0])
+                self.recent_msgs.append(response_choices[0])
                 self.total_msg_cnt += 1
                 return response_choices[0]["content"]
 
@@ -93,16 +107,25 @@ class ChatGPT(BaseLLM):
         # self.messages = init + self.messages[-2 * ChatGPT.REMAIN_ITER_NUM:]
 
         # Keep previous successful iter messages
-        self.messages = init + self._select_successful()
+        self.messages = init + self.compress_msg_algo()
 
         # TODO: compress by summarization using Ada?
         return
+
+    def __best_3(self) -> List[Dict[str, str]]:
+        return self._select_successful(n_best=3)
+
+    def __best_2_recent_1(self) -> List[Dict[str, str]]:
+        best = self._select_successful(n_best=2)
+        recent = self.recent_msgs[-2:]
+        return best + recent
 
     def _check_token_num(self) -> int:
         return num_tokens_from_messages(self.messages, self.model_name)
 
     def reset(self):
         self.messages.clear()
+        self.recent_msgs.clear()
         if self.system_prompt != "":
             self.messages.append({"role": "system", "content": self.system_prompt})
         # CLEAR RST
