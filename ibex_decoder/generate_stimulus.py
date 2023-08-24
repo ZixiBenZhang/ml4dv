@@ -55,7 +55,7 @@ def main():
     # build components
     prompt_generator = TemplatePromptGenerator4ID1(
         bin_descr_path="../examples_ID/bins_description.txt",
-        sampling_missed_bins_method="IDNEWEST",
+        sampling_missed_bins_method="IDADAS",
     )
 
     # stimulus_generator = Llama2(system_prompt=prompt_generator.generate_system_prompt())
