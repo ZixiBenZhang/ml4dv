@@ -62,7 +62,7 @@ def main():
     # print('Llama2 successfully built')
     stimulus_generator = ChatGPT(
         system_prompt=prompt_generator.generate_system_prompt(),
-        compress_msg_algo="recent 3",
+        compress_msg_algo="best 3",
     )
     extractor = DumbExtractor()
     stimulus_filter = Filter(0x0, 0xFFFFFFFF)
@@ -82,7 +82,7 @@ def main():
         stimulus_filter,
         [logger_txt, logger_csv],
         dialog_bound=1000,
-        rst_plan=rst_plan_IDADAR,
+        rst_plan=rst_plan_ORDINARY,
     )
     print("Agent successfully built\n")
 
