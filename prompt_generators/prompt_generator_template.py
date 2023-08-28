@@ -51,7 +51,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
                 self.sampling_missed_bins_method = self._sample_missed_bins_IDNEWEST
             elif sampling_missed_bins_method.upper() == "IDADAS":
                 self.sampling_missed_bins_method = self._sample_missed_bins_IDADAS
-            elif sampling_missed_bins_method.upper() == "IDAdaNew":
+            elif sampling_missed_bins_method.upper() == "IDADANEW":
                 self.sampling_missed_bins_method = self._sample_missed_bins_IDAdaNew
             else:
                 raise TypeError(
