@@ -264,9 +264,9 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
         epsilon = 3
 
         def resolve_strategy() -> Callable:
+            if self.cur_sampling_method is None:
+                return sample_mild_determ
             if len(self.adas_cov_hist) < 4:
-                if self.cur_sampling_method is None:
-                    return sample_mild_determ
                 return self.cur_sampling_method
             # print(f"Checking strategy... Current: {self.cur_sampling_method}")
             if self.adas_cov_hist[-1] - self.adas_cov_hist[-4] < epsilon:
