@@ -16,7 +16,7 @@ class ChatGPT(BaseLLM):
         temperature=0.4,
         top_p=1,
         max_gen_tokens=600,
-        compress_msg_algo: str = 'best 3',
+        compress_msg_algo: str = "best 3",
     ):
         super().__init__(system_prompt)
         openai_api_key = os.getenv("OPENAI_API_KEY")
@@ -40,15 +40,21 @@ class ChatGPT(BaseLLM):
         if self.system_prompt != "":
             self.messages.append({"role": "system", "content": self.system_prompt})
 
-        self.compress_msg_algo: Callable[[], List[Dict[str, str]]] = self.__resolve_msg_compress_algo(compress_msg_algo)
+        self.compress_msg_algo: Callable[
+            [], List[Dict[str, str]]
+        ] = self.__resolve_msg_compress_algo(compress_msg_algo)
 
     def __resolve_msg_compress_algo(self, compress_msg_algo) -> Callable:
-        if compress_msg_algo == 'best 3':
+        if compress_msg_algo == "best 3":
             return self.__best_3
-        elif compress_msg_algo == 'best 2 recent 1':
+        elif compress_msg_algo == "best 2 recent 1":
             return self.__best_2_recent_1
+        elif compress_msg_algo == "recent 3":
+            return self.__recent_3
         else:
-            raise TypeError(f"Invalid conversation compression algorithm {compress_msg_algo}.")
+            raise TypeError(
+                f"Invalid conversation compression algorithm {compress_msg_algo}."
+            )
 
     def __str__(self):
         return self.model_name
@@ -104,12 +110,9 @@ class ChatGPT(BaseLLM):
             init = self.messages[:3]
         else:
             init = self.messages[:2]
-        # self.messages = init + self.messages[-2 * ChatGPT.REMAIN_ITER_NUM:]
 
-        # Keep previous successful iter messages
+        # Keep recent / previous successful iter messages
         self.messages = init + self.compress_msg_algo()
-
-        # TODO: compress by summarization using Ada?
         return
 
     def __best_3(self) -> List[Dict[str, str]]:
@@ -119,6 +122,9 @@ class ChatGPT(BaseLLM):
         best = self._select_successful(n_best=2)
         recent = self.recent_msgs[-2:]
         return best + recent
+
+    def __recent_3(self) -> List[Dict[str, str]]:
+        return self.messages[-2 * 3 :]
 
     def _check_token_num(self) -> int:
         return num_tokens_from_messages(self.messages, self.model_name)

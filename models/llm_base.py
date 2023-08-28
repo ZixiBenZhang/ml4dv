@@ -24,6 +24,7 @@ class BaseLLM:
     def reset(self):
         raise NotImplementedError
 
+    # Called by agent when LLM had generated response
     def append_successful(
         self, prompt: Dict[str, str], response: Dict[str, str], cur_coverage: int
     ):
@@ -31,6 +32,7 @@ class BaseLLM:
             {"msg": (prompt, response), "hit": cur_coverage, "id": self.total_msg_cnt}
         )
 
+    # Called by agent when the response's coverage has been completely computed
     def update_successful(self, new_coverage: int):
         self.best_messages[-1]["hit"] = new_coverage - self.best_messages[-1]["hit"]
         self.best_messages = sorted(
@@ -50,6 +52,7 @@ class BaseLLM:
         else:
             self.best_messages = self.best_messages[: BaseLLM.REMAIN_ITER_NUM * 3]
 
+    # Called by models during conversation compression
     def _select_successful(self, n_best: int = 3) -> List[Dict[str, str]]:
         if len(self.best_messages) < n_best:
             return [

@@ -1,0 +1,4 @@
+cocotb
+pyzmq
+openai
+tiktoken
