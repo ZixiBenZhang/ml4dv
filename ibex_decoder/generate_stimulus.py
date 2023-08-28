@@ -53,7 +53,7 @@ def main():
     )
 
     # build components
-    prompt_generator = TemplatePromptGenerator4ID1(
+    prompt_generator = TemplatePromptGenerator4ID2(
         bin_descr_path="../examples_ID/bins_description.txt",
         sampling_missed_bins_method="IDAdaNew",
     )
@@ -62,7 +62,7 @@ def main():
     # print('Llama2 successfully built')
     stimulus_generator = ChatGPT(
         system_prompt=prompt_generator.generate_system_prompt(),
-        compress_msg_algo="best 3",
+        compress_msg_algo="recent 3",
     )
     extractor = DumbExtractor()
     stimulus_filter = Filter(0x0, 0xFFFFFFFF)
