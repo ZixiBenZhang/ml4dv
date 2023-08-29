@@ -1,3 +1,4 @@
+import re
 from typing import *
 
 from stride_detector.shared_types import CoverageDatabase as SDCD
@@ -140,11 +141,18 @@ class GlobalCoverageDatabase:
         if isinstance(self._coverage_database, SDCD):
             coverage_plan = self._get_coverage_plan_SD()
             coverage_plan = [k for (k, v) in coverage_plan.items() if v > 0]
-            return sum(map(lambda k: 2 if 'double' in k else 1, coverage_plan))
+            return sum(
+                map(
+                    lambda k: 2.5
+                    if re.fullmatch(r"double_-?\d+_-?\d+", k) is not None
+                    else 1,
+                    coverage_plan,
+                )
+            )
         elif isinstance(self._coverage_database, IDCD):
             coverage_plan = self._get_coverage_plan_ID()
             coverage_plan = [k for (k, v) in coverage_plan.items() if v > 0]
-            return sum(map(lambda k: 2.5 if '_x_' in k else 1, coverage_plan))
+            return sum(map(lambda k: 2.5 if "_x_" in k else 1, coverage_plan))
         else:
             raise TypeError(
                 f"coverage_database of type {type(self._coverage_database)} not supported."
