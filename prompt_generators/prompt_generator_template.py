@@ -165,7 +165,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
                 [missed_bins[:2], np.random.choice(missed_bins[2:], 3, replace=False)]
             )
         else:
-            np.random.shuffle(missed_bins)
+            pass
         return missed_bins
 
     @staticmethod
@@ -194,7 +194,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
                 [missed_bins[:2], np.random.choice(missed_bins[2:], 5, replace=False)]
             )
         else:
-            np.random.shuffle(missed_bins)
+            pass
         return missed_bins
 
     @staticmethod
@@ -207,7 +207,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
         elif len(missed_bins) >= 5:
             missed_bins = np.random.choice(missed_bins, 5, replace=False)
         else:
-            np.random.shuffle(missed_bins)
+            pass
         return missed_bins
 
     @staticmethod
@@ -236,7 +236,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
                 [missed_bins[:2], np.random.choice(missed_bins[2:], 5, replace=False)]
             )
         else:
-            np.random.shuffle(missed_bins)
+            pass
         return missed_bins
 
     # Can be extended to adapt all tasks
@@ -290,7 +290,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
         elif len(missed_bins) >= 7:
             self.cur_sampling_method = sample_random
         else:
-            self.cur_sampling_method = np.random.shuffle
+            self.cur_sampling_method = list
 
         return self.cur_sampling_method(missed_bins)
 
