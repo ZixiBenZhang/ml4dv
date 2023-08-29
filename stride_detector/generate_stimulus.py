@@ -13,10 +13,9 @@ sys.path.insert(0, os.path.dirname(directory))
 
 from stride_detector.shared_types import *
 from global_shared_types import *
-from agents.agent_LLM import LLMAgent
+from agents.agent_LLM import *
 from prompt_generators.prompt_generator_fixed_SD import FixedPromptGenerator4SD1
 from prompt_generators.prompt_generator_template_SD import *
-
 # from models.llm_llama2 import Llama2
 from models.llm_gpt import ChatGPT
 from stimuli_extractor import DumbExtractor
@@ -54,16 +53,11 @@ def main():
         "Please enter server's IP and port (e.g. 127.0.0.1:5050, 128.232.65.218:5555): "
     )
 
-    # TODO: auto trials
     # build components
-    prompt_generator = TemplatePromptGenerator4SD1(sampling_missed_bins_method="NEWEST")
-    # if isinstance(prompt_generator, FixedPromptGenerator4SD1):
-    #     prefix = '../logs_SD_fixed/'
-    # elif isinstance(prompt_generator, TemplatePromptGenerator4SD1):
-    #     prefix = '../logs_SD_template/'
-    # else:
-    #     raise TypeError(f"Prompt generator of type {type(prompt_generator)} is not supported")
-    prefix = "./logs/"
+    prompt_generator = TemplatePromptGenerator4SD1(
+        bin_descr_path="../examples_SD/bins_description.txt",
+        sampling_missed_bins_method="NEWEST",
+    )
 
     # stimulus_generator = Llama2(system_prompt=prompt_generator.generate_system_prompt())
     # print('Llama2 successfully built')
@@ -74,6 +68,7 @@ def main():
     stimulus_filter = Filter(-10000, 10000)
 
     # build loggers
+    prefix = "./logs/"
     t = datetime.now()
     t = t.strftime("%Y%m%d_%H%M%S")
     logger_txt = TXTLogger(f"{prefix}{t}.txt")
@@ -86,6 +81,8 @@ def main():
         extractor,
         stimulus_filter,
         [logger_txt, logger_csv],
+        dialog_bound=650,
+        rst_plan=rst_plan_ORDINARY,
     )
     print("Agent successfully built\n")
 

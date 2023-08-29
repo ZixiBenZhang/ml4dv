@@ -28,15 +28,24 @@ class BaseLLM:
 
     # Called by agent when LLM had generated response
     def append_successful(
-        self, prompt: Dict[str, str], response: Dict[str, str], cur_coverage: GlobalCoverageDatabase
+        self,
+        prompt: Dict[str, str],
+        response: Dict[str, str],
+        cur_coverage: GlobalCoverageDatabase,
     ):
         self.best_messages.append(
-            {"msg": (prompt, response), "hit": cur_coverage.get_coverage_score(), "id": self.total_msg_cnt}
+            {
+                "msg": (prompt, response),
+                "hit": cur_coverage.get_coverage_score(),
+                "id": self.total_msg_cnt,
+            }
         )
 
     # Called by agent when the response's coverage has been completely computed
     def update_successful(self, new_coverage: GlobalCoverageDatabase):
-        self.best_messages[-1]["hit"] = new_coverage.get_coverage_score() - self.best_messages[-1]["hit"]
+        self.best_messages[-1]["hit"] = (
+            new_coverage.get_coverage_score() - self.best_messages[-1]["hit"]
+        )
         self.best_messages = sorted(
             self.best_messages, key=lambda d: (d["hit"], d["id"]), reverse=True
         )
