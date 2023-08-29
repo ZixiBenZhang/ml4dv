@@ -36,7 +36,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
 
     def _resolve_sampling_method(self, sampling_missed_bins_method: Union[str, None]):
         methods = ["ORIGINAL", "NEWEST", "RANDOM", "IDNEWEST", "IDADAS", "IDAdaNew"]
-        assert sampling_missed_bins_method in methods, (
+        assert sampling_missed_bins_method.upper() in methods, (
             f"Invalid sampling method {sampling_missed_bins_method}. "
             f"Please use one of the following methods: {methods}."
         )
