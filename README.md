@@ -56,8 +56,15 @@ For detailed information, see `README` files of each module.
 ## Repository structure
 
 ---
-```bash
+```
 .
+│  global_shared_types.py   # Wrappers of CoverageDatabase and DURState
+│  main.py                  # Testing script
+│  python-requirements.txt
+│  README.md
+│  stimuli_extractor.py     # Extractor that extracts numbers from text response
+│  stimuli_filter.py        # Filter that filters out out-of-bound numbers
+│
 ├─agents                    # Stimulus producing agent, which incorporate all methods of the client side
 ├─examples_ID               # Manually created bin description of Ibex instruction decoder
 ├─examples_SD               # Manually created bin description of stride detector
@@ -72,5 +79,79 @@ For detailed information, see `README` files of each module.
 ├─models                    # LLM components of the agent, for getting natural language responses from LLMs
 ├─prompt_generators         # Prompting components of the agent, for generating question to the LLMs
 └─stride_detector           # Stride detector module
+    └─logs
+```
+
+Detailed structure:
+```
+.
+├─agents                    # Stimulus producing agent, which incorporate all methods of the client side
+│      agents_CLI.py
+│      agent_base.py
+│      agent_fschat.py
+│      agent_ID_dumb.py
+│      agent_LLM.py
+│      agent_random.py
+│      agent_SD_dumb.py
+│    
+├─examples_ID               # Manually created bin description of Ibex instruction decoder
+│      bins_description.txt
+│      bins_description_succinct.txt
+│      dut_code.txt
+│      tb_code.txt
+│
+├─examples_SD               # Manually created bin description of stride detector
+│      bins_description.txt
+│      dut_code.txt
+│      tb_code.txt
+│
+├─examples_SD_analogue      # Manually created task description, which is an analogue of the stride detector
+│      bins_description.txt
+│      dut_code.txt
+│      tb_code.txt
+│
+├─experiment_logs           # Experiment running logs
+│  ├─logs_ID_llama2
+│  ├─logs_SD_fixed
+│  └─logs_SD_template
+│
+├─ibex_decoder              # Ibex instruction decoder module
+│  │  generate_stimulus.py
+│  │  ibex_consts.py
+│  │  ibex_decoder.sv
+│  │  ibex_decoder_cocotb.py
+│  │  ibex_decoder_wrap.sv
+│  │  ibex_pkg.sv
+│  │  Makefile
+│  │  shared_types.py
+│  │
+│  └─logs
+│
+├─loggers                   # Logging components of the agent, for logging txt and csv files
+│      logger_base.py
+│      logger_csv.py
+│      logger_txt.py
+│
+├─models                    # LLM components of the agent, for getting natural language responses from LLMs
+│      llm_base.py
+│      llm_gpt.py
+│      llm_llama2.py
+│
+├─prompt_generators         # Prompting components of the agent, for generating question to the LLMs
+│      prompt_generator_base.py
+│      prompt_generator_fixed_ID.py
+│      prompt_generator_fixed_SD.py
+│      prompt_generator_template.py
+│      prompt_generator_template_ID.py
+│      prompt_generator_template_SD.py
+│
+└─stride_detector           # Stride detector module
+    │  generate_stimulus.py
+    │  Makefile
+    │  README.md
+    │  shared_types.py
+    │  stride_detector.sv
+    │  stride_detector_cocotb.py
+    │
     └─logs
 ```
