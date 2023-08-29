@@ -132,9 +132,7 @@ class LLMAgent(BaseAgent):
 
             # Update best_message of LLM
             if self.msg_index != 1:  # not init
-                self.stimulus_generator.update_successful(
-                    new_coverage=coverage_database.get_coverage_rate()[0]
-                )
+                self.stimulus_generator.update_successful(new_coverage=coverage_database)
 
             # Restart a dialog if low-efficient (nearly converged)
             self.history_cov_rate.append(coverage_database.get_coverage_rate()[0])
@@ -169,9 +167,7 @@ class LLMAgent(BaseAgent):
                 )
                 # Update best_message of LLM
                 if self.msg_index != 1:  # not init
-                    self.stimulus_generator.update_successful(
-                        new_coverage=coverage_database.get_coverage_rate()[0]
-                    )
+                    self.stimulus_generator.update_successful(new_coverage=coverage_database)
                 # Restart a dialog if low-efficient (nearly converged)
                 self.history_cov_rate.append(coverage_database.get_coverage_rate()[0])
                 self.all_history_cov_rate.append(
@@ -203,7 +199,7 @@ class LLMAgent(BaseAgent):
                 self.stimulus_generator.append_successful(
                     prompt={"role": "user", "content": prompt},
                     response={"role": "assistant", "content": response},
-                    cur_coverage=coverage_database.get_coverage_rate()[0],
+                    cur_coverage=coverage_database,
                 )
             if self.state == "INIT":
                 self.state = "ITER"
