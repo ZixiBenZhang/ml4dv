@@ -70,7 +70,6 @@ class Llama2(BaseLLM):
         # Keep previous successful iter messages
         self.messages[-1] = init + self._select_successful()
 
-        # TODO: compress by summarization using Ada?
         # print("Dialog compressed...")
         return
 

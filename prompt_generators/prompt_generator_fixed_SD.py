@@ -64,7 +64,6 @@ class FixedPromptGenerator4SD1(BasePromptGenerator):
         self, coverage_database: GlobalCoverageDatabase, **kwargs
     ) -> str:
         if kwargs["response_invalid"]:
-            # TODO: tune gibberish prompt (or maybe it's limitation of fixed prompts?)
             gibberish_prompt = (
                 "Your response doesn't answer my query.\n"
                 f"Please generate a list of integers, "
