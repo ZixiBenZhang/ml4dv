@@ -94,10 +94,11 @@ class ChatGPT(BaseLLM):
                 time.sleep(sleep_dur)
                 continue
             except openai.error.RateLimitError as e:
-                randomness_collision_avoidance = random.randint(0, 1000) / 300.0
-                sleep_dur = delay + randomness_collision_avoidance + 10
+                randomness_collision_avoidance = random.randint(1000, 4000) / 100.0
+                sleep_dur = delay + randomness_collision_avoidance
                 print(f"Error: {e}. Retrying in {round(sleep_dur, 2)} seconds.")
                 time.sleep(sleep_dur)
+                continue
             else:
                 response_choices: List[Dict[str, str]] = [
                     choice["message"] for choice in result["choices"]
