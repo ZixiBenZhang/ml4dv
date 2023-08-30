@@ -361,3 +361,17 @@ def rst_plan_IDAvoidConverge(cov_hist: List[int], all_cov_hist: List[int]) -> bo
     else:
         period = 7
     return len(cov_hist) >= period and cov_hist[-1] - cov_hist[-period] < epsilon
+
+
+def rst_plan_IDAdaAvoidConverge(cov_hist: List[int], all_cov_hist: List[int]) -> bool:
+    epsilon = 3
+    t = 15
+    if len(all_cov_hist) < t:
+        period = 7
+    elif all_cov_hist[-1] < 300:
+        period = 4
+    elif all_cov_hist[-t] == all_cov_hist[-1]:
+        period = 4
+    else:
+        period = 7
+    return len(cov_hist) >= period and cov_hist[-1] - cov_hist[-period] < epsilon
