@@ -19,6 +19,7 @@ class TemplatePromptGenerator4ID1(TemplatePromptGenerator):
         )
 
     def generate_system_prompt(self) -> str:
+        # TODO: improve SYSTEM msg
         return (
             "Please output a list of hexadecimal integers only, "
             f"each integer between 0x0 and 0xffffffff. \n"

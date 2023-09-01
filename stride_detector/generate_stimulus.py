@@ -1,11 +1,12 @@
 #!/bin/env python3
-
+import csv
 from datetime import datetime
 import zmq
 import pickle
 from contextlib import closing
 import sys
 import os
+import numpy as np
 
 directory = os.path.dirname(os.path.abspath("__file__"))
 sys.path.insert(0, os.path.dirname(directory))
@@ -49,68 +50,100 @@ class StimulusSender:
 
 
 def main():
+    BUDGET = 200
+
     server_ip_port = input(
         "Please enter server's IP and port (e.g. 127.0.0.1:5050, 128.232.65.218:5555): "
     )
 
-    # build components
-    prompt_generator = TemplatePromptGenerator4SD1(
-        bin_descr_path="../examples_SD/bins_description.txt",
-        sampling_missed_bins_method="NEWEST",
-    )
-
-    # stimulus_generator = Llama2(system_prompt=prompt_generator.generate_system_prompt())
-    # print('Llama2 successfully built')
-    stimulus_generator = ChatGPT(
-        system_prompt=prompt_generator.generate_system_prompt()
-    )
-    extractor = DumbExtractor()
-    stimulus_filter = Filter(-10000, 10000)
-
-    # build loggers
     prefix = "./logs/"
     t = datetime.now()
     t = t.strftime("%Y%m%d_%H%M%S")
-    logger_txt = TXTLogger(f"{prefix}{t}.txt")
-    logger_csv = CSVLogger(f"{prefix}{t}.csv")
 
-    # create agent
-    agent = LLMAgent(
-        prompt_generator,
-        stimulus_generator,
-        extractor,
-        stimulus_filter,
-        [logger_txt, logger_csv],
-        dialog_bound=650,
-        rst_plan=rst_plan_ORDINARY,
-    )
-    print("Agent successfully built\n")
+    header = ["Trial #", "Message cnt", "Coverage rate", "Coverage plan"]
+    data = []
+    trial_cnt = 0
 
-    # run test
-    stimulus = Stimulus(value=0, finish=False)
-    g_dut_state = GlobalDUTState()
-    g_coverage = GlobalCoverageDatabase()
+    while BUDGET > 0:
+        trial_cnt += 1
 
-    with closing(StimulusSender(f"tcp://{server_ip_port}")) as stimulus_sender:
-        while not agent.end_simulation(g_dut_state, g_coverage):
-            stimulus.value = agent.generate_next_value(g_dut_state, g_coverage)
-            dut_state, coverage = stimulus_sender.send_stimulus(stimulus)
-            g_dut_state.set(dut_state)
-            g_coverage.set(coverage)
-
-        coverage_plan = {
-            k: v for (k, v) in g_coverage.get_coverage_plan().items() if v > 0
-        }
-        print(
-            f"Finished at dialog #{agent.dialog_index}, message #{agent.msg_index}, \n"
-            f"with total {agent.total_msg_cnt} messages \n"
-            f"Hits: {coverage_plan} \n"
-            f"Coverage rate: {g_coverage.get_coverage_rate()}\n"
+        # build components
+        prompt_generator = TemplatePromptGenerator4SD1(
+            bin_descr_path="../examples_SD/bins_description.txt",
+            sampling_missed_bins_method="NEWEST",
         )
 
-        stimulus.value = None
-        stimulus.finish = True
-        stimulus_sender.send_stimulus(stimulus)
+        # stimulus_generator = Llama2(system_prompt=prompt_generator.generate_system_prompt())
+        # print('Llama2 successfully built')
+        stimulus_generator = ChatGPT(
+            system_prompt=prompt_generator.generate_system_prompt()
+        )
+        extractor = DumbExtractor()
+        stimulus_filter = Filter(-10000, 10000)
+
+        # build loggers
+        logger_txt = TXTLogger(f"{prefix}{t}_trial_{trial_cnt}.txt")
+        logger_csv = CSVLogger(f"{prefix}{t}_trial_{trial_cnt}.csv")
+
+        # create agent
+        agent = LLMAgent(
+            prompt_generator,
+            stimulus_generator,
+            extractor,
+            stimulus_filter,
+            [logger_txt, logger_csv],
+            dialog_bound=50,
+            rst_plan=rst_plan_ORDINARY,
+        )
+        print("Agent successfully built\n")
+
+        # run test
+        stimulus = Stimulus(value=0, finish=False)
+        g_dut_state = GlobalDUTState()
+        g_coverage = GlobalCoverageDatabase()
+
+        with closing(StimulusSender(f"tcp://{server_ip_port}")) as stimulus_sender:
+            while not agent.end_simulation(g_dut_state, g_coverage):
+                stimulus.value = agent.generate_next_value(g_dut_state, g_coverage)
+                dut_state, coverage = stimulus_sender.send_stimulus(stimulus)
+                g_dut_state.set(dut_state)
+                g_coverage.set(coverage)
+
+            BUDGET -= agent.total_msg_cnt
+            data.append(
+                [trial_cnt, agent.total_msg_cnt, g_coverage.get_coverage_rate()[0], str(g_coverage.get_coverage_plan())]
+            )
+            coverage_plan = {
+                k: v for (k, v) in g_coverage.get_coverage_plan().items() if v > 0
+            }
+            print(
+                f"Finished trial #{trial_cnt} at dialog #{agent.dialog_index}, message #{agent.msg_index}, \n"
+                f"with total {agent.total_msg_cnt} messages \n"
+                # f"Hits: {coverage_plan} \n"
+                f"Coverage rate: {g_coverage.get_coverage_rate()}\n"
+                f"Budget left: {BUDGET} messages"
+            )
+
+            stimulus.value = None
+            stimulus.finish = True
+            stimulus_sender.send_stimulus(stimulus)
+
+    with open(f"{prefix}{t}_summary.csv", "w+", encoding="UTF8", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(header)
+        writer.writerows(data)
+
+    print("\n******** FINAL RESULT ********\n")
+    for entry in data:
+        print(f"Trial #{entry[0]}, Msg cnt: {entry[1]}, Coverage: {entry[2]}")
+    min_hit_id = np.argmin([entry[2] for entry in data])
+    max_hit_id = np.argmax([entry[2] for entry in data])
+    print(
+        f"\n"
+        f"Total trial cnt: {trial_cnt}\n"
+        f"Min coverage: {data[min_hit_id][2]} by trial #{min_hit_id}\n"
+        f"Max coverage: {data[max_hit_id][2]} by trial #{max_hit_id}\n"
+    )
 
 
 if __name__ == "__main__":

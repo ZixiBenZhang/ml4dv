@@ -254,28 +254,33 @@ class SimulationController:
 async def basic_test(dut):
     server_port = input("Please enter server's port (e.g. 5050, 5555): ")
 
-    coverage_monitor = CoverageMonitor(dut)
-    dut.valid_i.value = 0
+    trial_cnt = 0
 
-    cocotb.start_soon(Clock(dut.clk_i, 10, units="ns").start())
-    await do_reset(dut)
+    while True:
+        trial_cnt += 1
 
-    with closing(
-        SimulationController(dut, coverage_monitor, f"tcp://*:{server_port}")
-    ) as simulation_controller:
-        simulation_controller.run_controller()
+        coverage_monitor = CoverageMonitor(dut)
+        dut.valid_i.value = 0
 
-        # Wait for end of simulation to be signalled. Give the design a few more
-        # clocks to run before outputting final coverage values
-        await simulation_controller.end_simulation_event.wait()
-        await ClockCycles(dut.clk_i, 5)
+        cocotb.start_soon(Clock(dut.clk_i, 10, units="ns").start())
+        await do_reset(dut)
 
-        # coverage_monitor.coverage_database.output_coverage()
-        from global_shared_types import GlobalCoverageDatabase
+        with closing(
+            SimulationController(dut, coverage_monitor, f"tcp://*:{server_port}")
+        ) as simulation_controller:
+            simulation_controller.run_controller()
 
-        print("***** FINAL COVERAGE *****")
-        print(
-            GlobalCoverageDatabase(
-                coverage_monitor.coverage_database
-            ).get_coverage_plan()
-        )
+            # Wait for end of simulation to be signalled. Give the design a few more
+            # clocks to run before outputting final coverage values
+            await simulation_controller.end_simulation_event.wait()
+            await ClockCycles(dut.clk_i, 5)
+
+            # coverage_monitor.coverage_database.output_coverage()
+            from global_shared_types import GlobalCoverageDatabase
+
+            print(f"***** FINAL COVERAGE of trial #{trial_cnt} *****")
+            print(
+                GlobalCoverageDatabase(
+                    coverage_monitor.coverage_database
+                ).get_coverage_rate()
+            )

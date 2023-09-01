@@ -79,12 +79,7 @@ class LLMAgent(BaseAgent):
             self.save_log()
             return True
 
-        if (
-            len(self.all_history_cov_rate) >= 25
-            and self.all_history_cov_rate[-1] == self.all_history_cov_rate[-25]
-            or len(self.all_history_cov_rate) >= 40
-            and self.all_history_cov_rate[-1] - self.all_history_cov_rate[-40] <= 2
-        ):
+        if self._check_converge():
             self.state = "DONE"
             self.log_append({"role": "coverage", "content": coverage})
             self.log_append({"role": "stop", "content": "model converged"})
@@ -100,6 +95,14 @@ class LLMAgent(BaseAgent):
 
         return False
 
+    def _check_converge(self) -> bool:
+        return (
+            len(self.all_history_cov_rate) >= 25
+            and self.all_history_cov_rate[-1] == self.all_history_cov_rate[-25]
+            or len(self.all_history_cov_rate) >= 40
+            and self.all_history_cov_rate[-1] - self.all_history_cov_rate[-40] <= 2
+        )
+
     def _get_next_value_from_buffer(self):
         stimulus = self.stimuli_buffer[0]
         self.stimuli_buffer.pop(0)
@@ -109,12 +112,14 @@ class LLMAgent(BaseAgent):
     def generate_next_value(
         self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase
     ) -> Union[int, None]:
+
         if coverage_database.get() is None:
             return 0
 
         coverage = coverage_database.get_coverage_plan()
 
-        # when not first stimulus & need to generate new response
+        # When not first stimulus & need to generate new response
+        # log coverage, update coverage of last msg, check need to reset
         if len(self.stimuli_buffer) == 0 and self.state != "INIT":
             # Log coverage
             self.log_append({"role": "coverage", "content": coverage})
@@ -122,11 +127,11 @@ class LLMAgent(BaseAgent):
             print(
                 f"Dialog #{self.dialog_index} Message #{self.msg_index} done, \n"
                 f"Total msg cnt: {self.total_msg_cnt} \n"
-                + (
-                    f"Hits: {coverage_plan} \n"
-                    if coverage_database.get_coverage_rate()[0] <= 100
-                    else ""
-                )
+                # + (
+                #     f"Hits: {coverage_plan} \n"
+                #     if coverage_database.get_coverage_rate()[0] <= 100
+                #     else ""
+                # )
                 + f"Coverage rate: {coverage_database.get_coverage_rate()}"
             )
 
@@ -148,18 +153,12 @@ class LLMAgent(BaseAgent):
 
         f_ = 0  # i.e. gibberish response
         while len(self.stimuli_buffer) == 0:
-            if self.total_msg_cnt >= self.dialog_bound:
+            if self.total_msg_cnt >= self.dialog_bound or self._check_converge():
                 # return 0 (same as None), so entering end_simulation and stops in next loop
                 return 0
-            if (
-                len(self.all_history_cov_rate) >= 25
-                and self.all_history_cov_rate[-1] == self.all_history_cov_rate[-25]
-                or len(self.all_history_cov_rate) >= 40
-                and self.all_history_cov_rate[-1] - self.all_history_cov_rate[-40] <= 2
-            ):
-                return 0
 
-            # only for gibberish i.e. looped
+            # If gibberish
+            # log coverage, update coverage of last msg, check need to reset
             if f_:
                 self.log_append({"role": "coverage", "content": coverage})
                 print(
@@ -167,11 +166,13 @@ class LLMAgent(BaseAgent):
                     f"Total msg cnt: {self.total_msg_cnt} \n"
                     f"Gibberish response"
                 )
+
                 # Update best_message of LLM
                 if self.msg_index != 1:  # not init
                     self.stimulus_generator.update_successful(
                         new_coverage=coverage_database
                     )
+
                 # Restart a dialog if low-efficient (nearly converged)
                 self.history_cov_rate.append(coverage_database.get_coverage_rate()[0])
                 self.all_history_cov_rate.append(
@@ -185,7 +186,7 @@ class LLMAgent(BaseAgent):
                     self.save_log()
                     print("log saved\n")
 
-            # Generate prompt
+            # Load prompt
             prompt = ""
             if self.state == "INIT":
                 prompt = self.prompt_generator.generate_initial_prompt()
@@ -197,17 +198,19 @@ class LLMAgent(BaseAgent):
                 prompt = "Thank you."
             self.log_append({"role": "user", "content": prompt})
 
-            # Get response
+            # Generate response
             response = self.stimulus_generator(prompt)
+
+            # update best_msgs
             if self.state == "ITER":
                 self.stimulus_generator.append_successful(
                     prompt={"role": "user", "content": prompt},
                     response={"role": "assistant", "content": response},
                     cur_coverage=coverage_database,
                 )
+
             if self.state == "INIT":
                 self.state = "ITER"
-
             self.total_msg_cnt += 1
             self.msg_index += 1
             self.log_append({"role": "assistant", "content": response})
