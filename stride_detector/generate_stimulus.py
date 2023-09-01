@@ -50,7 +50,7 @@ class StimulusSender:
 
 
 def main():
-    BUDGET = 100
+    BUDGET = 50
 
     server_ip_port = input(
         "Please enter server's IP and port (e.g. 127.0.0.1:5050, 128.232.65.218:5555): "
@@ -92,7 +92,7 @@ def main():
             extractor,
             stimulus_filter,
             [logger_txt, logger_csv],
-            dialog_bound=20,
+            dialog_bound=8,
             rst_plan=rst_plan_ORDINARY,
         )
         print("Agent successfully built\n")
