@@ -50,15 +50,15 @@ class StimulusSender:
 
 
 def main():
-    BUDGET = 50
+    BUDGET = 10
 
     server_ip_port = input(
         "Please enter server's IP and port (e.g. 127.0.0.1:5050, 128.232.65.218:5555): "
     )
 
-    prefix = "./logs/"
     t = datetime.now()
     t = t.strftime("%Y%m%d_%H%M%S")
+    prefix = f"./logs/{t}_budget/"
 
     header = ["Trial #", "Message cnt", "Coverage rate", "Coverage plan"]
     data = []
@@ -92,7 +92,7 @@ def main():
             extractor,
             stimulus_filter,
             [logger_txt, logger_csv],
-            dialog_bound=8,
+            dialog_bound=min(4, BUDGET),
             rst_plan=rst_plan_ORDINARY,
         )
         print("Agent successfully built\n")
@@ -121,7 +121,7 @@ def main():
                 f"with total {agent.total_msg_cnt} messages \n"
                 # f"Hits: {coverage_plan} \n"
                 f"Coverage rate: {g_coverage.get_coverage_rate()}\n"
-                f"Budget left: {BUDGET} messages\n"
+                f"BUDGET left: {BUDGET} messages\n"
             )
 
             stimulus.value = None
