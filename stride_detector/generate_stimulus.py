@@ -59,6 +59,8 @@ def main():
     t = datetime.now()
     t = t.strftime("%Y%m%d_%H%M%S")
     prefix = f"./logs/{t}_budget/"
+    if not os.path.exists(prefix):
+        os.makedirs(prefix)
 
     header = ["Trial #", "Message cnt", "Coverage rate", "Coverage plan"]
     data = []
