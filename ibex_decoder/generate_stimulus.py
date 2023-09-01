@@ -53,7 +53,7 @@ def main():
     )
 
     # build components
-    prompt_generator = TemplatePromptGenerator4ID2(
+    prompt_generator = TemplatePromptGenerator4ID1(
         bin_descr_path="../examples_ID/bins_description.txt",
         sampling_missed_bins_method="IDNewest",
     )
@@ -81,8 +81,8 @@ def main():
         extractor,
         stimulus_filter,
         [logger_txt, logger_csv],
-        dialog_bound=1000,
-        rst_plan=rst_plan_IDAvoidConverge,
+        dialog_bound=300,
+        rst_plan=rst_plan_ORDINARY,
     )
     print("Agent successfully built\n")
 

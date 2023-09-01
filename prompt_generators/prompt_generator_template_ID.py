@@ -23,7 +23,11 @@ class TemplatePromptGenerator4ID1(TemplatePromptGenerator):
             "Please output a list of hexadecimal integers only, "
             f"each integer between 0x0 and 0xffffffff. \n"
             f"Do not give any explanations. \n"
-            f"Output format: [a, b, c, ...]."
+            f"Output format: \n"
+            f"bin_name_1: a, \n"
+            f"bin_name_2: b, \n"
+            f"bin_name_3: c, \n"
+            f"..."
         )
 
     def _load_introduction(self) -> str:
