@@ -298,6 +298,6 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
         self, missed_bins: List[str], coverage_rate: Tuple[int, int]
     ) -> List[str]:
         if coverage_rate[0] < 300:
-            return self._sample_missed_bins_NEWEST(missed_bins, coverage_rate)
+            return self._sample_missed_bins_IDNEWEST(missed_bins, coverage_rate)
         else:
             return self._sample_missed_bins_IDADAS(missed_bins, coverage_rate)

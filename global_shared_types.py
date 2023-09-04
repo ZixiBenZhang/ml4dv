@@ -140,19 +140,19 @@ class GlobalCoverageDatabase:
     def get_coverage_score(self) -> float:
         if isinstance(self._coverage_database, SDCD):
             coverage_plan = self._get_coverage_plan_SD()
-            coverage_plan = [k for (k, v) in coverage_plan.items() if v > 0]
+            coverage = [k for (k, v) in coverage_plan.items() if v > 0]
             return sum(
                 map(
                     lambda k: 2.5
                     if re.fullmatch(r"double_-?\d+_-?\d+", k) is not None
                     else 1,
-                    coverage_plan,
+                    coverage,
                 )
             )
         elif isinstance(self._coverage_database, IDCD):
             coverage_plan = self._get_coverage_plan_ID()
-            coverage_plan = [k for (k, v) in coverage_plan.items() if v > 0]
-            return sum(map(lambda k: 2.5 if "_x_" in k else 1, coverage_plan))
+            coverage = [k for (k, v) in coverage_plan.items() if v > 0]
+            return sum(map(lambda k: 2.5 if "_x_" in k else 1, coverage))
         else:
             raise TypeError(
                 f"coverage_database of type {type(self._coverage_database)} not supported."
