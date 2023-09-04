@@ -50,7 +50,7 @@ class StimulusSender:
 
 
 def main():
-    BUDGET = Budget(budget_per_trial=1500, total_budget=10000)
+    BUDGET = Budget(budget_per_trial=10000, total_budget=100000)
 
     server_ip_port = input(
         "Please enter server's IP and port (e.g. 127.0.0.1:5050, 128.232.65.218:5555): "
@@ -129,6 +129,7 @@ def main():
             print(
                 f">>>> Finished trial #{trial_cnt} at dialog #{agent.dialog_index}, message #{agent.msg_index}, \n"
                 f"with total {agent.total_msg_cnt} messages \n"
+                f"and total {BUDGET.init_budget - BUDGET.budget} tokens \n"
                 # f"Hits: {coverage_plan} \n"
                 f"Coverage rate: {g_coverage.get_coverage_rate()}\n"
                 f"BUDGET left: {BUDGET.total_budget} tokens\n"
