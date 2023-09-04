@@ -82,7 +82,7 @@ def main():
         stimulus_filter,
         [logger_txt, logger_csv],
         dialog_bound=1000,
-        rst_plan=rst_plan_IDADAR,
+        rst_plan=rst_plan_ORDINARY,
     )
     print("Agent successfully built\n")
 
