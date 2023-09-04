@@ -25,6 +25,7 @@ class LLMAgent(BaseAgent):
         loggers: List[BaseLogger],
         dialog_bound=650,
         rst_plan: Callable[..., bool] = None,
+        token_budget=None,
     ):
         super().__init__()
         self.prompt_generator = prompt_generator
@@ -47,6 +48,8 @@ class LLMAgent(BaseAgent):
 
         self.history_cov_rate: List[int] = []
         self.all_history_cov_rate = []
+
+        self.token_budget: Union[int, None] = token_budget
 
     def reset(self):
         self.log_reset()
@@ -123,7 +126,7 @@ class LLMAgent(BaseAgent):
         if len(self.stimuli_buffer) == 0 and self.state != "INIT":
             # Log coverage
             self.log_append({"role": "coverage", "content": coverage})
-            coverage_plan = {k: v for (k, v) in coverage.items() if v > 0}
+            # coverage_plan = {k: v for (k, v) in coverage.items() if v > 0}
             print(
                 f"Dialog #{self.dialog_index} Message #{self.msg_index} done, \n"
                 f"Total msg cnt: {self.total_msg_cnt} \n"
@@ -196,10 +199,9 @@ class LLMAgent(BaseAgent):
                 )
             elif self.state == "DONE":  # should never happen
                 prompt = "Thank you."
-            self.log_append({"role": "user", "content": prompt})
 
             # Generate response
-            response = self.stimulus_generator(prompt)
+            response, (input_token_cnt, output_token_cnt, total_token_cnt) = self.stimulus_generator(prompt)
 
             # update best_msgs
             if self.state == "ITER":
@@ -213,7 +215,11 @@ class LLMAgent(BaseAgent):
                 self.state = "ITER"
             self.total_msg_cnt += 1
             self.msg_index += 1
-            self.log_append({"role": "assistant", "content": response})
+            self.token_budget -= total_token_cnt
+            # Todo: check budget
+
+            self.log_append({"role": "user", "content": prompt, "token cnt": input_token_cnt})
+            self.log_append({"role": "assistant", "content": response, "token cnt": output_token_cnt})
 
             gibberish = self._check_gibberish(response)
             if gibberish:
@@ -303,7 +309,7 @@ class LLMAgent(BaseAgent):
 
     # elements:
     # {role: info, content: [agent_info]},
-    # {role: ..., content: ...},
+    # {role: ..., content: ..., token cnt: ...},
     # {role: coverage, content: [coverage_plan]}
     # {role: stop, content: done | max stimuli number}
     # {role: reset}
@@ -319,10 +325,14 @@ class LLMAgent(BaseAgent):
                     logger.log.append({})
                     logger.log[-1]["USER"] = '"' + entry["content"] + '"'
                     logger.log[-1]["Action"] = "none"
+                    logger.log[-1]["Input Token Cnt"] = entry["token cnt"]
                 elif entry["role"] == "assistant":
                     logger.log[-1]["Message #"] = self.msg_index
                     logger.log[-1]["Dialog #"] = self.dialog_index
                     logger.log[-1]["ASSISTANT"] = '"' + entry["content"] + '"'
+                    logger.log[-1]["Output Token Cnt"] = entry["token cnt"]
+                    logger.log[-1]["Total Token Cnt"] = \
+                        logger.log[-1]["Input Token Cnt"] + logger.log[-1]["Output Token Cnt"]
                 elif entry["role"] == "coverage":
                     coverage_plan = {
                         k: v for (k, v) in entry["content"].items() if v > 0

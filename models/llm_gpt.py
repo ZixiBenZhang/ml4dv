@@ -59,7 +59,7 @@ class ChatGPT(BaseLLM):
     def __str__(self):
         return self.model_name
 
-    def __call__(self, prompt: str) -> str:
+    def __call__(self, prompt: str) -> Tuple[str, Tuple[int, int, int]]:
         self._compress_conversation()
         self.messages.append({"role": "user", "content": prompt})
         self.recent_msgs.append({"role": "user", "content": prompt})
@@ -106,7 +106,10 @@ class ChatGPT(BaseLLM):
                 self.messages.append(response_choices[0])
                 self.recent_msgs.append(response_choices[0])
                 self.total_msg_cnt += 1
-                return response_choices[0]["content"]
+                input_token = result["usage"]["prompt_tokens"]
+                output_token = result["usage"]["completion_tokens"]
+                total_token = result["usage"]["total_tokens"]
+                return response_choices[0]["content"], (input_token, output_token, total_token)
 
     def _compress_conversation(self):
         # STABLE RST & CLEAR RST

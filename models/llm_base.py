@@ -19,7 +19,7 @@ class BaseLLM:
         self.total_msg_cnt = 0
 
     @abstractmethod
-    def __call__(self, prompt: str) -> str:
+    def __call__(self, prompt: str) -> Tuple[str, Tuple[int, int, int]]:
         raise NotImplementedError
 
     @abstractmethod
