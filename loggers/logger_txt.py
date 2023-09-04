@@ -59,7 +59,8 @@ class TXTLogger(BaseLogger):
                     f.write(f"Dialog index: {self.logged_dialog_index}\n")
                     f.write(f"Message index: {self.logged_msg_index}\n")
                     f.write(f"Total msg cnt: {self.logged_total_msg_cnt}\n")
-                    f.write(f'Token counts: {rec["token cnt"]}\n')
+                    if rec["role"] != "system":
+                        f.write(f'Token counts: {rec["token cnt"]}\n')
                     f.write(f'Role: {rec["role"]}\n')
                     f.write(f'Content: {rec["content"]}\n\n')
 
