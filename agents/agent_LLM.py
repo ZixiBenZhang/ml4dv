@@ -49,7 +49,7 @@ class LLMAgent(BaseAgent):
         self.history_cov_rate: List[int] = []
         self.all_history_cov_rate = []
 
-        self.token_budget: Union[int, None] = token_budget
+        self.token_budget: Union[Budget, None] = token_budget
 
     def reset(self):
         self.log_reset()
@@ -93,6 +93,17 @@ class LLMAgent(BaseAgent):
             self.state = "DONE"
             self.log_append({"role": "coverage", "content": coverage})
             self.log_append({"role": "stop", "content": "max dialog number"})
+            self.save_log()
+            return True
+
+        if (
+            self.token_budget is not None
+            and self.token_budget.no_budget()
+            and len(self.stimuli_buffer) == 0
+        ):
+            self.state = "DONE"
+            self.log_append({"role": "coverage", "content": coverage})
+            self.log_append({"role": "stop", "content": "token budget exceeded"})
             self.save_log()
             return True
 
@@ -156,7 +167,12 @@ class LLMAgent(BaseAgent):
 
         f_ = 0  # i.e. gibberish response
         while len(self.stimuli_buffer) == 0:
-            if self.total_msg_cnt >= self.dialog_bound or self._check_converge():
+            if (
+                self.total_msg_cnt >= self.dialog_bound
+                or self._check_converge()
+                or self.token_budget is not None
+                and self.token_budget.no_budget()
+            ):
                 # return 0 (same as None), so entering end_simulation and stops in next loop
                 return 0
 
@@ -201,7 +217,11 @@ class LLMAgent(BaseAgent):
                 prompt = "Thank you."
 
             # Generate response
-            response, (input_token_cnt, output_token_cnt, total_token_cnt) = self.stimulus_generator(prompt)
+            response, (
+                input_token_cnt,
+                output_token_cnt,
+                total_token_cnt,
+            ) = self.stimulus_generator(prompt)
 
             # update best_msgs
             if self.state == "ITER":
@@ -215,11 +235,20 @@ class LLMAgent(BaseAgent):
                 self.state = "ITER"
             self.total_msg_cnt += 1
             self.msg_index += 1
-            self.token_budget -= total_token_cnt
-            # Todo: check budget
 
-            self.log_append({"role": "user", "content": prompt, "token cnt": input_token_cnt})
-            self.log_append({"role": "assistant", "content": response, "token cnt": output_token_cnt})
+            self.log_append(
+                {"role": "user", "content": prompt, "token cnt": input_token_cnt}
+            )
+            self.log_append(
+                {
+                    "role": "assistant",
+                    "content": response,
+                    "token cnt": output_token_cnt,
+                }
+            )
+
+            if self.token_budget is not None:
+                self.token_budget.budget -= total_token_cnt
 
             gibberish = self._check_gibberish(response)
             if gibberish:
@@ -331,8 +360,10 @@ class LLMAgent(BaseAgent):
                     logger.log[-1]["Dialog #"] = self.dialog_index
                     logger.log[-1]["ASSISTANT"] = '"' + entry["content"] + '"'
                     logger.log[-1]["Output Token Cnt"] = entry["token cnt"]
-                    logger.log[-1]["Total Token Cnt"] = \
-                        logger.log[-1]["Input Token Cnt"] + logger.log[-1]["Output Token Cnt"]
+                    logger.log[-1]["Total Token Cnt"] = (
+                        logger.log[-1]["Input Token Cnt"]
+                        + logger.log[-1]["Output Token Cnt"]
+                    )
                 elif entry["role"] == "coverage":
                     coverage_plan = {
                         k: v for (k, v) in entry["content"].items() if v > 0

@@ -109,7 +109,11 @@ class ChatGPT(BaseLLM):
                 input_token = result["usage"]["prompt_tokens"]
                 output_token = result["usage"]["completion_tokens"]
                 total_token = result["usage"]["total_tokens"]
-                return response_choices[0]["content"], (input_token, output_token, total_token)
+                return response_choices[0]["content"], (
+                    input_token,
+                    output_token,
+                    total_token,
+                )
 
     def _compress_conversation(self):
         # STABLE RST & CLEAR RST

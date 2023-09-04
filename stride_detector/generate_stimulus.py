@@ -50,7 +50,7 @@ class StimulusSender:
 
 
 def main():
-    BUDGET = 3000
+    BUDGET = Budget(budget_per_trial=1500, total_budget=10000)
 
     server_ip_port = input(
         "Please enter server's IP and port (e.g. 127.0.0.1:5050, 128.232.65.218:5555): "
@@ -62,12 +62,13 @@ def main():
     if not os.path.exists(prefix):
         os.makedirs(prefix)
 
-    header = ["Trial #", "Message cnt", "Coverage rate", "Coverage plan"]
+    header = ["Trial #", "Message cnt", "Token cnt", "Coverage rate", "Coverage plan"]
     data = []
     trial_cnt = 0
 
-    while BUDGET > 0:
+    while BUDGET.total_budget > 0:
         trial_cnt += 1
+        BUDGET.budget = BUDGET.init_budget
 
         # build components
         prompt_generator = TemplatePromptGenerator4SD1(
@@ -94,8 +95,9 @@ def main():
             extractor,
             stimulus_filter,
             [logger_txt, logger_csv],
-            dialog_bound=BUDGET,
+            dialog_bound=700,
             rst_plan=rst_plan_ORDINARY,
+            token_budget=BUDGET,
         )
         print("Agent successfully built\n")
 
@@ -111,19 +113,25 @@ def main():
                 g_dut_state.set(dut_state)
                 g_coverage.set(coverage)
 
-            BUDGET -= agent.total_msg_cnt
             data.append(
-                [trial_cnt, agent.total_msg_cnt, g_coverage.get_coverage_rate()[0], str(g_coverage.get_coverage_plan())]
+                [
+                    trial_cnt,
+                    agent.total_msg_cnt,
+                    BUDGET.init_budget - BUDGET.budget,
+                    g_coverage.get_coverage_rate()[0],
+                    str(g_coverage.get_coverage_plan()),
+                ]
             )
-            coverage_plan = {
-                k: v for (k, v) in g_coverage.get_coverage_plan().items() if v > 0
-            }
+            BUDGET.total_budget -= BUDGET.init_budget - BUDGET.budget
+            # coverage_plan = {
+            #     k: v for (k, v) in g_coverage.get_coverage_plan().items() if v > 0
+            # }
             print(
                 f">>>> Finished trial #{trial_cnt} at dialog #{agent.dialog_index}, message #{agent.msg_index}, \n"
                 f"with total {agent.total_msg_cnt} messages \n"
                 # f"Hits: {coverage_plan} \n"
                 f"Coverage rate: {g_coverage.get_coverage_rate()}\n"
-                f"BUDGET left: {BUDGET} messages\n"
+                f"BUDGET left: {BUDGET.total_budget} tokens\n"
             )
 
             stimulus.value = None
@@ -137,14 +145,16 @@ def main():
 
     print("\n******** FINAL RESULT ********\n")
     for entry in data:
-        print(f"Trial #{entry[0]}, Msg cnt: {entry[1]}, Coverage: {entry[2]}")
-    min_hit_id = np.argmin([entry[2] for entry in data])
-    max_hit_id = np.argmax([entry[2] for entry in data])
+        print(
+            f"Trial #{entry[0]}, Msg cnt: {entry[1]}, Token cnt: {entry[2]}, Coverage: {entry[3]}"
+        )
+    min_hit_id = np.argmin([entry[3] for entry in data])
+    max_hit_id = np.argmax([entry[3] for entry in data])
     print(
         f"\n"
         f"Total trial cnt: {trial_cnt}\n"
-        f"Min coverage: {data[min_hit_id][2]} by trial #{min_hit_id}\n"
-        f"Max coverage: {data[max_hit_id][2]} by trial #{max_hit_id}\n"
+        f"Min coverage: {data[min_hit_id][3]} by trial #{min_hit_id}\n"
+        f"Max coverage: {data[max_hit_id][3]} by trial #{max_hit_id}\n"
     )
 
 

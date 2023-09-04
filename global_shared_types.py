@@ -180,3 +180,16 @@ class GlobalDUTState:
             raise TypeError(f"DUT state of type {type(dut_state)} is not supported.")
 
         self._dut_state = dut_state
+
+
+class Budget:
+    budget: int
+    init_budget: int
+    total_budget: int
+
+    def __init__(self, budget_per_trial, total_budget):
+        self.init_budget = budget_per_trial
+        self.total_budget = total_budget
+
+    def no_budget(self):
+        return self.budget <= 0
