@@ -1,0 +1,115 @@
+Prompter: TemplatePromptGenerator4SD1
+Generator: gpt-3.5-turbo-0613
+Temperature: 0.4
+Top_p: 1
+Extractor: DumbExtractor
+
+Dialog index: 1
+Message index: 0
+Total msg cnt: 0
+Role: system
+Content: Please output a list of (positive or negative) integers only, each integer between -523 and 523. 
+Output format: [a, b, c, ...].
+
+Dialog index: 1
+Message index: 1
+Total msg cnt: 1
+Token counts: 608
+Role: user
+Content: You will receive a description of bins (i.e. test cases) of a testbench for a hardware device under test (DUT). Then, you are going to generate a list of integers to cover these test cases.
+
+----------
+Now, we want to test the DUT with a list of integers as its input. We want the input to cover the bins (i.e. test cases) that we care about. Here's the description of the bins that we care about:
+------
+BINS DESCRIPTION
+- The list contains segments (i.e. subsequences) of int.
+- Each segment is of length 18.
+- A segment follows a single-stride pattern with a stride width x if: the differences between two adjacent integers are always x.
+- A segment follows a double-stride pattern with a stride width pair (x, y) if: the differences between two adjacent integers are alternating x and y, meanwhile x and y are different.
+- A segment has no stride pattern if it neither follows a single-stride pattern nor a double-stride pattern.
+- The maximum stride width is 15, and the minimum stride width is -16.
+- For each of the following bins, the list contains at least one segment that satisfies it:
+---
+    - stride_1_seen - One bin per possible stride width between the minimum and maximum stride width, where the segment follows a single-stride pattern of the stride width.
+    - stride_2_seen - One bin per pair of possible stride widths between the minimum and maximum stride width, where the segment follows a double-stride pattern of the stride width pair.
+    - misc_bins - Various bins grouped in a dictionary:
+        - single_stride_[n|p]_overflow - A segment where an incoming stream of values has a valid single stride but that stride is below the minimum (n) or above the maximum (p) stride width.
+        - double_stride_[n|p][n|p] - A segment where an incoming stream of values has a valid double stride but those strides are below the minimum (n) or above the maximum (p) stride widths, nn indicates both are below the minimum, where np indicates one is below the minimum and the other above the maximum.
+---
+- Also, the list contains consecutive segments that satisfy the following bins:
+---
+    - no_stride_to_[single|double] - A segment has no repeating stride pattern, followed by another segment with a single/double stride pattern.
+    - [single|double]_stride_[double|single] - A segment of single/double repeating stride pattern, followed by another segment with a double/single pattern.
+---
+
+------
+
+----------
+Following the bins description, generate a list that contains segments of integers, which covers the described bins as much as you can.
+
+
+Dialog index: 1
+Message index: 1
+Total msg cnt: 1
+Token counts: 600
+Role: assistant
+Content: Here is a list that covers the described bins:
+
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+-1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15, -16, -17, -18,
+1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35,
+-1, -3, -5, -7, -9, -11, -13, -15, -17, -19, -21, -23, -25, -27, -29, -31, -33, -35,
+1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43, 46, 49, 52,
+-1, -4, -7, -10, -13, -16, -19, -22, -25, -28, -31, -34, -37, -40, -43, -46, -49, -52,
+1, 5, 9, 13, 17, 21, 25, 29, 33, 37, 41, 45, 49, 53, 57, 61, 65, 69,
+-1, -5, -9, -13, -17, -21, -25, -29, -33, -37, -41, -45, -49, -53, -57, -61, -65, -69,
+1, 6, 11, 16, 21, 26, 31, 36, 41, 46, 51, 56, 61, 66, 71, 76, 81, 86,
+-1, -6, -11, -16, -21, -26, -31, -36, -41, -46, -51, -56, -61, -66, -71, -76, -81, -86,
+1, 7, 13, 19, 25, 31, 37, 43, 49, 55, 61, 67, 73, 79, 85, 91, 97, 103,
+-
+
+Coverage rate: 12 / 1034
+Coverage plan: {'single_1': 15, 'single_2': 13, 'single_3': 13, 'single_4': 13, 'single_5': 13, 'single_6': 12, 'single_-5': 13, 'single_-4': 13, 'single_-3': 13, 'single_-2': 13, 'single_-1': 13, 'no_stride_to_single': 1}
+
+Dialog index: 1
+Message index: 2
+Total msg cnt: 2
+Token counts: 1413
+Role: user
+Content: The values you provided failed to cover all the bins.
+You will see the result coverage of your previous response(s), and then generate another list of integers to cover the unreached bins (i.e. test cases)
+Here are some of the unreached bins:
+------
+UNREACHED BINS
+- Single-stride pattern segment of stride width 0 is unreached.
+- Single-stride pattern segment of stride width 7 is unreached.
+- Single-stride pattern segment of stride width 11 is unreached.
+- Single-stride pattern segment of stride width -11 is unreached.
+- Single-stride pattern segment of stride width -16 is unreached.
+- Double-stride pattern segment of stride width pair (-15, 5) is unreached.
+- Double-stride pattern segment of stride width pair (-11, -8) is unreached.
+------
+Please regenerate a segment of length 18 for each of these unreached bins according to the BINS DESCRIPTION.
+
+Dialog index: 1
+Message index: 2
+Total msg cnt: 2
+Token counts: 412
+Role: assistant
+Content: Here is a revised list that covers the previously unreached bins:
+
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+[7, 14, 21, 28, 35, 42, 49, 56, 63, 70, 77, 84, 91, 98, 105, 112, 119, 126]
+[11, 22, 33, 44, 55, 66, 77, 88, 99, 110, 121, 132, 143, 154, 165, 176, 187, 198]
+[-11, -22, -33, -44, -55, -66, -77, -88, -99, -110, -121, -132, -143, -154, -165, -176, -187, -198]
+[-16, -32, -48, -64, -80, -96, -112, -128, -144, -160, -176, -192, -208, -224, -240, -256, -272, -288]
+[-15, -10, -5, 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70]
+[-11, -19, -27, -35, -43, -51, -59, -67, -75, -83, -91, -99, -107, -115, -123, -131, -139, -147]
+
+Please note that these lists are just examples and you can generate different lists that cover the unreached bins.
+
+Coverage rate: 18 / 1034
+Coverage plan: {'single_0': 13, 'single_1': 15, 'single_2': 13, 'single_3': 13, 'single_4': 13, 'single_5': 26, 'single_6': 13, 'single_7': 13, 'single_11': 13, 'single_-16': 13, 'single_-11': 13, 'single_-8': 12, 'single_-5': 13, 'single_-4': 13, 'single_-3': 13, 'single_-2': 13, 'single_-1': 13, 'no_stride_to_single': 2}
+
+Stop: token budget exceeded
+

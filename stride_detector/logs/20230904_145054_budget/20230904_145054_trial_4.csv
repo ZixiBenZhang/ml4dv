@@ -1,0 +1,142 @@
+Model,gpt-3.5-turbo-0613,SYSTEM,"Please output a list of (positive or negative) integers only, each integer between -523 and 523. 
+Output format: [a, b, c, ...].",temperature,0.4,top_p,1,Prompter,TemplatePromptGenerator4SD1,Extractor,DumbExtractor
+Total Message#,Dialog #,Message #,Total Token Cnt,USER,Input Token Cnt,ASSISTANT,Output Token Cnt,Action,Coverage Rate,Coverage Plan
+1,1,1,1208,"""You will receive a description of bins (i.e. test cases) of a testbench for a hardware device under test (DUT). Then, you are going to generate a list of integers to cover these test cases.
+
+----------
+Now, we want to test the DUT with a list of integers as its input. We want the input to cover the bins (i.e. test cases) that we care about. Here's the description of the bins that we care about:
+------
+BINS DESCRIPTION
+- The list contains segments (i.e. subsequences) of int.
+- Each segment is of length 18.
+- A segment follows a single-stride pattern with a stride width x if: the differences between two adjacent integers are always x.
+- A segment follows a double-stride pattern with a stride width pair (x, y) if: the differences between two adjacent integers are alternating x and y, meanwhile x and y are different.
+- A segment has no stride pattern if it neither follows a single-stride pattern nor a double-stride pattern.
+- The maximum stride width is 15, and the minimum stride width is -16.
+- For each of the following bins, the list contains at least one segment that satisfies it:
+---
+    - stride_1_seen - One bin per possible stride width between the minimum and maximum stride width, where the segment follows a single-stride pattern of the stride width.
+    - stride_2_seen - One bin per pair of possible stride widths between the minimum and maximum stride width, where the segment follows a double-stride pattern of the stride width pair.
+    - misc_bins - Various bins grouped in a dictionary:
+        - single_stride_[n|p]_overflow - A segment where an incoming stream of values has a valid single stride but that stride is below the minimum (n) or above the maximum (p) stride width.
+        - double_stride_[n|p][n|p] - A segment where an incoming stream of values has a valid double stride but those strides are below the minimum (n) or above the maximum (p) stride widths, nn indicates both are below the minimum, where np indicates one is below the minimum and the other above the maximum.
+---
+- Also, the list contains consecutive segments that satisfy the following bins:
+---
+    - no_stride_to_[single|double] - A segment has no repeating stride pattern, followed by another segment with a single/double stride pattern.
+    - [single|double]_stride_[double|single] - A segment of single/double repeating stride pattern, followed by another segment with a double/single pattern.
+---
+
+------
+
+----------
+Following the bins description, generate a list that contains segments of integers, which covers the described bins as much as you can.
+""",608,"""Here is a list that covers the described bins as much as possible:
+
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 
+-1, -2, -3, -4, -5, -6, -7, -8, -9, -10, -11, -12, -13, -14, -15, -16, -17, -18, 
+1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35, 
+-2, 0, -2, 0, -2, 0, -2, 0, -2, 0, -2, 0, -2, 0, -2, 0, -2, 0, 
+1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 
+-1, -2, -1, -2, -1, -2, -1, -2, -1, -2, -1, -2, -1, -2, -1, -2, -1, -2, 
+1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35, 
+-2, 0, -2, 0, -2, 0, -2, 0, -2, 0, -2, 0, -2, 0, -2, 0, -2, 0, 
+1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 
+-1, -2, -1, -2, -1, -2, -1, -2, -1, -2, -1, -2, -1, -2, -1, -2, -1, -2, 
+1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27""",600,none,10,"{'single_1': 19, 'single_2': 38, 'single_-1': 15, 'double_1_-1': 20, 'double_-1_1': 10, 'double_stride_np_overflow': 4, 'double_stride_pn_overflow': 2, 'no_stride_to_single': 1, 'single_stride_to_double': 2, 'double_stride_to_single': 1}"
+2,1,2,1818,"""The values you provided failed to cover all the bins.
+You will see the result coverage of your previous response(s), and then generate another list of integers to cover the unreached bins (i.e. test cases)
+Here are some of the unreached bins:
+------
+UNREACHED BINS
+- Single-stride pattern segment of stride width 0 is unreached.
+- Single-stride pattern segment of stride width 3 is unreached.
+- Single-stride pattern segment of stride width 6 is unreached.
+- Single-stride pattern segment of stride width -14 is unreached.
+- Single-stride pattern segment of stride width 11 is unreached.
+- Double-stride pattern segment of stride width pair (-16, 9) is unreached.
+- Double-stride pattern segment of stride width pair (-2, -8) is unreached.
+------
+Please regenerate a segment of length 18 for each of these unreached bins according to the BINS DESCRIPTION.""",1413,"""Apologies for the oversight. Here is a revised list that covers the previously unreached bins:
+
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43, 46, 49, 52,
+1, 4, 10, 16, 22, 28, 34, 40, 46, 52, 58, 64, 70, 76, 82, 88, 94, 100,
+-14, -28, -42, -56, -70, -84, -98, -112, -126, -140, -154, -168, -182, -196, -210, -224, -238, -252,
+11, 22, 33, 44, 55, 66, 77, 88, 99, 110, 121, 132, 143, 154, 165, 176, 187, 198,
+-16, 9, -16, 9, -16, 9, -16, 9, -16, 9, -16, 9, -16, 9, -16, 9, -16, 9,
+-2, -8, -2, -8, -2, -8, -2, -8, -2, -8, -2, -8, -2, -8, -2, -8, -2, -8]
+
+This revised list covers all the previously unreached bins.""",405,none,17,"{'single_0': 13, 'single_1': 19, 'single_2': 39, 'single_3': 15, 'single_6': 11, 'single_11': 13, 'single_-14': 13, 'single_-6': 1, 'single_-1': 15, 'double_1_-1': 20, 'double_-6_6': 10, 'double_-1_1': 10, 'double_stride_np_overflow': 6, 'double_stride_pn_overflow': 3, 'no_stride_to_single': 2, 'single_stride_to_double': 3, 'double_stride_to_single': 1}"
+3,1,3,2428,"""The values you provided failed to cover all the bins.
+You will see the result coverage of your previous response(s), and then generate another list of integers to cover the unreached bins (i.e. test cases)
+Here are some of the unreached bins:
+------
+UNREACHED BINS
+- Single-stride pattern segment of stride width 4 is unreached.
+- Single-stride pattern segment of stride width 5 is unreached.
+- Single-stride pattern segment of stride width -2 is unreached.
+- Single-stride pattern segment of stride width 15 is unreached.
+- Single-stride pattern segment of stride width -9 is unreached.
+- Double-stride pattern segment of stride width pair (-8, -2) is unreached.
+- Double-stride pattern segment of stride width pair (8, -6) is unreached.
+------
+Please regenerate a segment of length 18 for each of these unreached bins according to the BINS DESCRIPTION.""",2023,"""Apologies for the oversight. Here is a revised list that covers the previously unreached bins:
+
+[4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64, 68, 72,
+5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90,
+-2, -4, -6, -8, -10, -12, -14, -16, -18, -20, -22, -24, -26, -28, -30, -32, -34, -36,
+15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225, 240, 255, 270,
+-9, -18, -27, -36, -45, -54, -63, -72, -81, -90, -99, -108, -117, -126, -135, -144, -153, -162,
+-8, -2, -8, -2, -8, -2, -8, -2, -8, -2, -8, -2, -8, -2, -8, -2, -8, -2,
+8, -6, 8, -6, 8, -6, 8, -6, 8, -6, 8, -6, 8, -6, 8, -6, 8, -6]
+
+This revised list covers all the previously unreached bins.""",405,none,23,"{'single_0': 13, 'single_1': 19, 'single_2': 39, 'single_3': 15, 'single_4': 15, 'single_5': 13, 'single_6': 12, 'single_11': 13, 'single_15': 13, 'single_-14': 13, 'single_-9': 13, 'single_-6': 2, 'single_-2': 13, 'single_-1': 15, 'double_1_-1': 20, 'double_6_-6': 5, 'double_-6_6': 10, 'double_-1_1': 10, 'double_stride_np_overflow': 7, 'double_stride_pn_overflow': 5, 'no_stride_to_single': 2, 'single_stride_to_double': 4, 'double_stride_to_single': 2}"
+4,1,4,3050,"""The values you provided failed to cover all the bins.
+You will see the result coverage of your previous response(s), and then generate another list of integers to cover the unreached bins (i.e. test cases)
+Here are some of the unreached bins:
+------
+UNREACHED BINS
+- Single-stride pattern segment of stride width 7 is unreached.
+- Single-stride pattern segment of stride width 8 is unreached.
+- Double-stride pattern segment of stride width pair (0, 1) is unreached.
+- Double-stride pattern segment of stride width pair (0, 2) is unreached.
+- Double-stride pattern segment of stride width pair (0, 6) is unreached.
+- Double-stride pattern segment of stride width pair (9, -3) is unreached.
+- Double-stride pattern segment of stride width pair (13, 11) is unreached.
+------
+Please regenerate a segment of length 18 for each of these unreached bins according to the BINS DESCRIPTION.""",2648,"""Apologies for the oversight. Here is a revised list that covers the previously unreached bins:
+
+[7, 14, 21, 28, 35, 42, 49, 56, 63, 70, 77, 84, 91, 98, 105, 112, 119, 126,
+8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128, 136, 144,
+0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17,
+0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34,
+0, 6, 12, 18, 24, 30, 36, 42, 48, 54, 60, 66, 72, 78, 84, 90, 96, 102,
+9, 6, 3, 0, -3, -6, -9, -12, -15, -18, -21, -24, -27, -30, -33, -36, -39, -42,
+13, 24, 35, 46, 57, 68, 79, 90, 101, 112, 123, 134, 145, 156, 167, 178, 189, 200]
+
+This revised list covers all the previously unreached bins.""",402,none,26,"{'single_0': 13, 'single_1': 32, 'single_2': 52, 'single_3': 15, 'single_4': 15, 'single_5': 13, 'single_6': 25, 'single_7': 15, 'single_8': 13, 'single_11': 25, 'single_15': 13, 'single_-14': 13, 'single_-9': 13, 'single_-6': 2, 'single_-3': 12, 'single_-2': 13, 'single_-1': 15, 'double_1_-1': 20, 'double_6_-6': 5, 'double_-6_6': 10, 'double_-1_1': 10, 'double_stride_np_overflow': 7, 'double_stride_pn_overflow': 5, 'no_stride_to_single': 3, 'single_stride_to_double': 4, 'double_stride_to_single': 3}"
+5,1,5,3665,"""The values you provided failed to cover all the bins.
+You will see the result coverage of your previous response(s), and then generate another list of integers to cover the unreached bins (i.e. test cases)
+Here are some of the unreached bins:
+------
+UNREACHED BINS
+- Single-stride pattern segment of stride width 9 is unreached.
+- Single-stride pattern segment of stride width 10 is unreached.
+- Single-stride pattern segment of stride width -10 is unreached.
+- Double-stride pattern segment of stride width pair (0, 2) is unreached.
+- Single-stride pattern segment of stride width -15 is unreached.
+- Double-stride pattern segment of stride width pair (-11, 0) is unreached.
+- Double-stride pattern segment of stride width pair (10, 11) is unreached.
+------
+Please regenerate a segment of length 18 for each of these unreached bins according to the BINS DESCRIPTION.""",3260,"""Apologies for the oversight. Here is a revised list that covers the previously unreached bins:
+
+[9, 18, 27, 36, 45, 54, 63, 72, 81, 90, 99, 108, 117, 126, 135, 144, 153, 162,
+10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180,
+-10, -20, -30, -40, -50, -60, -70, -80, -90, -100, -110, -120, -130, -140, -150, -160, -170, -180,
+0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34,
+-15, -30, -45, -60, -75, -90, -105, -120, -135, -150, -165, -180, -195, -210, -225, -240, -255, -270,
+-11, 0, -11, 0, -11, 0, -11, 0, -11, 0, -11, 0, -11, 0, -11, 0, -11, 0,
+10, 21, 32, 43, 54, 65, 76, 87, 98, 109, 120, 131, 142, 153, 164, 175, 186, 197]
+
+This revised list covers all the previously unreached bins.""",405,token budget exceeded,30,"{'single_0': 13, 'single_1': 32, 'single_2': 65, 'single_3': 15, 'single_4': 15, 'single_5': 13, 'single_6': 25, 'single_7': 15, 'single_8': 13, 'single_9': 13, 'single_10': 13, 'single_11': 40, 'single_15': 13, 'single_-15': 13, 'single_-14': 13, 'single_-10': 13, 'single_-9': 13, 'single_-6': 2, 'single_-3': 12, 'single_-2': 13, 'single_-1': 15, 'double_1_-1': 20, 'double_6_-6': 5, 'double_-6_6': 10, 'double_-1_1': 10, 'double_stride_np_overflow': 9, 'double_stride_pn_overflow': 6, 'no_stride_to_single': 3, 'single_stride_to_double': 5, 'double_stride_to_single': 4}"
