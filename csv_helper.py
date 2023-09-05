@@ -1,4 +1,6 @@
 import csv
+import os.path
+
 from models.llm_gpt import num_tokens_from_messages
 
 
@@ -34,10 +36,69 @@ def print_token_cnt_avg(filename: str):
         print(sum(output_token) / len(output_token))
 
 
+def generate_summary_4SD(dir_path: str):
+    header = ["Trial #", "Message cnt", "Token cnt", "Coverage rate", "Coverage plan"]
+    data = []
+    prefix = f"./stride_detector/logs/{dir_path}_budget/"
+    if os.path.exists(f"{prefix}{dir_path}_summary.csv"):
+        t = input("Summary file with the same name already exists. Overwrite? [y/n]:")
+        while t not in ["y", "n"]:
+            t = input("Please enter [y/n]:")
+        if t == "n":
+            print("Overwrite cancelled.")
+            return
+
+    log_header = [
+        "Total Message#",
+        "Dialog #",
+        "Message #",
+        "Total Token Cnt",
+        "USER",
+        "Input Token Cnt",
+        "ASSISTANT",
+        "Output Token Cnt",
+        "Action",
+        "Coverage Rate",
+        "Coverage Plan",
+    ]
+
+    with open(f"{prefix}{dir_path}_summary.csv", "w+", encoding="UTF8", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(header)
+        trial_cnt = 1
+        while os.path.exists(f"{prefix}{dir_path}_trial_{trial_cnt}.csv"):
+            filename = f"{prefix}{dir_path}_trial_{trial_cnt}.csv"
+            with open(filename, "r", newline="") as fin:
+                reader = csv.DictReader(fin, fieldnames=log_header)
+                msg_cnt = 0
+                token_cnt = 0
+                for i, row in enumerate(reader):
+                    if i <= 1:
+                        continue
+                    # print(i, row)
+                    msg_cnt += 1
+                    token_cnt += int(row["Total Token Cnt"])
+                    coverage_rate = int(row["Coverage Rate"])
+                    coverage_plan = row["Coverage Plan"]
+
+                data.append(
+                    [trial_cnt,
+                     msg_cnt,
+                     token_cnt,
+                     coverage_rate,
+                     coverage_plan]
+                )
+
+            writer.writerow(data[-1])
+            trial_cnt += 1
+
+
 def main():
-    filenames = ["./ibex_decoder/logs/20230829_113216(gpt_harderbins_3).csv"]
-    for filename in filenames:
-        print_token_cnt_avg(filename)
+    # filenames = ["./ibex_decoder/logs/20230829_113216(gpt_harderbins_3).csv"]
+    # for filename in filenames:
+    #     print_token_cnt_avg(filename)
+    dir_path = "20230904_154402"
+    generate_summary_4SD(dir_path)
 
 
 if __name__ == "__main__":

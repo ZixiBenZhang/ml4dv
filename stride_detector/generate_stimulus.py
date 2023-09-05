@@ -67,6 +67,10 @@ def main():
     data = []
     trial_cnt = 0
 
+    with open(f"{prefix}{t}_summary.csv", "a+", encoding="UTF8", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(header)
+
     while BUDGET.total_budget > 0:
         trial_cnt += 1
         BUDGET.budget = BUDGET.init_budget
@@ -123,6 +127,10 @@ def main():
                     str(g_coverage.get_coverage_plan()),
                 ]
             )
+            with open(f"{prefix}{t}_summary.csv", "a+", encoding="UTF8", newline="") as f:
+                writer = csv.writer(f)
+                writer.writerow(data[-1])
+
             BUDGET.total_budget -= BUDGET.init_budget - BUDGET.budget
             # coverage_plan = {
             #     k: v for (k, v) in g_coverage.get_coverage_plan().items() if v > 0
@@ -139,11 +147,6 @@ def main():
             stimulus.value = None
             stimulus.finish = True
             stimulus_sender.send_stimulus(stimulus)
-
-    with open(f"{prefix}{t}_summary.csv", "w+", encoding="UTF8", newline="") as f:
-        writer = csv.writer(f)
-        writer.writerow(header)
-        writer.writerows(data)
 
     print("\n******** FINAL RESULT ********\n")
     for entry in data:
