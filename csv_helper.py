@@ -94,11 +94,11 @@ def generate_summary_4SD(dir_path: str):
 
 
 def main():
-    # filenames = ["./ibex_decoder/logs/20230829_113216(gpt_harderbins_3).csv"]
-    # for filename in filenames:
-    #     print_token_cnt_avg(filename)
-    dir_path = "20230904_154402"
-    generate_summary_4SD(dir_path)
+    filenames = ["./ibex_decoder/logs/20230829_113216(gpt_harderbins_3).csv"]
+    for filename in filenames:
+        print_token_cnt_avg(filename)
+    # dir_path = "20230904_154402"
+    # generate_summary_4SD(dir_path)
 
 
 if __name__ == "__main__":

@@ -290,6 +290,7 @@ class TemplatePromptGenerator4SD2(TemplatePromptGenerator):
             f"single_{i}": f"- Single-stride pattern segment of stride width {i} is unreached.\n"
             for i in range(-16, 16)
         }
+        ### Negative examples
         double_bins_difference = {
             f"double_{i}_{j}": f"- Double-stride pattern segment of stride width pair "
             f"({i}, {j}) is unreached. This can be hit with a segment of "

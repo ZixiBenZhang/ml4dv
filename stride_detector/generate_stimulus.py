@@ -50,6 +50,72 @@ class StimulusSender:
 
 
 def main():
+    server_ip_port = input(
+        "Please enter server's IP and port (e.g. 127.0.0.1:5050, 128.232.65.218:5555): "
+    )
+
+    prefix = f"./logs/"
+    t = datetime.now()
+    t = t.strftime("%Y%m%d_%H%M%S")
+
+    # build components
+    prompt_generator = TemplatePromptGenerator4SD1(
+        bin_descr_path="../examples_SD/bins_description.txt",
+        sampling_missed_bins_method="NEWEST",
+    )
+
+    # stimulus_generator = Llama2(system_prompt=prompt_generator.generate_system_prompt())
+    # print('Llama2 successfully built')
+    stimulus_generator = ChatGPT(
+        system_prompt=prompt_generator.generate_system_prompt()
+    )
+    extractor = DumbExtractor()
+    stimulus_filter = Filter(-10000, 10000)
+
+    # build loggers
+    logger_txt = TXTLogger(f"{prefix}{t}.txt")
+    logger_csv = CSVLogger(f"{prefix}{t}.csv")
+
+    # create agent
+    agent = LLMAgent(
+        prompt_generator,
+        stimulus_generator,
+        extractor,
+        stimulus_filter,
+        [logger_txt, logger_csv],
+        dialog_bound=650,
+        rst_plan=rst_plan_ORDINARY,
+    )
+    print("Agent successfully built\n")
+
+    # run test
+    stimulus = Stimulus(value=0, finish=False)
+    g_dut_state = GlobalDUTState()
+    g_coverage = GlobalCoverageDatabase()
+
+    with closing(StimulusSender(f"tcp://{server_ip_port}")) as stimulus_sender:
+        while not agent.end_simulation(g_dut_state, g_coverage):
+            stimulus.value = agent.generate_next_value(g_dut_state, g_coverage)
+            dut_state, coverage = stimulus_sender.send_stimulus(stimulus)
+            g_dut_state.set(dut_state)
+            g_coverage.set(coverage)
+
+        coverage_plan = {
+            k: v for (k, v) in g_coverage.get_coverage_plan().items() if v > 0
+        }
+        print(
+            f"Finished at dialog #{agent.dialog_index}, message #{agent.msg_index}, \n"
+            f"with total {agent.total_msg_cnt} messages \n"
+            f"Hits: {coverage_plan}, \n"
+            f"Coverage rate: {g_coverage.get_coverage_rate()}\n"
+        )
+
+        stimulus.value = None
+        stimulus.finish = True
+        stimulus_sender.send_stimulus(stimulus)
+
+
+def budget_experiment():
     INIT_BUDGET = 10000000
     BUDGET = Budget(budget_per_trial=INIT_BUDGET, total_budget=INIT_BUDGET)
 
@@ -165,4 +231,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    print("Running budget experiment on SD...")
+    budget_experiment()
