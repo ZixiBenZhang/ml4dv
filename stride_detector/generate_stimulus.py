@@ -227,9 +227,9 @@ def budget_experiment():
     print(
         f"\n"
         f"Total trial cnt: {trial_cnt}\n"
-        f"Total token cnt: {INIT_BUDGET - BUDGET.total_budget}"
-        f"Min coverage: {data[min_hit_id][3]} by trial #{min_hit_id}\n"
-        f"Max coverage: {data[max_hit_id][3]} by trial #{max_hit_id}\n"
+        f"Total token cnt: {INIT_BUDGET - BUDGET.total_budget}\n"
+        f"Min coverage: {data[min_hit_id][3]} by trial #{data[min_hit_id][0]}\n"
+        f"Max coverage: {data[max_hit_id][3]} by trial #{data[max_hit_id][0]}\n"
     )
 
 

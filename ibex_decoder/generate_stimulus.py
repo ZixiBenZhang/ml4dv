@@ -120,8 +120,8 @@ def main():
 
 
 def budget_experiment():
-    INIT_BUDGET = 20000
-    BUDGET = Budget(budget_per_trial=10000, total_budget=INIT_BUDGET)
+    INIT_BUDGET = 10000000
+    BUDGET = Budget(budget_per_trial=INIT_BUDGET, total_budget=INIT_BUDGET)
 
     server_ip_port = input(
         "Please enter server's IP and port (e.g. 127.0.0.1:5050, 128.232.65.218:5555): "
@@ -224,9 +224,9 @@ def budget_experiment():
     print(
         f"\n"
         f"Total trial cnt: {trial_cnt}\n"
-        f"Total token cnt: {INIT_BUDGET - BUDGET.total_budget}"
-        f"Min coverage: {data[min_hit_id][3]} by trial #{min_hit_id}\n"
-        f"Max coverage: {data[max_hit_id][3]} by trial #{max_hit_id}\n"
+        f"Total token cnt: {INIT_BUDGET - BUDGET.total_budget}\n"
+        f"Min coverage: {data[min_hit_id][3]} by trial #{data[min_hit_id][0]}\n"
+        f"Max coverage: {data[max_hit_id][3]} by trial #{data[max_hit_id][0]}\n"
     )
 
 
