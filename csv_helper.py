@@ -62,7 +62,9 @@ def generate_summary_4SD(dir_path: str):
         "Coverage Plan",
     ]
 
-    with open(f"{prefix}{dir_path}_summary.csv", "w+", encoding="UTF8", newline="") as f:
+    with open(
+        f"{prefix}{dir_path}_summary.csv", "w+", encoding="UTF8", newline=""
+    ) as f:
         writer = csv.writer(f)
         writer.writerow(header)
         trial_cnt = 1
@@ -82,11 +84,7 @@ def generate_summary_4SD(dir_path: str):
                     coverage_plan = row["Coverage Plan"]
 
                 data.append(
-                    [trial_cnt,
-                     msg_cnt,
-                     token_cnt,
-                     coverage_rate,
-                     coverage_plan]
+                    [trial_cnt, msg_cnt, token_cnt, coverage_rate, coverage_plan]
                 )
 
             writer.writerow(data[-1])

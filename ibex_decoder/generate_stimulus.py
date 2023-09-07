@@ -18,6 +18,7 @@ from agents.agents_CLI import *
 from agents.agent_LLM import *
 from prompt_generators.prompt_generator_fixed_ID import FixedPromptGenerator4ID1
 from prompt_generators.prompt_generator_template_ID import *
+
 # from models.llm_llama2 import Llama2
 from models.llm_gpt import ChatGPT
 from stimuli_extractor import DumbExtractor
@@ -119,7 +120,7 @@ def main():
 
 
 def budget_experiment():
-    INIT_BUDGET = 10000000
+    INIT_BUDGET = 20000
     BUDGET = Budget(budget_per_trial=INIT_BUDGET, total_budget=INIT_BUDGET)
 
     server_ip_port = input(
@@ -171,7 +172,8 @@ def budget_experiment():
             stimulus_filter,
             [logger_txt, logger_csv],
             dialog_bound=1000,
-            rst_plan=rst_plan_IDADAR,
+            rst_plan=rst_plan_ORDINARY,
+            token_budget=BUDGET,
         )
         print("Agent successfully built\n")
 
@@ -197,7 +199,9 @@ def budget_experiment():
                     str(g_coverage.get_coverage_plan()),
                 ]
             )
-            with open(f"{prefix}{t}_summary.csv", "a+", encoding="UTF8", newline="") as f:
+            with open(
+                f"{prefix}{t}_summary.csv", "a+", encoding="UTF8", newline=""
+            ) as f:
                 writer = csv.writer(f)
                 writer.writerow(data[-1])
 

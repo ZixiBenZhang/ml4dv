@@ -109,6 +109,11 @@ class ChatGPT(BaseLLM):
                 input_token = result["usage"]["prompt_tokens"]
                 output_token = result["usage"]["completion_tokens"]
                 total_token = result["usage"]["total_tokens"]
+                if total_token != input_token + output_token:
+                    print(
+                        f"Corrected fault of token cnts: input {input_token}, output {output_token}, total {total_token}"
+                    )
+                    total_token = input_token + output_token
                 return response_choices[0]["content"], (
                     input_token,
                     output_token,

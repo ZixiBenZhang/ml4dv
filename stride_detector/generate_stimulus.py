@@ -17,6 +17,7 @@ from global_shared_types import *
 from agents.agent_LLM import *
 from prompt_generators.prompt_generator_fixed_SD import FixedPromptGenerator4SD1
 from prompt_generators.prompt_generator_template_SD import *
+
 # from models.llm_llama2 import Llama2
 from models.llm_gpt import ChatGPT
 from stimuli_extractor import DumbExtractor
@@ -193,7 +194,9 @@ def budget_experiment():
                     str(g_coverage.get_coverage_plan()),
                 ]
             )
-            with open(f"{prefix}{t}_summary.csv", "a+", encoding="UTF8", newline="") as f:
+            with open(
+                f"{prefix}{t}_summary.csv", "a+", encoding="UTF8", newline=""
+            ) as f:
                 writer = csv.writer(f)
                 writer.writerow(data[-1])
 
