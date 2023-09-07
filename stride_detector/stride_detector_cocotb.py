@@ -14,6 +14,7 @@ from stride_detector.shared_types import *
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import Timer, ClockCycles, ReadWrite, ReadOnly, Event
+from global_shared_types import GlobalCoverageDatabase
 
 NO_STRIDE = 0
 SINGLE_STRIDE = 1
@@ -276,7 +277,6 @@ async def basic_test(dut):
             await ClockCycles(dut.clk_i, 5)
 
             # coverage_monitor.coverage_database.output_coverage()
-            from global_shared_types import GlobalCoverageDatabase
 
             print(f"***** FINAL COVERAGE of trial #{trial_cnt} *****")
             print(
