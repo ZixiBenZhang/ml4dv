@@ -171,7 +171,7 @@ def budget_experiment():
             stimulus_filter,
             [logger_txt, logger_csv],
             dialog_bound=1000,
-            rst_plan=rst_plan_ORDINARY,
+            rst_plan=rst_plan_IDADAR,
         )
         print("Agent successfully built\n")
 
