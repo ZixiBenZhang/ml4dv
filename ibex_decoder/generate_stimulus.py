@@ -121,7 +121,7 @@ def main():
 
 def budget_experiment():
     INIT_BUDGET = 20000
-    BUDGET = Budget(budget_per_trial=INIT_BUDGET, total_budget=INIT_BUDGET)
+    BUDGET = Budget(budget_per_trial=10000, total_budget=INIT_BUDGET)
 
     server_ip_port = input(
         "Please enter server's IP and port (e.g. 127.0.0.1:5050, 128.232.65.218:5555): "
