@@ -1,7 +1,6 @@
 import sys
 import os
 
-from global_shared_types import GlobalCoverageDatabase
 
 directory = os.path.dirname(os.path.abspath("__file__"))
 sys.path.insert(0, os.path.dirname(directory))
@@ -223,6 +222,8 @@ class SimulationController:
 
 @cocotb.test()
 async def basic_test(dut):
+    from global_shared_types import GlobalCoverageDatabase
+
     server_port = input("Please enter server's port (e.g. 5050, 5555): ")
 
     trial_cnt = 0

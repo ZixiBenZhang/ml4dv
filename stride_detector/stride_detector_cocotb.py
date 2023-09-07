@@ -14,7 +14,6 @@ from stride_detector.shared_types import *
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import Timer, ClockCycles, ReadWrite, ReadOnly, Event
-from global_shared_types import GlobalCoverageDatabase
 
 NO_STRIDE = 0
 SINGLE_STRIDE = 1
@@ -253,6 +252,8 @@ class SimulationController:
 
 @cocotb.test()
 async def basic_test(dut):
+    from global_shared_types import GlobalCoverageDatabase
+
     server_port = input("Please enter server's port (e.g. 5050, 5555): ")
 
     trial_cnt = 0
