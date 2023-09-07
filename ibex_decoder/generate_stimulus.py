@@ -230,5 +230,5 @@ def budget_experiment():
 
 
 if __name__ == "__main__":
-    print("Running main experiment on ID...")
-    main()
+    print("Running budget experiment on ID...")
+    budget_experiment()
