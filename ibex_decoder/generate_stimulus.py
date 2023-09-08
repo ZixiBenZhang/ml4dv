@@ -82,7 +82,7 @@ def main():
         extractor,
         stimulus_filter,
         [logger_txt, logger_csv],
-        dialog_bound=300,
+        dialog_bound=400,
         rst_plan=rst_plan_IDADAR,
     )
     print("Agent successfully built\n")

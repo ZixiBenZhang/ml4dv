@@ -217,13 +217,7 @@ class LLMAgent(BaseAgent):
                     # asking for long response
                     warmed_up=(
                         len(self.history_cov_rate) >= 4
-                        and all(
-                            [
-                                self.history_cov_rate[i] - self.history_cov_rate[i - 1]
-                                >= 20
-                                for i in range(-4 + 1, 0)
-                            ]
-                        )
+                        and self.history_cov_rate[-4] - self.history_cov_rate[-1] >= 50
                     ),
                 )
             elif self.state == "DONE":  # should never happen
