@@ -130,7 +130,9 @@ def main():
     # dir_path = "20230904_154402"
     # generate_summary_4SD(dir_path)
 
-    print_new_msg_for_token_bound(filename="./ibex_decoder/logs/20230907_201949_budget_IDADAR/20230907_201949_trial_6.csv")
+    print_new_msg_for_token_bound(
+        filename="./ibex_decoder/logs/20230907_201949_budget_IDADAR/20230907_201949_trial_6.csv"
+    )
 
 
 if __name__ == "__main__":

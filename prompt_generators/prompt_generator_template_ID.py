@@ -221,3 +221,39 @@ class TemplatePromptGenerator4ID2(TemplatePromptGenerator4ID1):
             " that satisfies the above conditions."
         )
         return prompt
+
+
+class TemplatePromptGenerator4ID3(TemplatePromptGenerator4ID2):
+    def __init__(
+        self,
+        dut_code_path: str = "../examples_ID/dut_code.txt",
+        tb_code_path: str = "../examples_ID/tb_code.txt",
+        bin_descr_path: str = "../examples_ID/bins_description.txt",
+        code_summary_type: int = 0,  # 0: no code, 1: code, 2: summary
+        sampling_missed_bins_method: Union[str, None] = None,
+    ):
+        super().__init__(
+            dut_code_path,
+            tb_code_path,
+            bin_descr_path,
+            code_summary_type,
+            sampling_missed_bins_method,
+        )
+
+    def _load_iter_question(self, **kwargs) -> str:
+        if kwargs["response_invalid"]:
+            iter_question = (
+                f"Please generate a list of 32-bit instructions (i.e. hex integers between "
+                f"0x0 and 0xffffffff) , with output format: [a, b, c, ...]."
+            )
+        elif kwargs["warmed_up"]:
+            iter_question = (
+                "Please regenerate a list of 100 32-bit instruction for these unreached bins "
+                "according to the BINS DESCRIPTION."
+            )
+        else:
+            iter_question = (
+                "Please regenerate a 32-bit instruction for each of these unreached bins "
+                "according to the BINS DESCRIPTION."
+            )
+        return iter_question

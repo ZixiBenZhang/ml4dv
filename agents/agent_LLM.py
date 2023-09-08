@@ -211,7 +211,20 @@ class LLMAgent(BaseAgent):
                 prompt = self.prompt_generator.generate_initial_prompt()
             elif self.state == "ITER":
                 prompt = self.prompt_generator.generate_iterative_prompt(
-                    coverage_database, response_invalid=f_
+                    coverage_database,
+                    # gibbering
+                    response_invalid=f_,
+                    # asking for long response
+                    warmed_up=(
+                        len(self.history_cov_rate) >= 4
+                        and all(
+                            [
+                                self.history_cov_rate[i] - self.history_cov_rate[i - 1]
+                                >= 30
+                                for i in range(-4 + 1, 0)
+                            ]
+                        )
+                    ),
                 )
             elif self.state == "DONE":  # should never happen
                 prompt = "Thank you."

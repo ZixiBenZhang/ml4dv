@@ -82,8 +82,8 @@ def main():
         extractor,
         stimulus_filter,
         [logger_txt, logger_csv],
-        dialog_bound=1000,
-        rst_plan=rst_plan_ORDINARY,
+        dialog_bound=800,
+        rst_plan=rst_plan_IDADAR,
     )
     print("Agent successfully built\n")
 
@@ -231,5 +231,5 @@ def budget_experiment():
 
 
 if __name__ == "__main__":
-    print("Running budget experiment on ID...")
-    budget_experiment()
+    print("Running main experiment on ID...")
+    main()
