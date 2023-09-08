@@ -56,7 +56,7 @@ def main():
     # build components
     prompt_generator = TemplatePromptGenerator4ID2(
         bin_descr_path="../examples_ID/bins_description.txt",
-        sampling_missed_bins_method="IDAdaNew",
+        sampling_missed_bins_method="IDNewest",
     )
 
     # stimulus_generator = Llama2(system_prompt=prompt_generator.generate_system_prompt())
@@ -83,7 +83,7 @@ def main():
         stimulus_filter,
         [logger_txt, logger_csv],
         dialog_bound=800,
-        rst_plan=rst_plan_IDADAR,
+        rst_plan=rst_plan_ORDINARY,
     )
     print("Agent successfully built\n")
 
