@@ -251,7 +251,7 @@ class TemplatePromptGenerator4ID3(TemplatePromptGenerator4ID2):
                 "Please regenerate a list of 100 32-bit instruction for these unreached bins "
                 "according to the BINS DESCRIPTION."
             )
-            print("Loaded prompt for long response...")
+            print("### Loaded prompt for long response...")
         else:
             iter_question = (
                 "Please regenerate a 32-bit instruction for each of these unreached bins "
