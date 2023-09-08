@@ -140,7 +140,7 @@ def budget_experiment():
 
     while BUDGET.total_budget > 0:
         trial_cnt += 1
-        BUDGET.budget = BUDGET.init_budget
+        BUDGET.budget = min(BUDGET.init_budget, BUDGET.total_budget)
 
         # build components
         prompt_generator = TemplatePromptGenerator4SD1(

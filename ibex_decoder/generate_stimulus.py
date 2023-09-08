@@ -120,7 +120,7 @@ def main():
 
 
 def budget_experiment():
-    INIT_BUDGET = 10000000
+    INIT_BUDGET = 1254098
     BUDGET = Budget(budget_per_trial=INIT_BUDGET, total_budget=INIT_BUDGET)
 
     server_ip_port = input(
@@ -143,7 +143,7 @@ def budget_experiment():
 
     while BUDGET.total_budget > 0:
         trial_cnt += 1
-        BUDGET.budget = BUDGET.init_budget
+        BUDGET.budget = min(BUDGET.init_budget, BUDGET.total_budget)
 
         # build components
         prompt_generator = TemplatePromptGenerator4ID2(

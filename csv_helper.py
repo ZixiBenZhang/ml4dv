@@ -10,7 +10,7 @@ def add_token_cnt(filename: str):
         # with open()
 
 
-def print_token_cnt_avg(filename: str):
+def print_old_token_cnt_avg(filename: str):
     header = [
         "Total Message#",
         "Dialog #",
@@ -26,7 +26,7 @@ def print_token_cnt_avg(filename: str):
     with open(filename, "r", newline="") as f:
         reader = csv.DictReader(f, fieldnames=header)
         for i, row in enumerate(reader):
-            if i == 0:
+            if i <= 1:
                 continue
             input_token.append(num_tokens_from_messages([{"user": row["USER"]}]))
             output_token.append(
@@ -34,6 +34,37 @@ def print_token_cnt_avg(filename: str):
             )
         print(sum(input_token) / len(input_token))
         print(sum(output_token) / len(output_token))
+
+
+def print_new_msg_for_token_bound(filename: str, token_bound: int = 1254098):
+    header = [
+        "Total Message#",
+        "Dialog #",
+        "Message #",
+        "Total Token Cnt",
+        "USER",
+        "Input Token Cnt",
+        "ASSISTANT",
+        "Output Token Cnt",
+        "Action",
+        "Coverage Rate",
+        "Coverage Plan",
+    ]
+    total_token = []
+    with open(filename, "r", newline="") as f:
+        reader = csv.DictReader(f, fieldnames=header)
+        for i, row in enumerate(reader):
+            if i <= 1:
+                continue
+            total_token.append(int(row["Total Token Cnt"]))
+            if sum(total_token) >= token_bound:
+                print(
+                    f"Total msg#: {row['Total Message#']}\n"
+                    f"Total token cnt: {sum(total_token)} / {token_bound}\n"
+                    f"Coverage Rate: {row['Coverage Rate']}\n"
+                    f"Coverage Plan: {row['Coverage Plan']}\n"
+                )
+                break
 
 
 def generate_summary_4SD(dir_path: str):
@@ -92,11 +123,14 @@ def generate_summary_4SD(dir_path: str):
 
 
 def main():
-    filenames = ["./ibex_decoder/logs/20230829_113216(gpt_harderbins_3).csv"]
-    for filename in filenames:
-        print_token_cnt_avg(filename)
+    # filenames = ["./ibex_decoder/logs/20230829_113216(gpt_harderbins_3).csv"]
+    # for filename in filenames:
+    #     print_token_cnt_avg(filename)
+
     # dir_path = "20230904_154402"
     # generate_summary_4SD(dir_path)
+
+    print_new_msg_for_token_bound(filename="./ibex_decoder/logs/20230907_201949_budget_IDADAR/20230907_201949_trial_6.csv")
 
 
 if __name__ == "__main__":
