@@ -220,7 +220,7 @@ class LLMAgent(BaseAgent):
                         and all(
                             [
                                 self.history_cov_rate[i] - self.history_cov_rate[i - 1]
-                                >= 30
+                                >= 20
                                 for i in range(-4 + 1, 0)
                             ]
                         )

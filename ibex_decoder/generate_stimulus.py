@@ -82,7 +82,7 @@ def main():
         extractor,
         stimulus_filter,
         [logger_txt, logger_csv],
-        dialog_bound=800,
+        dialog_bound=300,
         rst_plan=rst_plan_IDADAR,
     )
     print("Agent successfully built\n")
@@ -120,7 +120,7 @@ def main():
 
 
 def budget_experiment():
-    INIT_BUDGET = 1254098
+    INIT_BUDGET = 10000000
     BUDGET = Budget(budget_per_trial=INIT_BUDGET, total_budget=INIT_BUDGET)
 
     server_ip_port = input(
