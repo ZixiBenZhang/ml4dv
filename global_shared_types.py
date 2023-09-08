@@ -137,13 +137,13 @@ class GlobalCoverageDatabase:
         coverage_hit = {k: v for (k, v) in coverage.items() if v > 0}
         return len(coverage_hit), len(coverage)
 
-    def get_coverage_score(self) -> float:
+    def get_coverage_score(self, prioritise_harder_bins=True) -> float:
         if isinstance(self._coverage_database, SDCD):
             coverage_plan = self._get_coverage_plan_SD()
             coverage = [k for (k, v) in coverage_plan.items() if v > 0]
-            # without prioritising harder bins
-            return len(coverage)
-            ### Prioritise harder bins
+            if not prioritise_harder_bins:  # without prioritising harder bins
+                return len(coverage)
+            # Prioritise harder bins
             # return sum(
             #     map(
             #         lambda k: 2.5
@@ -155,9 +155,9 @@ class GlobalCoverageDatabase:
         elif isinstance(self._coverage_database, IDCD):
             coverage_plan = self._get_coverage_plan_ID()
             coverage = [k for (k, v) in coverage_plan.items() if v > 0]
-            # without prioritising harder bins
-            # return len(coverage)
-            ### Prioritise harder bins
+            if not prioritise_harder_bins:  # without prioritising harder bins
+                return len(coverage)
+            # Prioritise harder bins
             return sum(map(lambda k: 2.5 if "_x_" in k else 1, coverage))
         else:
             raise TypeError(

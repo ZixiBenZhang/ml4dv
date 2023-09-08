@@ -9,7 +9,7 @@ from global_shared_types import GlobalCoverageDatabase
 class BaseLLM:
     REMAIN_ITER_NUM = 3
 
-    def __init__(self, system_prompt: str = ""):
+    def __init__(self, system_prompt: str = "", best_iter_buffer_resetting="STABLE", prioritise_harder_bins=True):
         self.system_prompt = system_prompt
         self.temperature = 1
         self.top_p = 1
@@ -17,6 +17,11 @@ class BaseLLM:
         # 'msg': messages, 'hits': hit #, 'id': msg id
         self.best_messages: List[Dict[str, Union[Tuple[dict, dict], int, float]]] = []
         self.total_msg_cnt = 0
+
+        assert best_iter_buffer_resetting.upper() in ["STABLE", "KEEP", "CLEAR"], \
+            f'Invalid best-iter-message buffer resetting method. Should be one of {["STABLE", "KEEP", "CLEAR"]}.'
+        self.best_iter_buffer_resetting = best_iter_buffer_resetting.upper()
+        self.prioritise_harder_bins = prioritise_harder_bins
 
     @abstractmethod
     def __call__(self, prompt: str) -> Tuple[str, Tuple[int, int, int]]:
@@ -36,7 +41,7 @@ class BaseLLM:
         self.best_messages.append(
             {
                 "msg": (prompt, response),
-                "hit": cur_coverage.get_coverage_score(),
+                "hit": cur_coverage.get_coverage_score(self.prioritise_harder_bins),
                 "id": self.total_msg_cnt,
             }
         )
@@ -44,7 +49,7 @@ class BaseLLM:
     # Called by agent when the response's coverage has been completely computed
     def update_successful(self, new_coverage: GlobalCoverageDatabase):
         self.best_messages[-1]["hit"] = (
-            new_coverage.get_coverage_score() - self.best_messages[-1]["hit"]
+            new_coverage.get_coverage_score(self.prioritise_harder_bins) - self.best_messages[-1]["hit"]
         )
         self.best_messages = sorted(
             self.best_messages, key=lambda d: (d["hit"], d["id"]), reverse=True

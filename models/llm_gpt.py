@@ -16,9 +16,11 @@ class ChatGPT(BaseLLM):
         temperature=0.4,
         top_p=1,
         max_gen_tokens=600,
+        best_iter_buffer_resetting: str = "STABLE",
         compress_msg_algo: str = "best 3",
+        prioritise_harder_bins: bool = True,
     ):
-        super().__init__(system_prompt)
+        super().__init__(system_prompt, best_iter_buffer_resetting, prioritise_harder_bins)
         openai_api_key = os.getenv("OPENAI_API_KEY")
         assert openai_api_key is not None, "OpenAI API key not found."
         openai.api_key = openai_api_key
@@ -123,7 +125,8 @@ class ChatGPT(BaseLLM):
 
     def _compress_conversation(self):
         # STABLE RST & CLEAR RST
-        if len(self.messages) < 4 + 2 * ChatGPT.REMAIN_ITER_NUM:
+        if self.best_iter_buffer_resetting in ["STABLE", "CLEAR"] \
+                and len(self.messages) < 4 + 2 * ChatGPT.REMAIN_ITER_NUM:
             return
         if self.messages[0]["role"] == "system":
             init = self.messages[:3]
@@ -154,7 +157,8 @@ class ChatGPT(BaseLLM):
         if self.system_prompt != "":
             self.messages.append({"role": "system", "content": self.system_prompt})
         # CLEAR RST
-        # self.best_messages.clear()
+        if self.best_iter_buffer_resetting == "CLEAR":
+            self.best_messages.clear()
 
 
 def num_tokens_from_messages(messages, model="gpt-3.5-turbo-0613") -> int:

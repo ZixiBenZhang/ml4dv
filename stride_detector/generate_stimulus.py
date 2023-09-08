@@ -68,7 +68,10 @@ def main():
     # stimulus_generator = Llama2(system_prompt=prompt_generator.generate_system_prompt())
     # print('Llama2 successfully built')
     stimulus_generator = ChatGPT(
-        system_prompt=prompt_generator.generate_system_prompt()
+        system_prompt=prompt_generator.generate_system_prompt(),
+        best_iter_buffer_resetting="STABLE",
+        compress_msg_algo="best 3",
+        prioritise_harder_bins=False,
     )
     extractor = DumbExtractor()
     stimulus_filter = Filter(-10000, 10000)
@@ -84,7 +87,7 @@ def main():
         extractor,
         stimulus_filter,
         [logger_txt, logger_csv],
-        dialog_bound=650,
+        dialog_bound=800,
         rst_plan=rst_plan_ORDINARY,
     )
     print("Agent successfully built\n")
@@ -151,7 +154,10 @@ def budget_experiment():
         # stimulus_generator = Llama2(system_prompt=prompt_generator.generate_system_prompt())
         # print('Llama2 successfully built')
         stimulus_generator = ChatGPT(
-            system_prompt=prompt_generator.generate_system_prompt()
+            system_prompt=prompt_generator.generate_system_prompt(),
+            best_iter_buffer_resetting="STABLE",
+            compress_msg_algo="best 3",
+            prioritise_harder_bins=True,
         )
         extractor = DumbExtractor()
         stimulus_filter = Filter(-10000, 10000)

@@ -16,8 +16,9 @@ class Llama2(BaseLLM):
         max_seq_len=10000,
         max_batch_size=4,
         max_gen_len=800,
+        best_iter_buffer_resetting: str = "STABLE",
     ):
-        super().__init__(system_prompt)
+        super().__init__(system_prompt, best_iter_buffer_resetting)
         self.model_name = model_path.split("/")[0]
 
         self.generator = Llama.build(
@@ -59,7 +60,7 @@ class Llama2(BaseLLM):
 
     def _compress_conversation(self):
         # STABLE RST & CLEAR RST
-        if len(self.messages[-1]) < 4 + 2 * Llama2.REMAIN_ITER_NUM:
+        if self.best_iter_buffer_resetting in ["STABLE", "CLEAR"] and len(self.messages[-1]) < 4 + 2 * Llama2.REMAIN_ITER_NUM:
             return
         if self.messages[-1][0]["role"] == "system":
             init = self.messages[-1][:3]
@@ -78,4 +79,5 @@ class Llama2(BaseLLM):
         if self.system_prompt != "":
             self.messages[-1].append({"role": "system", "content": self.system_prompt})
         # CLEAR RST
-        # self.best_messages.clear()
+        if self.best_iter_buffer_resetting == "CLEAR":
+            self.best_messages.clear()
