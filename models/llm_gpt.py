@@ -123,8 +123,8 @@ class ChatGPT(BaseLLM):
 
     def _compress_conversation(self):
         # STABLE RST & CLEAR RST
-        if len(self.messages) < 4 + 2 * ChatGPT.REMAIN_ITER_NUM:
-            return
+        # if len(self.messages) < 4 + 2 * ChatGPT.REMAIN_ITER_NUM:
+        #     return
         if self.messages[0]["role"] == "system":
             init = self.messages[:3]
         else:
@@ -154,7 +154,7 @@ class ChatGPT(BaseLLM):
         if self.system_prompt != "":
             self.messages.append({"role": "system", "content": self.system_prompt})
         # CLEAR RST
-        self.best_messages.clear()
+        # self.best_messages.clear()
 
 
 def num_tokens_from_messages(messages, model="gpt-3.5-turbo-0613") -> int:
