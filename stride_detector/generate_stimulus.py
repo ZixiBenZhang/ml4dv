@@ -60,7 +60,7 @@ def main():
     t = t.strftime("%Y%m%d_%H%M%S")
 
     # build components
-    prompt_generator = TemplatePromptGenerator4SD1(
+    prompt_generator = TemplatePromptGenerator4SD2(
         bin_descr_path="../examples_SD/bins_description.txt",
         sampling_missed_bins_method="NEWEST",
     )
@@ -71,7 +71,7 @@ def main():
         system_prompt=prompt_generator.generate_system_prompt(),
         best_iter_buffer_resetting="STABLE",
         compress_msg_algo="best 3",
-        prioritise_harder_bins=False,
+        prioritise_harder_bins=True,
     )
     extractor = DumbExtractor()
     stimulus_filter = Filter(-10000, 10000)
