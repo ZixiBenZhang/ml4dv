@@ -54,7 +54,7 @@ def main():
     )
 
     # build components
-    prompt_generator = TemplatePromptGenerator4ID3(
+    prompt_generator = TemplatePromptGenerator4ID2(
         bin_descr_path="../examples_ID/bins_description.txt",
         sampling_missed_bins_method="IDAdaNew",
     )
