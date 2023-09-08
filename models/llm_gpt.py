@@ -123,8 +123,8 @@ class ChatGPT(BaseLLM):
 
     def _compress_conversation(self):
         # STABLE RST & CLEAR RST
-        # if len(self.messages) < 4 + 2 * ChatGPT.REMAIN_ITER_NUM:
-        #     return
+        if len(self.messages) < 4 + 2 * ChatGPT.REMAIN_ITER_NUM:
+            return
         if self.messages[0]["role"] == "system":
             init = self.messages[:3]
         else:
