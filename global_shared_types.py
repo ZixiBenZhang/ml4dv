@@ -144,14 +144,14 @@ class GlobalCoverageDatabase:
             if not prioritise_harder_bins:  # without prioritising harder bins
                 return len(coverage)
             # Prioritise harder bins
-            # return sum(
-            #     map(
-            #         lambda k: 2.5
-            #         if re.fullmatch(r"double_-?\d+_-?\d+", k) is not None
-            #         else 1,
-            #         coverage,
-            #     )
-            # )
+            return sum(
+                map(
+                    lambda k: 2.5
+                    if re.fullmatch(r"double_-?\d+_-?\d+", k) is not None
+                    else 1,
+                    coverage,
+                )
+            )
         elif isinstance(self._coverage_database, IDCD):
             coverage_plan = self._get_coverage_plan_ID()
             coverage = [k for (k, v) in coverage_plan.items() if v > 0]
