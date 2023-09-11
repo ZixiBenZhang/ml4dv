@@ -127,12 +127,12 @@ def main():
     # for filename in filenames:
     #     print_token_cnt_avg(filename)
 
-    # dir_path = "20230904_154402"
-    # generate_summary_4SD(dir_path)
+    dir_path = "20230911_100453"
+    generate_summary_4SD(dir_path)
 
-    print_new_msg_for_token_bound(
-        filename="ibex_decoder/logs/20230907_201949_budget(Template2, IDAdaNew, Stable, Best3 with harder bins, IDAdaR)/20230907_201949_trial_6.csv"
-    )
+    # print_new_msg_for_token_bound(
+    #     filename="ibex_decoder/logs/20230907_201949_budget(Template2, IDAdaNew, Stable, Best3 with harder bins, IDAdaR)/20230907_201949_trial_6.csv"
+    # )
 
 
 if __name__ == "__main__":

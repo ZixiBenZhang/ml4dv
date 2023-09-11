@@ -51,6 +51,8 @@ class StimulusSender:
 
 
 def main():
+    print("Running main experiment on SD...\n")
+
     server_ip_port = input(
         "Please enter server's IP and port (e.g. 127.0.0.1:5050, 128.232.65.218:5555): "
     )
@@ -120,7 +122,9 @@ def main():
 
 
 def budget_experiment():
-    INIT_BUDGET = 7568176
+    print("Running budget experiment on SD...\n")
+
+    INIT_BUDGET = 2274273
     BUDGET = Budget(budget_per_trial=INIT_BUDGET, total_budget=INIT_BUDGET)
 
     server_ip_port = input(
@@ -143,7 +147,8 @@ def budget_experiment():
 
     while BUDGET.total_budget > 0:
         trial_cnt += 1
-        BUDGET.budget = min(BUDGET.init_budget, BUDGET.total_budget)
+        BUDGET.init_budget = min(BUDGET.init_budget, BUDGET.total_budget)
+        BUDGET.budget = BUDGET.init_budget
 
         # build components
         prompt_generator = TemplatePromptGenerator4SD1(
@@ -240,5 +245,4 @@ def budget_experiment():
 
 
 if __name__ == "__main__":
-    print("Running budget experiment on SD...\n")
     budget_experiment()
