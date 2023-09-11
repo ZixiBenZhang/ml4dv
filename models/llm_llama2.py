@@ -60,7 +60,10 @@ class Llama2(BaseLLM):
 
     def _compress_conversation(self):
         # STABLE RST & CLEAR RST
-        if self.best_iter_buffer_resetting in ["STABLE", "CLEAR"] and len(self.messages[-1]) < 4 + 2 * Llama2.REMAIN_ITER_NUM:
+        if (
+            self.best_iter_buffer_resetting in ["STABLE", "CLEAR"]
+            and len(self.messages[-1]) < 4 + 2 * Llama2.REMAIN_ITER_NUM
+        ):
             return
         if self.messages[-1][0]["role"] == "system":
             init = self.messages[-1][:3]

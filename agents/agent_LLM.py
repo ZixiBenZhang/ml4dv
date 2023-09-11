@@ -23,9 +23,9 @@ class LLMAgent(BaseAgent):
         stimulus_extractor: BaseExtractor,
         stimulus_filter: BaseFilter,
         loggers: List[BaseLogger],
-        dialog_bound=650,
+        dialog_bound: int = 650,
         rst_plan: Callable[..., bool] = None,
-        token_budget=None,
+        token_budget: Union[Budget, None] = None,
     ):
         super().__init__()
         self.prompt_generator = prompt_generator

@@ -20,7 +20,9 @@ class ChatGPT(BaseLLM):
         compress_msg_algo: str = "best 3",
         prioritise_harder_bins: bool = True,
     ):
-        super().__init__(system_prompt, best_iter_buffer_resetting, prioritise_harder_bins)
+        super().__init__(
+            system_prompt, best_iter_buffer_resetting, prioritise_harder_bins
+        )
         openai_api_key = os.getenv("OPENAI_API_KEY")
         assert openai_api_key is not None, "OpenAI API key not found."
         openai.api_key = openai_api_key
@@ -125,8 +127,10 @@ class ChatGPT(BaseLLM):
 
     def _compress_conversation(self):
         # STABLE RST & CLEAR RST
-        if self.best_iter_buffer_resetting in ["STABLE", "CLEAR"] \
-                and len(self.messages) < 4 + 2 * ChatGPT.REMAIN_ITER_NUM:
+        if (
+            self.best_iter_buffer_resetting in ["STABLE", "CLEAR"]
+            and len(self.messages) < 4 + 2 * ChatGPT.REMAIN_ITER_NUM
+        ):
             return
         if self.messages[0]["role"] == "system":
             init = self.messages[:3]

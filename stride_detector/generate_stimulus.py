@@ -157,7 +157,7 @@ def budget_experiment():
             system_prompt=prompt_generator.generate_system_prompt(),
             best_iter_buffer_resetting="STABLE",
             compress_msg_algo="best 3",
-            prioritise_harder_bins=True,
+            prioritise_harder_bins=False,
         )
         extractor = DumbExtractor()
         stimulus_filter = Filter(-10000, 10000)
@@ -240,5 +240,5 @@ def budget_experiment():
 
 
 if __name__ == "__main__":
-    print("Running main experiment on SD...\n")
-    main()
+    print("Running budget experiment on SD...\n")
+    budget_experiment()

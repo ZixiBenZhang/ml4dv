@@ -131,7 +131,7 @@ def main():
     # generate_summary_4SD(dir_path)
 
     print_new_msg_for_token_bound(
-        filename="./ibex_decoder/logs/20230907_201949_budget_IDADAR/20230907_201949_trial_6.csv"
+        filename="ibex_decoder/logs/20230907_201949_budget(Template2, IDAdaNew, Stable, Best3 with harder bins, IDAdaR)/20230907_201949_trial_6.csv"
     )
 
 
