@@ -120,7 +120,7 @@ def main():
 
 
 def budget_experiment():
-    INIT_BUDGET = 10000000
+    INIT_BUDGET = 7568176
     BUDGET = Budget(budget_per_trial=INIT_BUDGET, total_budget=INIT_BUDGET)
 
     server_ip_port = input(
@@ -240,5 +240,5 @@ def budget_experiment():
 
 
 if __name__ == "__main__":
-    print("Running main experiment on SD...\n")
-    main()
+    print("Running budget experiment on SD...\n")
+    budget_experiment()
