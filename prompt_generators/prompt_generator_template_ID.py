@@ -223,6 +223,7 @@ class TemplatePromptGenerator4ID2(TemplatePromptGenerator4ID1):
         return prompt
 
 
+# ask for long response when warmed up
 class TemplatePromptGenerator4ID3(TemplatePromptGenerator4ID2):
     def __init__(
         self,

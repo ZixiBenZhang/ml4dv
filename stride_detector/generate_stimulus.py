@@ -60,7 +60,7 @@ def main():
     t = t.strftime("%Y%m%d_%H%M%S")
 
     # build components
-    prompt_generator = TemplatePromptGenerator4SD2(
+    prompt_generator = TemplatePromptGenerator4SD1(
         bin_descr_path="../examples_SD/bins_description.txt",
         sampling_missed_bins_method="NEWEST",
     )
@@ -87,7 +87,7 @@ def main():
         extractor,
         stimulus_filter,
         [logger_txt, logger_csv],
-        dialog_bound=800,
+        dialog_bound=1000,
         rst_plan=rst_plan_ORDINARY,
     )
     print("Agent successfully built\n")
@@ -240,5 +240,5 @@ def budget_experiment():
 
 
 if __name__ == "__main__":
-    print("Running budget experiment on SD...\n")
-    budget_experiment()
+    print("Running main experiment on SD...\n")
+    main()
