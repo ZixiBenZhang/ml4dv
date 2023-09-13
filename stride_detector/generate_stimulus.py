@@ -124,7 +124,7 @@ def main():
 def budget_experiment():
     print("Running budget experiment on SD...\n")
 
-    INIT_BUDGET = 2274273
+    INIT_BUDGET = 10000000
     print(f"Start with BUDGET={INIT_BUDGET}\n")
 
     BUDGET = Budget(budget_per_trial=INIT_BUDGET, total_budget=INIT_BUDGET)
@@ -162,9 +162,9 @@ def budget_experiment():
         # print('Llama2 successfully built')
         stimulus_generator = ChatGPT(
             system_prompt=prompt_generator.generate_system_prompt(),
-            best_iter_buffer_resetting="STABLE",
+            best_iter_buffer_resetting="KEEP",
             compress_msg_algo="best 3",
-            prioritise_harder_bins=False,
+            prioritise_harder_bins=True,
         )
         extractor = DumbExtractor()
         stimulus_filter = Filter(-10000, 10000)
