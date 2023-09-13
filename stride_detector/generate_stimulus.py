@@ -125,6 +125,8 @@ def budget_experiment():
     print("Running budget experiment on SD...\n")
 
     INIT_BUDGET = 2274273
+    print(f"Start with BUDGET={INIT_BUDGET}\n")
+
     BUDGET = Budget(budget_per_trial=INIT_BUDGET, total_budget=INIT_BUDGET)
 
     server_ip_port = input(

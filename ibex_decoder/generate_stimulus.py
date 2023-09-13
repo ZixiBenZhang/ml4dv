@@ -18,8 +18,6 @@ from agents.agents_CLI import *
 from agents.agent_LLM import *
 from prompt_generators.prompt_generator_fixed_ID import FixedPromptGenerator4ID1
 from prompt_generators.prompt_generator_template_ID import *
-
-# from models.llm_llama2 import Llama2
 from models.llm_gpt import ChatGPT
 from stimuli_extractor import DumbExtractor
 from stimuli_filter import Filter
@@ -48,7 +46,76 @@ class StimulusSender:
             self.socket.close()
 
 
+def main_llama2():
+    print("Running main_llama2 experiment on ID...")
+
+    from models.llm_llama2 import Llama2
+
+    server_ip_port = input(
+        "Please enter server's IP and port (e.g. 127.0.0.1:5050, 128.232.65.218:5555): "
+    )
+
+    # build components
+    prompt_generator = TemplatePromptGenerator4ID2(
+        bin_descr_path="../examples_ID/bins_description.txt",
+        sampling_missed_bins_method="IDNewest",
+    )
+
+    stimulus_generator = Llama2(
+        system_prompt=prompt_generator.generate_system_prompt(),
+        best_iter_buffer_resetting="STABLE",
+        compress_msg_algo="best 3",
+        prioritise_harder_bins=True,
+    )
+    print('Llama2 successfully built')
+
+    extractor = DumbExtractor()
+    stimulus_filter = Filter(0x0, 0xFFFFFFFF)
+
+    # build loggers
+    prefix = "./logs/"
+    t = datetime.now()
+    t = t.strftime("%Y%m%d_%H%M%S")
+    logger_txt = TXTLogger(f"{prefix}{t}.txt")
+    logger_csv = CSVLogger(f"{prefix}{t}.csv")
+
+    # create agent
+    agent = LLMAgent(
+        prompt_generator,
+        stimulus_generator,
+        extractor,
+        stimulus_filter,
+        [logger_txt, logger_csv],
+        dialog_bound=1000,
+        rst_plan=rst_plan_ORDINARY,
+    )
+    print("Agent successfully built\n")
+
+    # run test
+    g_dut_state = GlobalDUTState()
+    g_coverage = GlobalCoverageDatabase()
+
+    with closing(StimulusSender(f"tcp://{server_ip_port}")) as stimulus_sender:
+        while not agent.end_simulation(g_dut_state, g_coverage):
+            stimulus = agent.generate_next_value(g_dut_state, g_coverage)
+            coverage = stimulus_sender.send_stimulus(stimulus)
+            g_coverage.set(coverage)
+
+        coverage = stimulus_sender.send_stimulus(None)
+
+        g_coverage.set(coverage)
+        coverage_plan = {
+            k: v for (k, v) in g_coverage.get_coverage_plan().items() if v > 0
+        }
+        print(
+            f"Finished with hits: {coverage_plan}\n"
+            f"Coverage: {g_coverage.get_coverage_rate()}\n"
+        )
+
+
 def main():
+    print("Running main experiment on ID...")
+
     server_ip_port = input(
         "Please enter server's IP and port (e.g. 127.0.0.1:5050, 128.232.65.218:5555): "
     )
@@ -122,7 +189,11 @@ def main():
 
 
 def budget_experiment():
+    print("Running budget experiment on ID...")
+
     INIT_BUDGET = 10000000
+    print(f"Start with BUDGET={INIT_BUDGET}\n")
+
     BUDGET = Budget(budget_per_trial=INIT_BUDGET, total_budget=INIT_BUDGET)
 
     server_ip_port = input(
@@ -236,5 +307,4 @@ def budget_experiment():
 
 
 if __name__ == "__main__":
-    print("Running main experiment on ID...")
-    main()
+    main_llama2()
