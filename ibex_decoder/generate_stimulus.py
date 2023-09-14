@@ -121,7 +121,7 @@ def main():
     )
 
     # build components
-    prompt_generator = TemplatePromptGenerator4ID2(
+    prompt_generator = TemplatePromptGenerator4ID1(
         bin_descr_path="../examples_ID/bins_description.txt",
         sampling_missed_bins_method="IDNewest",
     )
@@ -132,7 +132,7 @@ def main():
         system_prompt=prompt_generator.generate_system_prompt(),
         best_iter_buffer_resetting="STABLE",
         compress_msg_algo="best 3",
-        prioritise_harder_bins=True,
+        prioritise_harder_bins=False,
     )
     extractor = DumbExtractor()
     stimulus_filter = Filter(0x0, 0xFFFFFFFF)
@@ -151,8 +151,8 @@ def main():
         extractor,
         stimulus_filter,
         [logger_txt, logger_csv],
-        dialog_bound=800,
-        rst_plan=rst_plan_ORDINARY,
+        dialog_bound=300,
+        rst_plan=rst_plan_FAST,
     )
     print("Agent successfully built\n")
 
@@ -307,4 +307,4 @@ def budget_experiment():
 
 
 if __name__ == "__main__":
-    main_llama2()
+    main()

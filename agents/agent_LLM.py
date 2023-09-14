@@ -393,6 +393,18 @@ def rst_plan_ORDINARY(cov_hist: List[int], all_cov_hist: List[int]) -> bool:
     return len(cov_hist) >= period and cov_hist[-1] - cov_hist[-period] < epsilon
 
 
+def rst_plan_FAST(cov_hist: List[int], all_cov_hist: List[int]) -> bool:
+    epsilon = 3
+    period = 4
+    return len(cov_hist) >= period and cov_hist[-1] - cov_hist[-period] < epsilon
+
+
+def rst_plan_SLOW(cov_hist: List[int], all_cov_hist: List[int]) -> bool:
+    epsilon = 3
+    period = 10
+    return len(cov_hist) >= period and cov_hist[-1] - cov_hist[-period] < epsilon
+
+
 def rst_plan_IDADAR(cov_hist: List[int], all_cov_hist: List[int]) -> bool:
     epsilon = 3
     if all_cov_hist[-1] < 300:
