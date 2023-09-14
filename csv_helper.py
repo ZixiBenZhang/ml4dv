@@ -127,7 +127,7 @@ def main():
     # for filename in filenames:
     #     print_token_cnt_avg(filename)
 
-    dir_path = "20230911_100453"
+    dir_path = "20230913_230540"
     generate_summary_4SD(dir_path)
 
     # print_new_msg_for_token_bound(
