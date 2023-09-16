@@ -1,5 +1,6 @@
 #!/bin/env python3
 import csv
+import time
 from datetime import datetime
 import zmq
 import pickle
@@ -14,11 +15,10 @@ sys.path.insert(0, os.path.dirname(directory))
 
 from stride_detector.shared_types import *
 from global_shared_types import *
+from agents.agent_random import *
 from agents.agent_LLM import *
 from prompt_generators.prompt_generator_fixed_SD import FixedPromptGenerator4SD1
 from prompt_generators.prompt_generator_template_SD import *
-
-# from models.llm_llama2 import Llama2
 from models.llm_gpt import ChatGPT
 from stimuli_extractor import DumbExtractor
 from stimuli_filter import Filter
@@ -48,6 +48,42 @@ class StimulusSender:
     def close(self):
         if self.socket:
             self.socket.close()
+
+
+def random_experiment():
+    print("Running random experiment on SD...\n")
+
+    server_ip_port = input(
+        "Please enter server's IP and port (e.g. 127.0.0.1:5050, 128.232.65.218:5555): "
+    )
+
+    CYCLES = 10000000
+    agent = RandomAgent(total_cycle=CYCLES, seed=datetime.now().timestamp())
+
+    # run test
+    stimulus = Stimulus(value=0, finish=False)
+    g_dut_state = GlobalDUTState()
+    g_coverage = GlobalCoverageDatabase()
+
+    with closing(StimulusSender(f"tcp://{server_ip_port}")) as stimulus_sender:
+        while not agent.end_simulation(g_dut_state, g_coverage):
+            stimulus.value = agent.generate_next_value(g_dut_state, g_coverage)
+            dut_state, coverage = stimulus_sender.send_stimulus(stimulus)
+            g_dut_state.set(dut_state)
+            g_coverage.set(coverage)
+
+        coverage_plan = {
+            k: v for (k, v) in g_coverage.get_coverage_plan().items() if v > 0
+        }
+        print(
+            f"Finished random agent with {CYCLES} cycles \n"
+            f"Hits: {coverage_plan}, \n"
+            f"Coverage rate: {g_coverage.get_coverage_rate()}\n"
+        )
+
+        stimulus.value = None
+        stimulus.finish = True
+        stimulus_sender.send_stimulus(stimulus)
 
 
 def main():
@@ -247,4 +283,4 @@ def budget_experiment():
 
 
 if __name__ == "__main__":
-    budget_experiment()
+    random_experiment()

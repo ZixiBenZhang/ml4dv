@@ -4,6 +4,8 @@ from pprint import pprint
 import fire as fire
 import openai
 
+from models.llm_gpt import num_tokens_from_messages
+
 
 def testLlama(ckpt_dir="llama-2-7b-chat/", max_seq_len=4096, max_gen_len=None):
     from llama import Llama
@@ -72,5 +74,10 @@ def testGPT():
         print(f"Choice {i}:\n{msg}\n")
 
 
+def t():
+    print(num_tokens_from_messages([{'': '0x3a2c3e5e'}])-6)
+    # each number is 1~10 tokens
+
+
 if __name__ == "__main__":
-    fire.Fire(testGPT())
+    fire.Fire(t())
