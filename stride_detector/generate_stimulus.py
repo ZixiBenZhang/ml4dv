@@ -58,7 +58,7 @@ def random_experiment():
     )
 
     CYCLES = 10000000
-    agent = RandomAgent(total_cycle=CYCLES, seed=datetime.now().timestamp())
+    agent = RandomAgent(total_cycle=CYCLES, seed=0)
 
     # run test
     stimulus = Stimulus(value=0, finish=False)
