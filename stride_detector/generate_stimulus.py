@@ -76,7 +76,7 @@ def random_experiment():
             k: v for (k, v) in g_coverage.get_coverage_plan().items() if v > 0
         }
         print(
-            f"Finished random agent with {CYCLES} cycles \n"
+            f"Finished random agent on stride detector with {CYCLES} cycles \n"
             f"Hits: {coverage_plan}, \n"
             f"Coverage rate: {g_coverage.get_coverage_rate()}\n"
         )

@@ -46,6 +46,39 @@ class StimulusSender:
             self.socket.close()
 
 
+def random_experiment():
+    print("Running random experiment on ID...")
+
+    server_ip_port = input(
+        "Please enter server's IP and port (e.g. 127.0.0.1:5050, 128.232.65.218:5555): "
+    )
+
+    CYCLES = 10000000
+    agent = RandomAgent(total_cycle=CYCLES, seed=datetime.now().timestamp())
+
+    # run test
+    g_dut_state = GlobalDUTState()
+    g_coverage = GlobalCoverageDatabase()
+
+    with closing(StimulusSender(f"tcp://{server_ip_port}")) as stimulus_sender:
+        while not agent.end_simulation(g_dut_state, g_coverage):
+            stimulus = agent.generate_next_value(g_dut_state, g_coverage)
+            coverage = stimulus_sender.send_stimulus(stimulus)
+            g_coverage.set(coverage)
+
+        coverage = stimulus_sender.send_stimulus(None)
+
+        g_coverage.set(coverage)
+        coverage_plan = {
+            k: v for (k, v) in g_coverage.get_coverage_plan().items() if v > 0
+        }
+        print(
+            f"Finished random agent on Ibex with {CYCLES} cycles \n"
+            f"Hits: {coverage_plan}, \n"
+            f"Coverage rate: {g_coverage.get_coverage_rate()}\n"
+        )
+
+
 def main_llama2():
     print("Running main_llama2 experiment on ID...")
 
@@ -307,4 +340,4 @@ def budget_experiment():
 
 
 if __name__ == "__main__":
-    main()
+    random_experiment()
