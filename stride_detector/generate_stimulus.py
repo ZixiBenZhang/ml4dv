@@ -68,6 +68,7 @@ def random_experiment():
     with closing(StimulusSender(f"tcp://{server_ip_port}")) as stimulus_sender:
         while not agent.end_simulation(g_dut_state, g_coverage):
             stimulus.value = agent.generate_next_value(g_dut_state, g_coverage)
+            print(stimulus.value)
             dut_state, coverage = stimulus_sender.send_stimulus(stimulus)
             g_dut_state.set(dut_state)
             g_coverage.set(coverage)
