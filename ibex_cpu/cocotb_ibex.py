@@ -119,7 +119,7 @@ class SimulationController:
                     assert False, "Saw bad stimulus message"
 
                 for addr, data in stimulus_obj.insn_mem_updates:
-                    imem.write_mem(addr, data)
+                    self.imem_agent.write_mem(addr, data)
 
                 await ClockCycles(self.dut.clk_i, 1)
                 await ReadWrite()
@@ -153,7 +153,6 @@ async def basic_test(dut):
 
     cocotb.start_soon(Clock(dut.clk_i, 10, units="ns").start())
     await do_reset(dut)
-    #cocotb.start_soon(run_imem(dut))
     cocotb.start_soon(imem_agent.run_mem())
     cocotb.start_soon(dmem_agent.run_mem())
     cocotb.start_soon(update_magic_loc(dut, dmem_agent))
