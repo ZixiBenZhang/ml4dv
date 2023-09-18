@@ -57,7 +57,7 @@ def random_experiment():
         "Please enter server's IP and port (e.g. 127.0.0.1:5050, 128.232.65.218:5555): "
     )
 
-    CYCLES = 10000000
+    CYCLES = 1000000
     agent = RandomAgent(total_cycle=CYCLES, seed=0)
 
     # run test
@@ -68,7 +68,6 @@ def random_experiment():
     with closing(StimulusSender(f"tcp://{server_ip_port}")) as stimulus_sender:
         while not agent.end_simulation(g_dut_state, g_coverage):
             stimulus.value = agent.generate_next_value(g_dut_state, g_coverage)
-            print(stimulus.value)
             dut_state, coverage = stimulus_sender.send_stimulus(stimulus)
             g_dut_state.set(dut_state)
             g_coverage.set(coverage)

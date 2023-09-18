@@ -53,7 +53,7 @@ def random_experiment():
         "Please enter server's IP and port (e.g. 127.0.0.1:5050, 128.232.65.218:5555): "
     )
 
-    CYCLES = 10000000
+    CYCLES = 1000000
     agent = RandomAgent(total_cycle=CYCLES, seed=datetime.now().timestamp())
 
     # run test
