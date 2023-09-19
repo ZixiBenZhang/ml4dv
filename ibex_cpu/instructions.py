@@ -8,6 +8,8 @@ class Cov(Enum):
     ZERO_DST = 'zero_dst'
     ZERO_SRC = 'zero_src'
     SAME_SRC = 'same_src'
+    BR_BACKWARDS = 'br_backwards'
+    BR_FORWARDS = 'br_forwards'
 
 
 class Instr(Enum):
@@ -136,12 +138,16 @@ class JInstruction(Encoding):
 
     @staticmethod
     def coverpoints() -> list[Cov]:
-        return [Cov.SEEN, Cov.ZERO_DST]
+        return [Cov.SEEN, Cov.ZERO_DST, Cov.BR_BACKWARDS, Cov.BR_FORWARDS]
 
     def sample_coverage(self) -> list[Cov]:
         out = [Cov.SEEN]
         if 0 == self.rd():
             out.append(Cov.ZERO_DST)
+        if 0 > self.offset():
+            out.append(Cov.BR_BACKWARDS)
+        if 0 < self.offset():
+            out.append(Cov.BR_FORWARDS)
         return out
 
 
