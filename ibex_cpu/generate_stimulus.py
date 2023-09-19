@@ -12,6 +12,7 @@ sys.path.insert(0, os.path.dirname(directory))
 # print(sys.path)
 
 from agents.agent_LLM import *
+from agents.agent_IC_dumb import *
 from loggers.logger_csv import CSVLogger
 from loggers.logger_txt import TXTLogger
 from models.llm_gpt import ChatGPT
@@ -42,6 +43,7 @@ class StimulusSender:
     def close(self):
         if self.socket:
             self.socket.close()
+
 
 def main():
     print("Running main experiment on IC...\n")
@@ -85,23 +87,26 @@ def main():
     # )
     # print("Agent successfully built\n")
 
-    stimulus = Stimulus(insn_mem_updates = [], finish = False)
+    agent = DumbAgent4IC()
+
+    stimulus = Stimulus(insn_mem_updates=[], finish=False)
     g_dut_state = GlobalDUTState()
     g_coverage = GlobalCoverageDatabase()
 
     with closing(StimulusSender("tcp://localhost:5555")) as stimulus_sender:
-        while True:
+        while not agent.end_simulation(g_dut_state, g_coverage):
+            stimulus.insn_mem_updates = agent.generate_next_value(g_dut_state, g_coverage)
             ibex_state, coverage = stimulus_sender.send_stimulus(stimulus)
+            g_dut_state.set(ibex_state)
+            g_coverage.set(coverage)
 
             if ibex_state.last_pc is not None:
                 print(f'{ibex_state.last_pc:08x} {ibex_state.last_insn:08x}')
 
-            if ibex_state.last_pc == 0x100080 + 0x18:
-                break
-
         stimulus.finish = True
         _, final_coverage = stimulus_sender.send_stimulus(stimulus)
         final_coverage.output()
+
 
 if __name__ == "__main__":
     main()
