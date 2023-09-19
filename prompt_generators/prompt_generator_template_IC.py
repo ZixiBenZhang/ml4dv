@@ -37,7 +37,6 @@ class TemplatePromptGenerator4IC1(TemplatePromptGenerator):
             #     "between 0x0 and 0xffffffff) to cover the test cases.\n"
             # )
         elif self.code_summary_type == 0:
-            # TODO: Template2: condense task introduction
             return (
                 "You will receive a description of bins (i.e. test cases) of a testbench for "
                 "a hardware device under test (DUT), which is a RISC-V CPU. "
@@ -80,7 +79,7 @@ class TemplatePromptGenerator4IC1(TemplatePromptGenerator):
 
     def _load_init_question(self) -> str:
         init_question = (
-            "Generate a list, which can be empty if necessary, of address-instruction "
+            "Please generate a list, which can be empty if necessary, of address-instruction "
             "pairs in 32-bit hexadecimal format to update the CPU's memory, ensuring "
             "it covers the specified bins upon resuming execution from the current PC. \n"
         )
@@ -177,36 +176,44 @@ class TemplatePromptGenerator4IC1(TemplatePromptGenerator):
         return iter_question
 
 
-# Init as FixedPrompt, Iter as TemplatePrompt
-# class TemplatePromptGenerator4ID2(TemplatePromptGenerator4ID1):
-#     def __init__(
-#         self,
-#         dut_code_path: str = "../examples_ID/dut_code.txt",
-#         tb_code_path: str = "../examples_ID/tb_code.txt",
-#         bin_descr_path: str = "../examples_ID/bins_description.txt",
-#         code_summary_type: int = 0,  # 0: no code, 1: code, 2: summary
-#         sampling_missed_bins_method: Union[str, None] = None,
-#     ):
-#         super().__init__(
-#             dut_code_path,
-#             tb_code_path,
-#             bin_descr_path,
-#             code_summary_type,
-#             sampling_missed_bins_method,
-#         )
-#         self.bin_descr_path = bin_descr_path
-#
-#     def generate_initial_prompt(self) -> str:
-#         with open(self.bin_descr_path, "r") as f:
-#             bins_description = f.read()
-#         prompt = (
-#             "Please generate a list of 32-bit instructions (i.e. hex integers between 0x0 and 0xffffffff)"
-#             " for a RISC-V processor that satisfies these described bins (i.e. test cases):\n"
-#             "------\n"
-#             "BINS DESCRIPTION\n"
-#             f"{bins_description}"
-#             "------\n"
-#             "Please generate a list of 32-bit instructions (i.e. hex integers between 0x0 and 0xffffffff)"
-#             " that satisfies the above conditions."
-#         )
-#         return prompt
+# Succinct task introduction
+class TemplatePromptGenerator4IC2(TemplatePromptGenerator4IC1):
+    def __init__(
+        self,
+        dut_code_path: str = "../examples_IC/dut_code.txt",
+        tb_code_path: str = "../examples_IC/tb_code.txt",
+        bin_descr_path: str = "../examples_IC/bins_description.txt",
+        code_summary_type: int = 0,  # 0: no code, 1: code, 2: summary
+        sampling_missed_bins_method: Union[str, None] = None,
+    ):
+        super().__init__(
+            dut_code_path,
+            tb_code_path,
+            bin_descr_path,
+            code_summary_type,
+            sampling_missed_bins_method,
+        )
+
+    def generate_initial_prompt(self, **kwargs) -> str:
+        with open(self.bin_descr_path, "r") as f:
+            bins_description = f.read()
+        prompt = (
+            # TODO: instr memo bounds; pass in current instr memo??
+            f"We are working with a CPU capable of executing RISC-V instructions. "
+            f"The CPU's instruction memory is defined within the address range of "
+            f"{0x00100080}, and its program counter (PC) is currently "
+            f"set to {kwargs['current_pc']}. \n"
+            f"Our objective is to update the CPU's instruction memory with a sequence "
+            f"of 32-bit addresses and corresponding 32-bit instructions. The goal is "
+            f"to ensure that, when the CPU resumes executing instructions from the "
+            f"current PC, it covers the bins (i.e. test cases) that are of interest to us. \n"
+            f"Here's the description of the bins that are of interest to us:\n"
+            "------\n"
+            "BINS DESCRIPTION\n"
+            f"{bins_description}"
+            "------\n"
+            "Please generate a list, which can be empty if necessary, of address-instruction "
+            "pairs in 32-bit hexadecimal format to update the CPU's memory, ensuring "
+            "it covers the specified bins upon resuming execution from the current PC. \n"
+        )
+        return prompt
