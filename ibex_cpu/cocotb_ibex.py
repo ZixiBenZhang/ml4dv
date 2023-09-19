@@ -5,10 +5,14 @@ import struct
 import zmq
 from pathlib import Path
 
+directory = os.path.dirname(os.path.abspath("__file__"))
+sys.path.insert(0, os.path.dirname(directory))
+# print(sys.path)
+
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import Timer, ClockCycles, FallingEdge, ReadWrite, Event
-from instruction_monitor import *
+from ibex_cpu.instruction_monitor import *
 from contextlib import closing
 
 async def do_reset(dut):

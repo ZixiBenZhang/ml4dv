@@ -1,7 +1,7 @@
 from dataclasses import dataclass, astuple
 
 from cocotb.triggers import ClockCycles, ReadOnly
-from shared_types import *
+from ibex_cpu.shared_types import *
 
 @dataclass
 class InstructionInfo:
