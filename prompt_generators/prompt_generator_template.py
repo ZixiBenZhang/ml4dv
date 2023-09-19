@@ -27,7 +27,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
 
         self.intro = self._load_introduction()
         self.code_summary = self._load_code_summary(dut_code_path, tb_code_path)
-        self.tb_summary = self._load_bins_summary(bin_descr_path)
+        self.bin_descr_path = bin_descr_path
         self.init_question = self._load_init_question()
 
         self.coverage_difference_prompts_dict = (
@@ -72,7 +72,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def _load_bins_summary(self, bin_descr_dir) -> str:
+    def _load_bins_summary(self, bin_descr_dir, **kwargs) -> str:
         raise NotImplementedError
 
     @abstractmethod
@@ -99,13 +99,14 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
             f"Output format: [a, b, c, ...]."
         )
 
-    def generate_initial_prompt(self) -> str:
+    def generate_initial_prompt(self, **kwargs) -> str:
         # Initial Template: introduction + summaries + question
+        tb_summary = self._load_bins_summary(self.bin_descr_path, **kwargs)
         initial_prompt = (
             self.intro
             + "\n----------\n"
             + self.code_summary
-            + self.tb_summary
+            + tb_summary
             + "\n----------\n"
             + self.init_question
         )

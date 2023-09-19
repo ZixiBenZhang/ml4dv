@@ -69,7 +69,7 @@ class TemplatePromptGenerator4SD1(TemplatePromptGenerator):
             # TODO: code summaries
             raise NotImplementedError
 
-    def _load_bins_summary(self, bin_descr_dir) -> str:
+    def _load_bins_summary(self, bin_descr_dir, **kwargs) -> str:
         with open(bin_descr_dir, "r") as f:
             bins_description = f.read()
         tb_summary = (
@@ -235,7 +235,7 @@ class TemplatePromptGenerator4SD2(TemplatePromptGenerator):
             # TODO: code summaries
             raise NotImplementedError
 
-    def _load_bins_summary(self, bin_descr_dir) -> str:
+    def _load_bins_summary(self, bin_descr_dir, **kwargs) -> str:
         with open(bin_descr_dir, "r") as f:
             bins_description = f.read()
         tb_summary = (
@@ -362,7 +362,7 @@ class TemplatePromptGenerator4SDAnalog(TemplatePromptGenerator):
     def generate_initial_prompt(self) -> str:
         # Initial Template: introduction + summaries + question
         initial_prompt = (
-            self.intro + "\n\n" + self.tb_summary + "\n\n" + self.init_question
+            self.intro + "\n\n" + self._load_bins_summary(self.bin_descr_path) + "\n\n" + self.init_question
         )
         return initial_prompt
 
@@ -376,7 +376,7 @@ class TemplatePromptGenerator4SDAnalog(TemplatePromptGenerator):
     def _load_code_summary(self, dut_code_path, tb_code_path) -> str:
         return ""
 
-    def _load_bins_summary(self, bin_descr_dir) -> str:
+    def _load_bins_summary(self, bin_descr_dir, **kwargs) -> str:
         tb_summary = (
             f"Here are some definitions:\n"
             f"- A sequence follows a single-stride pattern with a stride width x if: "

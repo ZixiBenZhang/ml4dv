@@ -19,7 +19,6 @@ class TemplatePromptGenerator4ID1(TemplatePromptGenerator):
         )
 
     def generate_system_prompt(self) -> str:
-        # TODO: improve SYSTEM msg
         return (
             "Please output a list of hexadecimal integers only, "
             f"each integer between 0x0 and 0xffffffff. \n"
@@ -76,7 +75,7 @@ class TemplatePromptGenerator4ID1(TemplatePromptGenerator):
             # TODO: code summaries
             raise NotImplementedError
 
-    def _load_bins_summary(self, bin_descr_dir) -> str:
+    def _load_bins_summary(self, bin_descr_dir, **kwargs) -> str:
         with open(bin_descr_dir, "r") as f:
             bins_description = f.read()
         tb_summary = (

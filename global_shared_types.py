@@ -139,7 +139,7 @@ class GlobalCoverageDatabase:
         return coverage_plan
 
     def _get_coverage_plan_IC(self) -> Dict[str, int]:
-        # TODO
+        # TODO: get Ibex CPU coverage plan
         coverage_plan = {}
         op_bins = ["alu_ops", "alu_imm_ops", "misc", "load_ops", "store_ops"]
         reg_bins = ["read_reg_a", "read_reg_b", "write_reg"]

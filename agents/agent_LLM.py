@@ -207,6 +207,7 @@ class LLMAgent(BaseAgent):
 
             # Load prompt
             prompt = ""
+            # TODO: pass dut_state into generate_init/iter_prompt
             if self.state == "INIT":
                 prompt = self.prompt_generator.generate_initial_prompt()
             elif self.state == "ITER":
