@@ -1,7 +1,7 @@
-from dataclasses import dataclass, astuple
+from dataclasses import dataclass
 
-from cocotb.triggers import ClockCycles, ReadOnly
-from shared_types import *
+from shared_types import CoverageDatabase, RegOpCoverage
+
 
 @dataclass
 class InstructionInfo:
@@ -13,17 +13,19 @@ class InstructionInfo:
 
 riscv_instructions = [
     InstructionInfo(0xfe00707f, 0b0110011, 'add', 'reg-op'),
-    InstructionInfo(0xfe00707f, 0b0110011 | (0b0100000 << 25), 'sub', 'reg-op'),
+    InstructionInfo(0xfe00707f, 0b0110011 | (0b0100000 << 25),
+                    'sub', 'reg-op'),
     InstructionInfo(0xfe00707f, 0b0110011 | (0b001 << 12), 'sll', 'reg-op'),
     InstructionInfo(0xfe00707f, 0b0110011 | (0b010 << 12), 'slt', 'reg-op'),
     InstructionInfo(0xfe00707f, 0b0110011 | (0b011 << 12), 'sltu', 'reg-op'),
     InstructionInfo(0xfe00707f, 0b0110011 | (0b100 << 12), 'xor', 'reg-op'),
     InstructionInfo(0xfe00707f, 0b0110011 | (0b101 << 12), 'srl', 'reg-op'),
     InstructionInfo(0xfe00707f, 0b0110011 | (0b101 << 12) | (0b0100000 << 25),
-        'sra', 'reg-op'),
+                    'sra', 'reg-op'),
     InstructionInfo(0xfe00707f, 0b0110011 | (0b110 << 12), 'or', 'reg-op'),
     InstructionInfo(0xfe00707f, 0b0110011 | (0b111 << 12), 'and', 'reg-op'),
 ]
+
 
 class InstructionMonitor:
     def __init__(self, dut):
@@ -31,7 +33,7 @@ class InstructionMonitor:
         self.insn_valid = dut.u_top.rvfi_valid
         self.insn_pc = dut.u_top.rvfi_pc_rdata
         self.insn = dut.u_top.rvfi_insn
-        self.coverage_db = CoverageDatabase(reg_op_insn_coverage = {})
+        self.coverage_db = CoverageDatabase(reg_op_insn_coverage={})
         self.last_pc = None
         self.last_insn = None
 

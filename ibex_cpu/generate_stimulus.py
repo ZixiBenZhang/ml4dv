@@ -1,10 +1,10 @@
 #!/bin/env python3
 
 import zmq
-import pickle
 from contextlib import closing
 
-from shared_types import *
+from shared_types import Stimulus, CoverageDatabase, IbexStateInfo
+
 
 class StimulusSender:
     def __init__(self, zmq_addr):
@@ -29,8 +29,9 @@ class StimulusSender:
         if self.socket:
             self.socket.close()
 
+
 def main():
-    stimulus = Stimulus(insn_mem_updates = [], finish = False)
+    stimulus = Stimulus(insn_mem_updates=[], finish=False)
 
     with closing(StimulusSender("tcp://localhost:5555")) as stimulus_sender:
         while True:
@@ -45,6 +46,7 @@ def main():
         stimulus.finish = True
         _, final_coverage = stimulus_sender.send_stimulus(stimulus)
         final_coverage.output()
+
 
 if __name__ == "__main__":
     main()

@@ -1,6 +1,6 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, astuple
 from typing import Optional
-from pprint import pprint
+
 
 @dataclass
 class RegOpCoverage:
@@ -26,7 +26,11 @@ class RegOpCoverage:
             self.same_src += 1
 
     def __str__(self):
-        return f'seen: {self.seen}, zero_dst: {self.zero_dst}, zero_src: {self.zero_src}, same_src: {self.same_src}'
+        return (
+            f'seen: {self.seen}, zero_dst: {self.zero_dst}, '
+            f'zero_src: {self.zero_src}, same_src: {self.same_src}'
+        )
+
 
 @dataclass
 class CoverageDatabase:
@@ -34,7 +38,7 @@ class CoverageDatabase:
 
     def get_coverage_vector(self):
         coverage_list = list(self.reg_op_insn_coverage.items())
-        coverage_list.sort(key = lambda c: c[0])
+        coverage_list.sort(key=lambda c: c[0])
         coverage_vector = []
 
         for insn_name, coverage_info in coverage_list:
@@ -44,16 +48,18 @@ class CoverageDatabase:
 
     def get_coverage_bool_vector(self):
         return list(map(lambda x: 1 if x > 0 else 0,
-            self.get_coverage_vector()))
+                        self.get_coverage_vector()))
 
     def output(self):
         for insn_name, insn_coverage in self.reg_op_insn_coverage.items():
             print(f'{insn_name} {insn_coverage}')
 
+
 @dataclass
 class Stimulus:
     insn_mem_updates: list[tuple[int, int]]
     finish: bool
+
 
 @dataclass
 class IbexStateInfo:

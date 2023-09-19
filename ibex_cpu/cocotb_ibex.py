@@ -1,15 +1,14 @@
-import os
-import random
-import sys
 import struct
 import zmq
-from pathlib import Path
 
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import Timer, ClockCycles, FallingEdge, ReadWrite, Event
-from instruction_monitor import *
+from cocotb.triggers import Timer, ClockCycles, ReadWrite, Event
+from instruction_monitor import InstructionMonitor
+from shared_types import Stimulus, IbexStateInfo
+
 from contextlib import closing
+
 
 async def do_reset(dut):
     dut.rst_ni.value = 1
@@ -22,12 +21,13 @@ async def do_reset(dut):
     dut.rst_ni.value = 1
 
 prog = [0x00000293,
- 0x01400313,
- 0x006282b3,
- 0xffdff06f]
+        0x01400313,
+        0x006282b3,
+        0xffdff06f]
+
 
 class MemAgent:
-    def __init__(self, dut, mem_name, default_load_val = 0xC0001073, handle_writes = True):
+    def __init__(self, dut, mem_name, default_load_val=0xC0001073, handle_writes=True):
         self.mem_dict = {}
 
         self.clk = dut.clk_i
@@ -67,7 +67,7 @@ class MemAgent:
             self.rvalid.value = 0
 
             if (self.req.value):
-                self.gnt.value = 1;
+                self.gnt.value = 1
                 access_addr = self.addr.value
 
                 if self.handle_writes and self.we.value:
@@ -77,7 +77,7 @@ class MemAgent:
 
                 await ClockCycles(self.clk, 1)
                 await ReadWrite()
-                self.gnt.value = 0;
+                self.gnt.value = 0
                 self.rvalid.value = 1
 
                 if self.handle_writes and write_data:
@@ -85,7 +85,8 @@ class MemAgent:
                     self.mem_dict[int(access_addr)] = int(write_data)
                 else:
                     self.rdata.value = self.mem_dict.get(int(access_addr),
-                            self.default_load_val)
+                                                         self.default_load_val)
+
 
 async def update_magic_loc(dut, dmem_agent):
     dmem_agent.mem_dict[0x80000000] = 1
@@ -95,6 +96,7 @@ async def update_magic_loc(dut, dmem_agent):
         await ReadWrite()
 
         dmem_agent.mem_dict[0x80000000] += 1
+
 
 class SimulationController:
     def __init__(self, dut, instruction_monitor, imem_agent, zmq_addr):
@@ -112,7 +114,7 @@ class SimulationController:
             await ClockCycles(self.dut.clk_i, 1)
             await ReadWrite()
 
-            while(True):
+            while (True):
                 stimulus_obj = socket.recv_pyobj()
 
                 if not isinstance(stimulus_obj, Stimulus):
@@ -127,11 +129,11 @@ class SimulationController:
                 self.instruction_monitor.sample_insn_coverage()
 
                 ibex_state_info = IbexStateInfo(
-                        last_pc = self.instruction_monitor.last_pc,
-                        last_insn = self.instruction_monitor.last_insn)
+                    last_pc=self.instruction_monitor.last_pc,
+                    last_insn=self.instruction_monitor.last_insn)
 
                 socket.send_pyobj((ibex_state_info,
-                    self.instruction_monitor.coverage_db))
+                                   self.instruction_monitor.coverage_db))
 
                 if stimulus_obj.finish:
                     self.end_simulation_event.set()
@@ -140,14 +142,15 @@ class SimulationController:
     def close(self):
         self.zmq_context.term()
 
+
 @cocotb.test()
 async def basic_test(dut):
 
-    dut.data_gnt_i.value = 0;
-    dut.data_rvalid_i.value = 0;
+    dut.data_gnt_i.value = 0
+    dut.data_rvalid_i.value = 0
 
-    imem_agent = MemAgent(dut, "instr", handle_writes = False)
-    dmem_agent = MemAgent(dut, "data", handle_writes = True)
+    imem_agent = MemAgent(dut, "instr", handle_writes=False)
+    dmem_agent = MemAgent(dut, "data", handle_writes=True)
     ins_mon = InstructionMonitor(dut)
     imem_agent.load_bin('test_prog.bin', 0x100080)
 
@@ -159,7 +162,8 @@ async def basic_test(dut):
 
     await ClockCycles(dut.clk_i, 1)
 
-    with closing(SimulationController(dut, ins_mon, imem_agent, "tcp://*:5555")) as simulation_controller:
+    sim_ctrl = SimulationController(dut, ins_mon, imem_agent, "tcp://*:5555")
+    with closing(sim_ctrl) as simulation_controller:
         cocotb.start_soon(simulation_controller.controller_loop())
 
         await simulation_controller.end_simulation_event.wait()
