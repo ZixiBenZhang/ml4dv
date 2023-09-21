@@ -1,11 +1,17 @@
 import struct
 import zmq
+import os
+import sys
+
+directory = os.path.dirname(os.path.abspath("__file__"))
+sys.path.insert(0, os.path.dirname(directory))
+# print(sys.path)
 
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import Timer, ClockCycles, ReadWrite, Event
-from instruction_monitor import InstructionMonitor
-from shared_types import Stimulus, IbexStateInfo
+from ibex_cpu.instruction_monitor import InstructionMonitor
+from ibex_cpu.shared_types import Stimulus, IbexStateInfo
 
 from contextlib import closing
 

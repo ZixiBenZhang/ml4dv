@@ -1,5 +1,12 @@
-from shared_types import CoverageDatabase
-from instructions import Instr, Encoding
+import os
+import sys
+
+directory = os.path.dirname(os.path.abspath("__file__"))
+sys.path.insert(0, os.path.dirname(directory))
+# print(sys.path)
+
+from ibex_cpu.shared_types import CoverageDatabase
+from ibex_cpu.instructions import Instr, Encoding
 
 
 class InstructionMonitor:

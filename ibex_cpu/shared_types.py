@@ -1,8 +1,14 @@
+import os
+import sys
 from dataclasses import dataclass
 from collections import OrderedDict
 from typing import Optional
 
-from instructions import Instr, Cov
+directory = os.path.dirname(os.path.abspath("__file__"))
+sys.path.insert(0, os.path.dirname(directory))
+# print(sys.path)
+
+from ibex_cpu.instructions import Instr, Cov
 
 
 @dataclass
