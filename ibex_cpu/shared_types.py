@@ -1,59 +1,43 @@
-from dataclasses import dataclass, astuple
+from dataclasses import dataclass
+from collections import OrderedDict
 from typing import Optional
-from pprint import pprint
 
-@dataclass
-class RegOpCoverage:
-    seen: int
-    zero_dst: int
-    zero_src: int
-    same_src: int
+from instructions import Instr, Cov
 
-    def sample(self, insn_bits):
-        self.seen += 1
-
-        rd = (insn_bits >> 7) & 0x1f
-        if rd == 0:
-            self.zero_dst += 1
-
-        rs1 = (insn_bits >> 15) & 0x1f
-        rs2 = (insn_bits >> 20) & 0x1f
-
-        if rs1 == 0 or rs2 == 0:
-            self.zero_src += 1
-
-        if rs1 == rs2:
-            self.same_src += 1
-
-    def __str__(self):
-        return f'seen: {self.seen}, zero_dst: {self.zero_dst}, zero_src: {self.zero_src}, same_src: {self.same_src}'
 
 @dataclass
 class CoverageDatabase:
-    reg_op_insn_coverage: dict[str, RegOpCoverage]
+    instructions: dict[Instr, dict[Cov, int]]
 
-    def get_coverage_vector(self):
-        coverage_list = list(self.reg_op_insn_coverage.items())
-        coverage_list.sort(key = lambda c: c[0])
-        coverage_vector = []
+    def get_coverage_dict(self) -> OrderedDict[str, int]:
+        generator = (
+            (f"{instr.value}_{cov.value}", num)
+            for (instr, covs) in self.instructions.items()
+            for (cov, num) in covs.items()
+        )
+        return OrderedDict(sorted(generator, key=lambda cov: cov[0]))
 
-        for insn_name, coverage_info in coverage_list:
-            coverage_vector += list(astuple(coverage_info))
-
-        return coverage_vector
+    def get_coverage_vector(self) -> list[int]:
+        return list(self.get_coverage_dict().values())
 
     def get_coverage_bool_vector(self):
         return list(map(lambda x: 1 if x > 0 else 0,
-            self.get_coverage_vector()))
+                        self.get_coverage_vector()))
 
     def output(self):
-        for insn_name, insn_coverage in self.reg_op_insn_coverage.items():
-            print(f'{insn_name} {insn_coverage}')
+        for (instr, covs) in self.instructions.items():
+            print(f'{instr.value}:')
+            print(
+                ' ' * 4,
+                ', '.join(f'{cov.value}: {num}' for (cov, num) in covs.items())
+            )
+
 
 @dataclass
 class Stimulus:
     insn_mem_updates: list[tuple[int, int]]
     finish: bool
+
 
 @dataclass
 class IbexStateInfo:
