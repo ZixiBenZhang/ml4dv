@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from pprint import pprint
 
 import fire as fire
@@ -75,7 +76,8 @@ def testGPT():
 
 
 def t():
-    print(num_tokens_from_messages([{'': '0x3a2c3e5e'}])-6)
+    print(datetime.now().timestamp())
+    # print(num_tokens_from_messages([{'': '0x3a2c3e5e'}])-6)
     # each number is 1~10 tokens
 
 
