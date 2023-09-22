@@ -258,7 +258,7 @@ async def basic_test(dut):
 
     trial_cnt = 0
 
-    while trial_cnt == 0:
+    while True:
         trial_cnt += 1
 
         coverage_monitor = CoverageMonitor(dut)

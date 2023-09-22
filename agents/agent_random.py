@@ -5,7 +5,7 @@ import random
 class RandomAgent(BaseAgent):
     def __init__(self, total_cycle=1000000, seed=0):
         super().__init__()
-        self.seed = seed
+        self.seed = 0
         random.seed(self.seed)
         self.total_cycle = total_cycle
         self.current_cycle = 0
