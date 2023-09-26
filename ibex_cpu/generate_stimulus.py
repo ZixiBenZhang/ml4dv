@@ -17,8 +17,8 @@ from loggers.logger_csv import CSVLogger
 from loggers.logger_txt import TXTLogger
 from models.llm_gpt import ChatGPT
 from ibex_cpu.shared_types import *
-from stimuli_extractor import DumbExtractor
-from stimuli_filter import Filter
+from stimuli_extractor import *
+from stimuli_filter import *
 from prompt_generators.prompt_generator_template_IC import *
 
 
@@ -69,8 +69,8 @@ def main():
         compress_msg_algo="best 3",
         prioritise_harder_bins=False,
     )
-    extractor = DumbExtractor()
-    stimulus_filter = Filter(-10000, 10000)
+    extractor = ICExtractor()
+    stimulus_filter = ICFilter(0x0, 0xffffffff)
 
     # build loggers
     logger_txt = TXTLogger(f"{prefix}{t}.txt")

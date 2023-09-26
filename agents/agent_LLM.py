@@ -125,7 +125,7 @@ class LLMAgent(BaseAgent):
 
     def generate_next_value(
         self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase
-    ) -> Union[int, None]:
+    ) -> Union[int, List[Tuple[int, int]], None]:
 
         if coverage_database.get() is None:
             return 0
