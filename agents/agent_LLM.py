@@ -127,14 +127,13 @@ class LLMAgent(BaseAgent):
         self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase
     ) -> Union[int, List[Tuple[int, int]], None]:
 
-        if coverage_database.get() is None:
-            return 0
-
-        coverage = coverage_database.get_coverage_plan()
+        # if coverage_database.get() is None:
+        #     return 0
 
         # When not first stimulus & need to generate new response
         # log coverage, update coverage of last msg, check need to reset
-        if len(self.stimuli_buffer) == 0 and self.state != "INIT":
+        if coverage_database.get() is not None and len(self.stimuli_buffer) == 0 and self.state != "INIT":
+            coverage = coverage_database.get_coverage_plan()
             # Log coverage
             self.log_append({"role": "coverage", "content": coverage})
             # coverage_plan = {k: v for (k, v) in coverage.items() if v > 0}
@@ -179,6 +178,7 @@ class LLMAgent(BaseAgent):
             # If gibberish
             # log coverage, update coverage of last msg, check need to reset
             if f_:
+                coverage = coverage_database.get_coverage_plan()
                 self.log_append({"role": "coverage", "content": coverage})
                 print(
                     f"Dialog #{self.dialog_index} Message #{self.msg_index} done, \n"
