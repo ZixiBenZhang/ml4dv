@@ -3,7 +3,7 @@ import sys
 from dataclasses import dataclass
 from itertools import chain
 from collections import OrderedDict
-from typing import Optional
+from typing import Optional, Dict
 
 directory = os.path.dirname(os.path.abspath("__file__"))
 sys.path.insert(0, os.path.dirname(directory))
