@@ -35,7 +35,15 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
         )
 
     def _resolve_sampling_method(self, sampling_missed_bins_method: Union[str, None]):
-        methods = ["ORIGINAL", "NEWEST", "RANDOM", "IDNEWEST", "IDADAS", "IDADANEW", "ICNEWEST"]
+        methods = [
+            "ORIGINAL",
+            "NEWEST",
+            "RANDOM",
+            "IDNEWEST",
+            "IDADAS",
+            "IDADANEW",
+            "ICNEWEST",
+        ]
         assert sampling_missed_bins_method.upper() in methods, (
             f"Invalid sampling method {sampling_missed_bins_method}. "
             f"Please use one of the following methods: {methods}."
@@ -307,7 +315,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
 
     @staticmethod
     def _sample_missed_bins_ICNEWEST(
-            missed_bins: List[str], coverage_rate: Tuple[int, int]
+        missed_bins: List[str], coverage_rate: Tuple[int, int]
     ) -> List[str]:
         # IC NEWEST
         if len(missed_bins) >= 40:

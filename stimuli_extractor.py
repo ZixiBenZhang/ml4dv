@@ -39,7 +39,10 @@ class ICExtractor(BaseExtractor):
             re.findall(r"\(0x[\da-fA-F]+, ?0x[\da-fA-F]+\)", text, re.I)
         )
         updates = list(
-            map(lambda t: tuple(map(lambda x: int(x, 16), t[1:-1].split(',')))[:2], pairs)
+            map(
+                lambda t: tuple(map(lambda x: int(x, 16), t[1:-1].split(",")))[:2],
+                pairs,
+            )
         )
         return updates
 

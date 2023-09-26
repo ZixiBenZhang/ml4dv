@@ -362,7 +362,11 @@ class TemplatePromptGenerator4SDAnalog(TemplatePromptGenerator):
     def generate_initial_prompt(self) -> str:
         # Initial Template: introduction + summaries + question
         initial_prompt = (
-            self.intro + "\n\n" + self._load_bins_summary(self.bin_descr_path) + "\n\n" + self.init_question
+            self.intro
+            + "\n\n"
+            + self._load_bins_summary(self.bin_descr_path)
+            + "\n\n"
+            + self.init_question
         )
         return initial_prompt
 

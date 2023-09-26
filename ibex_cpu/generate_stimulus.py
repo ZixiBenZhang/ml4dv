@@ -70,7 +70,7 @@ def main():
         prioritise_harder_bins=False,
     )
     extractor = ICExtractor()
-    stimulus_filter = ICFilter(0x0, 0xffffffff)
+    stimulus_filter = ICFilter(0x0, 0xFFFFFFFF)
 
     # build loggers
     logger_txt = TXTLogger(f"{prefix}{t}.txt")
@@ -96,13 +96,15 @@ def main():
 
     with closing(StimulusSender(f"tcp://{server_ip_port}")) as stimulus_sender:
         while not agent.end_simulation(g_dut_state, g_coverage):
-            stimulus.insn_mem_updates = agent.generate_next_value(g_dut_state, g_coverage)
+            stimulus.insn_mem_updates = agent.generate_next_value(
+                g_dut_state, g_coverage
+            )
             ibex_state, coverage = stimulus_sender.send_stimulus(stimulus)
             g_dut_state.set(ibex_state)
             g_coverage.set(coverage)
 
             if ibex_state.last_pc is not None:
-                print(f'{ibex_state.last_pc:08x} {ibex_state.last_insn:08x}')
+                print(f"{ibex_state.last_pc:08x} {ibex_state.last_insn:08x}")
 
         stimulus.finish = True
         _, final_coverage = stimulus_sender.send_stimulus(stimulus)

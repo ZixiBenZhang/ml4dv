@@ -47,6 +47,7 @@ from ibex_cpu.shared_types import IbexStateInfo
 # or seen: 0, zero_dst: 0, zero_src: 0, same_src: 0
 # and seen: 0, zero_dst: 0, zero_src: 0, same_src: 0
 
+
 class DumbAgent4IC(BaseAgent):
     def __init__(self):
         super().__init__()

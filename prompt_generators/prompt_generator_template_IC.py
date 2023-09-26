@@ -109,7 +109,14 @@ class TemplatePromptGenerator4IC1(TemplatePromptGenerator):
         return result_summary
 
     def _load_coverage_difference_prompts_dict(self) -> Dict[str, str]:
-        basic_bins = {"seen": [], "zero_dst": [], "zero_src": [], "same_src": [], "br_backwards": [], "br_forwards": []}
+        basic_bins = {
+            "seen": [],
+            "zero_dst": [],
+            "zero_src": [],
+            "same_src": [],
+            "br_backwards": [],
+            "br_forwards": [],
+        }
         for instr in Instr:
             for cov in instr.type().coverpoints():
                 basic_bins[cov.value].append(instr.value)
@@ -121,30 +128,42 @@ class TemplatePromptGenerator4IC1(TemplatePromptGenerator):
 
         basic_bins_difference = {}
         for op in basic_bins["seen"]:
-            basic_bins_difference[f"{op}_seen"] = f"- {op}_seen: the CPU hasn't performed the operation {op}.\n"
+            basic_bins_difference[
+                f"{op}_seen"
+            ] = f"- {op}_seen: the CPU hasn't performed the operation {op}.\n"
         for op in basic_bins["zero_dst"]:
-            basic_bins_difference[f"{op}_zero_dst"] = f"- {op}_zero_dst: the CPU hasn't executed an instruction " \
-                                                      f"that performs the operation {op} with register zero as " \
-                                                      f"the destination register.\n"
+            basic_bins_difference[f"{op}_zero_dst"] = (
+                f"- {op}_zero_dst: the CPU hasn't executed an instruction "
+                f"that performs the operation {op} with register zero as "
+                f"the destination register.\n"
+            )
         for op in basic_bins["zero_src"]:
-            basic_bins_difference[f"{op}_zero_src"] = f"- {op}_zero_src: the CPU hasn't executed an instruction " \
-                                                      f"that performs the operation {op} with register zero as " \
-                                                      f"one of the source registers.\n"
+            basic_bins_difference[f"{op}_zero_src"] = (
+                f"- {op}_zero_src: the CPU hasn't executed an instruction "
+                f"that performs the operation {op} with register zero as "
+                f"one of the source registers.\n"
+            )
         for op in basic_bins["same_src"]:
-            basic_bins_difference[f"{op}_same_src"] = f"- {op}_same_src: the CPU hasn't executed an instruction " \
-                                                      f"that performs the operation {op} with same source registers.\n"
+            basic_bins_difference[f"{op}_same_src"] = (
+                f"- {op}_same_src: the CPU hasn't executed an instruction "
+                f"that performs the operation {op} with same source registers.\n"
+            )
         for op in basic_bins["br_backwards"]:
-            basic_bins_difference[f"{op}_br_backwards"] = f"- {op}_br_backwards: the CPU hasn't performed a {op} " \
-                                                          f"operation that makes a backward jump.\n"
+            basic_bins_difference[f"{op}_br_backwards"] = (
+                f"- {op}_br_backwards: the CPU hasn't performed a {op} "
+                f"operation that makes a backward jump.\n"
+            )
         for op in basic_bins["br_forwards"]:
-            basic_bins_difference[f"{op}_br_forwards"] = f"- {op}_br_backwards: the CPU hasn't performed a {op} " \
-                                                         f"operation that makes a forward jump.\n"
+            basic_bins_difference[f"{op}_br_forwards"] = (
+                f"- {op}_br_backwards: the CPU hasn't performed a {op} "
+                f"operation that makes a forward jump.\n"
+            )
 
         raw_bins_difference = {
             f"{prev_instr}->{instr}_{cov}": f"- {prev_instr}->{instr}_{cov}: the CPU hasn't perform a "
-                                            f"{prev_instr} operation followed by a {instr} operation with "
-                                            f"RaW hazard, in which the second operation has a source register "
-                                            f"that is the same as the destination register of the first operation.\n"
+            f"{prev_instr} operation followed by a {instr} operation with "
+            f"RaW hazard, in which the second operation has a source register "
+            f"that is the same as the destination register of the first operation.\n"
             for prev_instr, instr, cov in raw_bins
         }
 

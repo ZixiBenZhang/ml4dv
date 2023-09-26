@@ -100,7 +100,7 @@ def main_llama2():
         compress_msg_algo="best 3",
         prioritise_harder_bins=True,
     )
-    print('Llama2 successfully built')
+    print("Llama2 successfully built")
 
     extractor = DumbExtractor()
     stimulus_filter = Filter(0x0, 0xFFFFFFFF)

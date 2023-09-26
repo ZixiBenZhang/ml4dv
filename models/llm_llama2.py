@@ -20,7 +20,9 @@ class Llama2(BaseLLM):
         compress_msg_algo: str = "best 3",
         prioritise_harder_bins: bool = True,
     ):
-        super().__init__(system_prompt, best_iter_buffer_resetting, prioritise_harder_bins)
+        super().__init__(
+            system_prompt, best_iter_buffer_resetting, prioritise_harder_bins
+        )
         self.model_name = model_path.split("/")[0]
 
         self.generator = Llama.build(

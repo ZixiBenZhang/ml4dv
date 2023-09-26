@@ -26,10 +26,8 @@ async def do_reset(dut):
 
     dut.rst_ni.value = 1
 
-prog = [0x00000293,
-        0x01400313,
-        0x006282b3,
-        0xffdff06f]
+
+prog = [0x00000293, 0x01400313, 0x006282B3, 0xFFDFF06F]
 
 
 class MemAgent:
@@ -37,26 +35,26 @@ class MemAgent:
         self.mem_dict = {}
 
         self.clk = dut.clk_i
-        self.gnt = getattr(dut, mem_name + '_gnt_i')
-        self.req = getattr(dut, mem_name + '_req_o')
-        self.addr = getattr(dut, mem_name + '_addr_o')
-        self.rvalid = getattr(dut, mem_name + '_rvalid_i')
-        self.rdata = getattr(dut, mem_name + '_rdata_i')
+        self.gnt = getattr(dut, mem_name + "_gnt_i")
+        self.req = getattr(dut, mem_name + "_req_o")
+        self.addr = getattr(dut, mem_name + "_addr_o")
+        self.rvalid = getattr(dut, mem_name + "_rvalid_i")
+        self.rdata = getattr(dut, mem_name + "_rdata_i")
 
         self.default_load_val = default_load_val
 
         self.handle_writes = handle_writes
 
         if handle_writes:
-            self.we = getattr(dut, mem_name + '_we_o')
-            self.wdata = getattr(dut, mem_name + '_wdata_o')
-            self.be = getattr(dut, mem_name + '_be_o')
+            self.we = getattr(dut, mem_name + "_we_o")
+            self.wdata = getattr(dut, mem_name + "_wdata_o")
+            self.be = getattr(dut, mem_name + "_be_o")
 
     def load_bin(self, bin_filename, start_addr):
-        with open(bin_filename, 'rb') as bin_file:
+        with open(bin_filename, "rb") as bin_file:
             cur_addr = start_addr
 
-            for (word,) in struct.iter_unpack('<I', bin_file.read()):
+            for (word,) in struct.iter_unpack("<I", bin_file.read()):
                 self.mem_dict[cur_addr] = word
                 cur_addr += 4
 
@@ -72,7 +70,7 @@ class MemAgent:
             await ReadWrite()
             self.rvalid.value = 0
 
-            if (self.req.value):
+            if self.req.value:
                 self.gnt.value = 1
                 access_addr = self.addr.value
 
@@ -87,11 +85,12 @@ class MemAgent:
                 self.rvalid.value = 1
 
                 if self.handle_writes and write_data:
-                    self.rdata.value = 0xdeadbaad
+                    self.rdata.value = 0xDEADBAAD
                     self.mem_dict[int(access_addr)] = int(write_data)
                 else:
-                    self.rdata.value = self.mem_dict.get(int(access_addr),
-                                                         self.default_load_val)
+                    self.rdata.value = self.mem_dict.get(
+                        int(access_addr), self.default_load_val
+                    )
 
 
 async def update_magic_loc(dut, dmem_agent):
@@ -120,7 +119,7 @@ class SimulationController:
             await ClockCycles(self.dut.clk_i, 1)
             await ReadWrite()
 
-            while (True):
+            while True:
                 stimulus_obj = socket.recv_pyobj()
 
                 if not isinstance(stimulus_obj, Stimulus):
@@ -136,10 +135,12 @@ class SimulationController:
 
                 ibex_state_info = IbexStateInfo(
                     last_pc=self.instruction_monitor.last_pc,
-                    last_insn=self.instruction_monitor.last_insn)
+                    last_insn=self.instruction_monitor.last_insn,
+                )
 
-                socket.send_pyobj((ibex_state_info,
-                                   self.instruction_monitor.coverage_db))
+                socket.send_pyobj(
+                    (ibex_state_info, self.instruction_monitor.coverage_db)
+                )
 
                 if stimulus_obj.finish:
                     self.end_simulation_event.set()
@@ -161,7 +162,7 @@ async def basic_test(dut):
     imem_agent = MemAgent(dut, "instr", handle_writes=False)
     dmem_agent = MemAgent(dut, "data", handle_writes=True)
     ins_mon = InstructionMonitor(dut)
-    imem_agent.load_bin('test_prog.bin', 0x100080)
+    imem_agent.load_bin("test_prog.bin", 0x100080)
 
     cocotb.start_soon(Clock(dut.clk_i, 10, units="ns").start())
     await do_reset(dut)
