@@ -170,7 +170,7 @@ class GlobalCoverageDatabase:
             # Prioritise harder bins
             return sum(map(lambda k: 2.5 if "_x_" in k else 1, coverage))
         elif isinstance(self._coverage_database, ICCD):
-            coverage_plan = self._get_coverage_plan_ID()
+            coverage_plan = self._get_coverage_plan_IC()
             coverage = [k for (k, v) in coverage_plan.items() if v > 0]
             if not prioritise_harder_bins:  # without prioritising harder bins
                 return len(coverage)

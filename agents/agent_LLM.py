@@ -136,15 +136,15 @@ class LLMAgent(BaseAgent):
             coverage = coverage_database.get_coverage_plan()
             # Log coverage
             self.log_append({"role": "coverage", "content": coverage})
-            # coverage_plan = {k: v for (k, v) in coverage.items() if v > 0}
+            coverage_plan = {k: v for (k, v) in coverage.items() if v > 0}
             print(
                 f"Dialog #{self.dialog_index} Message #{self.msg_index} done, \n"
                 f"Total msg cnt: {self.total_msg_cnt} \n"
-                # + (
-                #     f"Hits: {coverage_plan} \n"
-                #     if coverage_database.get_coverage_rate()[0] <= 100
-                #     else ""
-                # )
+                + (
+                    f"Hits: {coverage_plan} \n"
+                    if coverage_database.get_coverage_rate()[0] <= 100
+                    else ""
+                )
                 + f"Coverage rate: {coverage_database.get_coverage_rate()}"
             )
 
@@ -269,10 +269,6 @@ class LLMAgent(BaseAgent):
 
             stimuli = self.stimulus_filter(self.extractor(response))
             self.stimuli_buffer.extend(stimuli)
-            print(
-                f"Response: {response}\n"
-                f"Stimuli: {stimuli}\n"
-            )
 
         return self._get_next_value_from_buffer()
 

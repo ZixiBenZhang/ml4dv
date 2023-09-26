@@ -4,7 +4,7 @@ from ibex_cpu.instructions import Instr, Cov
 
 class TemplatePromptGenerator4IC1(TemplatePromptGenerator):
     IMEM_LB = "0x00100080"
-    IMEM_UB = "0x00100180"
+    IMEM_UB = "0x001000ff"
 
     def __init__(
         self,
