@@ -17,7 +17,7 @@ class CoverageDatabase:
     instructions: dict[Instr, dict[Cov, int]]
     cross_coverage: dict[Instr, dict[tuple[Instr, Cov], int]]
 
-    def get_coverage_dict(self) -> OrderedDict[str, int]:
+    def get_coverage_dict(self) -> Dict[str, int]:
         cov_generator = (
             (f"{instr.value}_{cov.value}", num)
             for (instr, covs) in self.instructions.items()
@@ -29,7 +29,7 @@ class CoverageDatabase:
             for ((prev_instr, cov), num) in x_covs.items()
         )
         generator = chain(cov_generator, xcov_generator)
-        return OrderedDict(sorted(generator, key=lambda cov: cov[0]))
+        return dict(sorted(generator, key=lambda cov: cov[0]))
 
     def get_coverage_vector(self) -> list[int]:
         return list(self.get_coverage_dict().values())
