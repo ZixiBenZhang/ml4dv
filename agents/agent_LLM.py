@@ -207,9 +207,11 @@ class LLMAgent(BaseAgent):
 
             # Load prompt
             prompt = ""
-            # TODO: pass dut_state into generate_init/iter_prompt
             if self.state == "INIT":
-                prompt = self.prompt_generator.generate_initial_prompt()
+                prompt = self.prompt_generator.generate_initial_prompt(
+                    current_pc=dut_state.get_pc(),
+                    last_instr=dut_state.get_last_instr(),
+                )
             elif self.state == "ITER":
                 prompt = self.prompt_generator.generate_iterative_prompt(
                     coverage_database,
@@ -220,6 +222,8 @@ class LLMAgent(BaseAgent):
                         len(self.history_cov_rate) >= 4
                         and self.history_cov_rate[-1] - self.history_cov_rate[-4] >= 50
                     ),
+                    current_pc=dut_state.get_pc(),
+                    last_instr=dut_state.get_last_instr(),
                 )
             elif self.state == "DONE":  # should never happen
                 prompt = "Thank you."

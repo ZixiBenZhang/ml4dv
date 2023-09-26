@@ -1,7 +1,11 @@
 from prompt_generators.prompt_generator_template import *
+from ibex_cpu.instructions import Instr, Cov
 
 
 class TemplatePromptGenerator4IC1(TemplatePromptGenerator):
+    IMEM_LB = "0x00100080"
+    IMEM_UB = "0x00100180"
+
     def __init__(
         self,
         dut_code_path: str = "../examples_IC/dut_code.txt",
@@ -30,12 +34,6 @@ class TemplatePromptGenerator4IC1(TemplatePromptGenerator):
     def _load_introduction(self) -> str:
         if self.code_summary_type == 1:
             raise NotImplementedError
-            # return (
-            #     "You will receive programs of a RISC-V instruction decoder and a testbench for it, "
-            #     "as well as a description of bins (i.e. test cases). "
-            #     "Then, you are going to generate a list of 32-bit instructions (i.e. hex integers "
-            #     "between 0x0 and 0xffffffff) to cover the test cases.\n"
-            # )
         elif self.code_summary_type == 0:
             return (
                 "You will receive a description of bins (i.e. test cases) of a testbench for "
@@ -63,7 +61,7 @@ class TemplatePromptGenerator4IC1(TemplatePromptGenerator):
             # TODO: instr memo bounds; pass in current instr memo??
             f"We are working with a CPU capable of executing RISC-V instructions. "
             f"The CPU's instruction memory is defined within the address range of "
-            f"{0x00100080}, and its program counter (PC) is currently "
+            f"{self.IMEM_LB} to {self.IMEM_UB}, and its program counter (PC) is currently "
             f"set to {kwargs['current_pc']}. \n"
             f"Our objective is to update the CPU's instruction memory with a sequence "
             f"of 32-bit addresses and corresponding 32-bit instructions. The goal is "
@@ -98,10 +96,11 @@ class TemplatePromptGenerator4IC1(TemplatePromptGenerator):
 
         # TODO: pass in current instr memo??
         result_summary += (
-            f"The CPU has successfully executed numerous instructions following your update, "
-            f"and its program counter (PC) is presently set to 0x0010008c. \n"
-            f"You will now observe the coverage achieved by the CPU based on your previous "
-            f"responses, and proceed to generate another list, which can be empty if necessary, "
+            f"The CPU has successfully executed numerous instructions following your update. "
+            f"The last instruction performed was {kwargs['last_instr']}, and the program counter (PC) is "
+            f"presently set to {kwargs['current_pc']}. \n"
+            f"You will now observe the bins haven't been achieved by the CPU, and proceed to "
+            f"generate another list, which can be empty if necessary, "
             f"of address-instruction pairs to further modify the CPU's memory, ensuring it "
             f"covers the previously unreached bins (i.e. test cases) upon resuming execution "
             f"from the current PC.\n"
@@ -110,51 +109,48 @@ class TemplatePromptGenerator4IC1(TemplatePromptGenerator):
         return result_summary
 
     def _load_coverage_difference_prompts_dict(self) -> Dict[str, str]:
-        # TODO: difference prompts
-        alu = ["ADD", "SUB", "AND", "OR", "XOR", "SLL", "SRL", "SRA", "SLT", "SLTU"]
-        op_bins = (
-            alu
-            + list(map(lambda s: f"{s}I", alu))
-            + ["LW", "LH", "LB", "SW", "SH", "SB"]
-        )
+        basic_bins = {"seen": [], "zero_dst": [], "zero_src": [], "same_src": [], "br_backwards": [], "br_forwards": []}
+        for instr in Instr:
+            for cov in instr.type().coverpoints():
+                basic_bins[cov.value].append(instr.value)
 
-        ports = {
-            "read_A_reg_": "read_A",
-            "read_B_reg_": "read_B",
-            "write_reg_": "write",
-        }
-        reg_bins = {
-            f"{port}{i}": port_name
-            for i in range(32)
-            for port, port_name in ports.items()
-        }
+        raw_bins = []
+        for instr in Instr:
+            for prev_instr, cov in instr.type().cross_coverpoints():
+                raw_bins.append((prev_instr.value, instr.value, cov.value))
 
-        # may have invalid cross bin entries that will never be in missed bins
-        cross_bins = {
-            f"{op}_x_{reg}": (op, port_name)
-            for reg, port_name in reg_bins.items()
-            for op in op_bins
-        }
+        basic_bins_difference = {}
+        for op in basic_bins["seen"]:
+            basic_bins_difference[f"{op}_seen"] = f"- {op}_seen: the CPU hasn't performed the operation {op}.\n"
+        for op in basic_bins["zero_dst"]:
+            basic_bins_difference[f"{op}_zero_dst"] = f"- {op}_zero_dst: the CPU hasn't executed an instruction " \
+                                                      f"that performs the operation {op} with register zero as " \
+                                                      f"the destination register.\n"
+        for op in basic_bins["zero_src"]:
+            basic_bins_difference[f"{op}_zero_src"] = f"- {op}_zero_src: the CPU hasn't executed an instruction " \
+                                                      f"that performs the operation {op} with register zero as " \
+                                                      f"one of the source registers.\n"
+        for op in basic_bins["same_src"]:
+            basic_bins_difference[f"{op}_same_src"] = f"- {op}_same_src: the CPU hasn't executed an instruction " \
+                                                      f"that performs the operation {op} with same source registers.\n"
+        for op in basic_bins["br_backwards"]:
+            basic_bins_difference[f"{op}_br_backwards"] = f"- {op}_br_backwards: the CPU hasn't performed a {op} " \
+                                                          f"operation that makes a backward jump.\n"
+        for op in basic_bins["br_forwards"]:
+            basic_bins_difference[f"{op}_br_forwards"] = f"- {op}_br_backwards: the CPU hasn't performed a {op} " \
+                                                         f"operation that makes a forward jump.\n"
 
-        op_bins_difference = {
-            op: f"- {op}: there's no instruction that performs the operation {op}.\n"
-            for op in op_bins
-        }
-        reg_bins_difference = {
-            port: f"- {port}: there's no instruction that uses the {port_name} port of "
-            f"register {port[-1]}.\n"
-            for port, port_name in reg_bins.items()
-        }
-        cross_bins_difference = {
-            bin_name: f"- {bin_name}: there's no operation that performs the operation {op_name} "
-            f"using the {port_name} port of register {bin_name[-1]}.\n"
-            for bin_name, (op_name, port_name) in cross_bins.items()
+        raw_bins_difference = {
+            f"{prev_instr}->{instr}_{cov}": f"- {prev_instr}->{instr}_{cov}: the CPU hasn't perform a "
+                                            f"{prev_instr} operation followed by a {instr} operation with "
+                                            f"RaW hazard, in which the second operation has a source register "
+                                            f"that is the same as the destination register of the first operation.\n"
+            for prev_instr, instr, cov in raw_bins
         }
 
         coverage_difference_template = {
-            **op_bins_difference,
-            **reg_bins_difference,
-            **cross_bins_difference,
+            **basic_bins_difference,
+            **raw_bins_difference,
         }
         return coverage_difference_template
 
@@ -201,8 +197,9 @@ class TemplatePromptGenerator4IC2(TemplatePromptGenerator4IC1):
             # TODO: instr memo bounds; pass in current instr memo??
             f"We are working with a CPU capable of executing RISC-V instructions. "
             f"The CPU's instruction memory is defined within the address range of "
-            f"{0x00100080}, and its program counter (PC) is currently "
-            f"set to {kwargs['current_pc']}. \n"
+            f"{self.IMEM_LB} to {self.IMEM_UB}, where 0x00100098 is currently the return instruction "
+            f"of the process. The program counter (PC) is currently set to "
+            f"{kwargs['current_pc']}. \n"
             f"Our objective is to update the CPU's instruction memory with a sequence "
             f"of 32-bit addresses and corresponding 32-bit instructions. The goal is "
             f"to ensure that, when the CPU resumes executing instructions from the "

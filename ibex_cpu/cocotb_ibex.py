@@ -151,6 +151,9 @@ class SimulationController:
 
 @cocotb.test()
 async def basic_test(dut):
+    from global_shared_types import GlobalCoverageDatabase
+
+    server_port = input("Please enter server's port (e.g. 5050, 5555): ")
 
     dut.data_gnt_i.value = 0
     dut.data_rvalid_i.value = 0
@@ -168,7 +171,7 @@ async def basic_test(dut):
 
     await ClockCycles(dut.clk_i, 1)
 
-    sim_ctrl = SimulationController(dut, ins_mon, imem_agent, "tcp://*:5555")
+    sim_ctrl = SimulationController(dut, ins_mon, imem_agent, f"tcp://*:{server_port}")
     with closing(sim_ctrl) as simulation_controller:
         cocotb.start_soon(simulation_controller.controller_loop())
 

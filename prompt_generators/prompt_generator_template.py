@@ -35,7 +35,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
         )
 
     def _resolve_sampling_method(self, sampling_missed_bins_method: Union[str, None]):
-        methods = ["ORIGINAL", "NEWEST", "RANDOM", "IDNEWEST", "IDADAS", "IDADANEW"]
+        methods = ["ORIGINAL", "NEWEST", "RANDOM", "IDNEWEST", "IDADAS", "IDADANEW", "ICNEWEST"]
         assert sampling_missed_bins_method.upper() in methods, (
             f"Invalid sampling method {sampling_missed_bins_method}. "
             f"Please use one of the following methods: {methods}."
@@ -53,6 +53,8 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
                 self.sampling_missed_bins_method = self._sample_missed_bins_IDADAS
             elif sampling_missed_bins_method.upper() == "IDADANEW":
                 self.sampling_missed_bins_method = self._sample_missed_bins_IDAdaNew
+            elif sampling_missed_bins_method.upper() == "ICNEWEST":
+                self.sampling_missed_bins_method = self._sample_missed_bins_ICNEWEST
             else:
                 raise TypeError(
                     f"Invalid sampling method {sampling_missed_bins_method}. "
@@ -302,3 +304,32 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
             return self._sample_missed_bins_IDNEWEST(missed_bins, coverage_rate)
         else:
             return self._sample_missed_bins_IDADAS(missed_bins, coverage_rate)
+
+    @staticmethod
+    def _sample_missed_bins_ICNEWEST(
+            missed_bins: List[str], coverage_rate: Tuple[int, int]
+    ) -> List[str]:
+        # IC NEWEST
+        if len(missed_bins) >= 40:
+            if coverage_rate[0] / coverage_rate[1] <= 1 / 4:  # easier bins
+                missed_bins = np.concatenate(
+                    [
+                        missed_bins[:2],
+                        np.random.choice(missed_bins[2:50], 3, replace=False),
+                        np.random.choice(missed_bins[50:], 2, replace=False),
+                    ]
+                )
+            else:  # harder bins
+                missed_bins = np.concatenate(
+                    [
+                        missed_bins[:2],
+                        np.random.choice(missed_bins[2:], 5, replace=False),
+                    ]
+                )
+        elif len(missed_bins) > 7:
+            missed_bins = np.concatenate(
+                [missed_bins[:2], np.random.choice(missed_bins[2:], 5, replace=False)]
+            )
+        else:
+            pass
+        return missed_bins
