@@ -2,14 +2,15 @@
 
 ---
 ___LLM4DV___ is a benchmark for utilising large language models in hardware design verification. 
-This project provides a workflow for incorporating LLMs in stimuli generation (i.e. 
+This project provides a framework for incorporating LLMs in test stimuli generation (i.e. 
 generating inputs for testing a device). The goal is to generate stimuli to cover most of the test bins 
-(i.e. test cases) with the LLM generating tokens as few as possible.
+(i.e. test cases) from a predefined coverage plan with the LLM using as few tokens as possible.
 
-This project contains two device-under-test:
+This project contains three device-under-test:
 1. __Stride detector__: a device that detects single- and double-stride patterns. 
-This kind of design is the core of prefetchers for CPUs. 
+This kind of design is the core of data prefetchers for CPUs. 
 2. __*Ibex* instruction decoder__: a RISC-V instruction decoder.
+3. __*Ibex* CPU__: a RISC-V CPU, with instruction and data memory.
 
 This project provides hardware descriptions and various design verification methods for each of the DUTs.
 
@@ -17,7 +18,7 @@ This project provides hardware descriptions and various design verification meth
 
 ---
 The simulation runs as a client-server model. The client side generates stimuli to the server. The server 
-side receives stimuli, computes bin coverage, and returns the coverage back to the client.
+side receives stimuli, computes coverage, and returns the DUT state and coverage back to the client.
 
 ### Software pre-requisites
 
@@ -89,10 +90,14 @@ Detailed structure:
 │      agents_CLI.py
 │      agent_base.py
 │      agent_fschat.py
+│      agent_IC_dumb.py
 │      agent_ID_dumb.py
 │      agent_LLM.py
 │      agent_random.py
 │      agent_SD_dumb.py
+│    
+├─examples_IC               # Manually created bin description of Ibex CPU
+│      bins_description.txt
 │    
 ├─examples_ID               # Manually created bin description of Ibex instruction decoder
 │      bins_description.txt
@@ -115,6 +120,22 @@ Detailed structure:
 │  ├─logs_SD_fixed
 │  └─logs_SD_template
 │
+├─ibex_decoder              # Ibex CPU module
+│  │  .flake8
+│  │  cocotb_ibex.py
+│  │  cocotb_ibex.sv
+│  │  generate_stimulus.py
+│  │  instructions.py
+│  │  instruction_monitor.py
+│  │  lint.sh
+│  │  Makefile
+│  │  mypy.ini
+│  │  README.md
+│  │  shared_types.py
+│  │  test_prog.bin
+│  │
+│  └─logs
+│
 ├─ibex_decoder              # Ibex instruction decoder module
 │  │  generate_stimulus.py
 │  │  ibex_consts.py
@@ -125,7 +146,9 @@ Detailed structure:
 │  │  Makefile
 │  │  shared_types.py
 │  │
-│  └─logs
+│  ├─logs
+│  │
+│  └─src
 │
 ├─loggers                   # Logging components of the agent, for logging txt and csv files
 │      logger_base.py
@@ -142,6 +165,7 @@ Detailed structure:
 │      prompt_generator_fixed_ID.py
 │      prompt_generator_fixed_SD.py
 │      prompt_generator_template.py
+│      prompt_generator_template_IC.py
 │      prompt_generator_template_ID.py
 │      prompt_generator_template_SD.py
 │
