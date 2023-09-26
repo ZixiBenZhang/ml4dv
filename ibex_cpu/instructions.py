@@ -4,12 +4,26 @@ import unittest
 
 
 class Cov(Enum):
+    """Coverage Types
+
+    Instruction Coverpoints:
+      seen: Has been observed.
+      zero_dst: The destination register has been `x0`.
+      zero_src: A source register has been `x0`.
+      same_src: Two source registers have been the same.
+      br_backwards: Has caused a branch backwards.
+      br_forwards: Has caused a branch forwards.
+
+    Cross Instruction Coverpoints:
+      raw_hazard: Reads from  a register the previous instruction wrote to.
+    """
     SEEN = 'seen'
     ZERO_DST = 'zero_dst'
     ZERO_SRC = 'zero_src'
     SAME_SRC = 'same_src'
     BR_BACKWARDS = 'br_backwards'
     BR_FORWARDS = 'br_forwards'
+    RAW_HAZARD = 'raw_hazard'
 
 
 class Instr(Enum):
@@ -112,6 +126,21 @@ class RInstruction(Encoding):
             out.append(Cov.ZERO_SRC)
         return out
 
+    @staticmethod
+    def cross_coverpoints() -> list[tuple[Instr, Cov]]:
+        return [
+            (instr, Cov.RAW_HAZARD)
+            for instr in Instr
+            if instr.type() in {RInstruction, JInstruction}
+        ]
+
+    def sample_cross_coverage(self, previous: 'TypedInstruction') -> list[tuple[Instr, Cov]]:
+        out = []
+        if isinstance(previous, RInstruction) or isinstance(previous, JInstruction):
+            if previous.rd() in {self.rs1(), self.rs2()}:
+                out.append((previous.instruction(), Cov.RAW_HAZARD))
+        return out
+
 
 class JInstruction(Encoding):
     rd = get_rd
@@ -150,6 +179,13 @@ class JInstruction(Encoding):
             out.append(Cov.BR_FORWARDS)
         return out
 
+    @staticmethod
+    def cross_coverpoints() -> list[tuple[Instr, Cov]]:
+        return []
+
+    def sample_cross_coverage(self, previous: 'TypedInstruction') -> list[tuple[Instr, Cov]]:
+        return []
+
 
 class SInstruction(Encoding):
     rs1 = get_rs1
@@ -186,6 +222,22 @@ class SInstruction(Encoding):
             out.append(Cov.SAME_SRC)
         if 0 == self.rs1() or 0 == self.rs2():
             out.append(Cov.ZERO_SRC)
+        return out
+
+    @staticmethod
+    def cross_coverpoints() -> list[tuple[Instr, Cov]]:
+        return [
+            (instr, Cov.RAW_HAZARD)
+            for instr in Instr
+            if instr.type() in {RInstruction, JInstruction}
+        ]
+        return []
+
+    def sample_cross_coverage(self, previous: 'TypedInstruction') -> list[tuple[Instr, Cov]]:
+        out = []
+        if isinstance(previous, RInstruction) or isinstance(previous, JInstruction):
+            if previous.rd() in {self.rs1(), self.rs2()}:
+                out.append((previous.instruction(), Cov.RAW_HAZARD))
         return out
 
 
