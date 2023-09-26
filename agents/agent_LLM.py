@@ -271,7 +271,7 @@ class LLMAgent(BaseAgent):
             self.stimuli_buffer.extend(stimuli)
             print(
                 f"Response: {response}\n"
-                f"Extracted: {stimuli}\n"
+                f"Stimuli: {stimuli}\n"
             )
 
         return self._get_next_value_from_buffer()

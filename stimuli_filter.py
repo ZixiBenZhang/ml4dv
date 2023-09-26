@@ -22,11 +22,11 @@ class ICFilter(BaseFilter):
         self.lower_bound = lower_bound
         self.upper_bound = upper_bound
 
-    def __call__(self, updates: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
-        return list(
+    def __call__(self, updates: List[Tuple[int, int]]) -> List[List[Tuple[int, int]]]:
+        return [list(
             filter(
                 lambda p: self.lower_bound <= p[0] <= self.upper_bound
                 and self.lower_bound <= p[1] <= self.upper_bound,
                 updates,
             )
-        )
+        )]
