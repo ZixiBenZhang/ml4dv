@@ -28,7 +28,8 @@ class TemplatePromptGenerator4IC1(TemplatePromptGenerator):
             f"Please output a list of pairs of hexadecimal integers only, "
             f"each integer between 0x0 and 0xffffffff. \n"
             f"Do not give any explanations. \n"
-            f"Output format: [(a, i), (b, j), (c, k), ...]."
+            f"Output format: [(a, i), (b, j), (c, k), ...], where a, b, c, ... "
+            f"are valid addresses, and i, j, k, ... are valid RISC-V instruction code."
         )
 
     def _load_introduction(self) -> str:
@@ -176,10 +177,12 @@ class TemplatePromptGenerator4IC1(TemplatePromptGenerator):
     def _load_iter_question(self, **kwargs) -> str:
         if kwargs["response_invalid"]:
             iter_question = (
-                "Please generate a list, which can be empty if necessary, of "
-                "address-instruction pairs in 32-bit hexadecimal format (i.e. "
-                "hex integers between 0x0 and 0xffffffff), with output format: "
-                "[(a, i), (b, j), (c, k), ...].\n"
+                f"Please generate a list, which can be empty if necessary, of "
+                f"address-instruction pairs in 32-bit hexadecimal format (i.e. "
+                f"hex integers between 0x0 and 0xffffffff), with output format: "
+                f"[(a, i), (b, j), (c, k), ...]. Make sure the addresses are in "
+                f"the range of {self.IMEM_LB} to {self.IMEM_UB}, and the instructions "
+                f"are valid RISC-V instruction codes.\n"
             )
         else:
             iter_question = (
