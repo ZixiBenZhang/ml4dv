@@ -183,10 +183,11 @@ class TemplatePromptGenerator4IC1(TemplatePromptGenerator):
             )
         else:
             iter_question = (
-                "Please generate a list, which can be empty if necessary, of address-instruction "
-                "pairs in 32-bit hexadecimal format to further update the CPU's memory, "
-                "ensuring it covers the specified unreached bins (i.e. test cases) upon resuming "
-                "execution from the current PC.\n"
+                f"Please generate a list, which can be empty if necessary, of address-instruction "
+                f"pairs in 32-bit hexadecimal format to further update the CPU's memory, "
+                f"ensuring it covers the specified unreached bins (i.e. test cases) upon resuming "
+                f"execution from the current PC. Make sure the addresses are in the range of "
+                f"{self.IMEM_LB} to {self.IMEM_UB}, and the instructions are valid RISC-V instruction codes.\n"
             )
         return iter_question
 
