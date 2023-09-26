@@ -59,6 +59,9 @@ For detailed information, see `README` files of each module.
 ---
 ```
 .
+│  csv_helper.py            # Utils for processing csv experiment logs
+│  flake.lock
+│  flake.nix
 │  global_shared_types.py   # Wrappers of CoverageDatabase and DURState
 │  main.py                  # Testing script
 │  python-requirements.txt
