@@ -96,8 +96,8 @@ class TemplatePromptGenerator4IC1(TemplatePromptGenerator):
         elif kwargs["update_invalid"]:
             result_summary = (
                 "Your list of updates was invalid, either because the addresses are out-of-bound"
-                "or the instructions you provided are not valid RISC-V instructions. Try to amend "
-                "it in your new response. \n"
+                "or the instructions you provided are not valid R-type, S-type, or J-type RISC-V "
+                "instructions. Try to amend it in your new response. \n"
                 f"The CPU has executed numerous instructions following your last update. The last "
                 f"instruction performed was {kwargs['last_instr']}, and the program counter (PC) is "
                 f"presently set to {kwargs['current_pc']}. \n"
@@ -203,7 +203,8 @@ class TemplatePromptGenerator4IC1(TemplatePromptGenerator):
                 f"ensuring it covers the specified unreached bins (i.e. test cases) upon resuming "
                 f"execution from the current PC. Make sure the addresses are in the range of "
                 f"{self.IMEM_LB} to {self.IMEM_UB}, and the instructions are valid R-type, S-type, "
-                f"or J-type instructions. We encourage you to attempt diverse variety of operations. \n"
+                f"or J-type instructions. We encourage you to update addresses into diverse variety "
+                f"of operations. \n"
             )
         return iter_question
 
@@ -250,6 +251,7 @@ class TemplatePromptGenerator4IC2(TemplatePromptGenerator4IC1):
             f"to update the CPU's memory, ensuring it covers the specified bins upon resuming "
             f"execution from the current PC. Make sure the addresses $a$ are in the range of "
             f"{self.IMEM_LB} to {self.IMEM_UB}, and the instructions $i$ are VALID R-type, S-type, "
-            f"or J-type instructions. We encourage you to attempt diverse variety of operations. \n"
+            f"or J-type instructions. We encourage you to update addresses into diverse variety "
+            f"of operations. \n"
         )
         return prompt

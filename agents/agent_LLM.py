@@ -296,7 +296,7 @@ class LLMAgent(BaseAgent):
         return False
 
     def _check_update_invalid(self, response: str, stimuli: List[List[Tuple[int, int]]]) -> bool:
-        print(f"checking invalid update: response {len(response)}, stimuli[0] {len(stimuli[0])}")
+        # print(f"checking invalid update: response {len(response)}, stimuli[0] {len(stimuli[0])}")
         if not isinstance(self.stimulus_filter, ICFilter):
             return False
         return len(stimuli[0]) == 0 and len(response) > 10
