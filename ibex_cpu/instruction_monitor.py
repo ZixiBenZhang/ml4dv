@@ -31,8 +31,8 @@ class InstructionMonitor:
 
     def sample_insn_coverage(self):
         if self.insn_valid.value == 0:
-            # self.last_pc = None
-            # self.last_insn = None
+            self.last_pc = None
+            self.last_insn = None
             return
 
         insn = Encoding(self.insn.value).typed()
@@ -47,7 +47,7 @@ class InstructionMonitor:
                 (last_insn := Encoding(self.last_insn).typed()) is not None
             ):
                 for insn_cov in insn.sample_cross_coverage(last_insn):
-                    self.coverage_db.instructions[mnemonic][insn_cov] += 1
+                    self.coverage_db.cross_coverage[mnemonic][insn_cov] += 1
 
         self.last_pc = int(self.insn_pc.value)
         self.last_insn = int(self.insn.value)
