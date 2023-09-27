@@ -1,8 +1,8 @@
-from typing import List, Tuple
+from typing import List, Tuple, Any
 
 
 class BaseFilter:
-    def __call__(self, stimuli: List[int]) -> List[int]:
+    def __call__(self, stimuli: List[int]) -> List[Any]:
         raise NotImplementedError
 
 
