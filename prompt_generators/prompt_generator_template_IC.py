@@ -28,8 +28,7 @@ class TemplatePromptGenerator4IC1(TemplatePromptGenerator):
             f"Please output a list of pairs of hexadecimal integers only, "
             f"each integer between 0x0 and 0xffffffff. \n"
             f"Do not give any explanations. \n"
-            f"Output format: [(a, i), (b, j), (c, k), ...], where a, b, c, ... "
-            f"are valid addresses, and i, j, k, ... are valid RISC-V instruction code."
+            f"Output format: [(a, i), (b, j), (c, k), ...]."
         )
 
     def _load_introduction(self) -> str:
@@ -59,7 +58,7 @@ class TemplatePromptGenerator4IC1(TemplatePromptGenerator):
         with open(bin_descr_dir, "r") as f:
             bins_description = f.read()
         tb_summary = (
-            # TODO: instr memo bounds; pass in current instr memo??
+            # TODO: pass in current instr memo??
             f"We are working with a CPU capable of executing RISC-V instructions. "
             f"The CPU's instruction memory is defined within the address range of "
             f"{self.IMEM_LB} to {self.IMEM_UB}, and its program counter (PC) is currently "
@@ -78,9 +77,11 @@ class TemplatePromptGenerator4IC1(TemplatePromptGenerator):
 
     def _load_init_question(self) -> str:
         init_question = (
-            "Please generate a list, which can be empty if necessary, of address-instruction "
-            "pairs in 32-bit hexadecimal format to update the CPU's memory, ensuring "
-            "it covers the specified bins upon resuming execution from the current PC. \n"
+            f"Following the bins description, generate a list, which can be empty if "
+            f"necessary, of address-instruction pairs $(a, i)$ in 32-bit hexadecimal format "
+            f"to update the CPU's memory, ensuring it covers the specified bins upon resuming "
+            f"execution from the current PC. Make sure the addresses $a$ are in the range of "
+            f"{self.IMEM_LB} to {self.IMEM_UB}, and the instructions $i$ are valid RISC-V instruction codes.\n"
         )
         return init_question
 
@@ -217,7 +218,7 @@ class TemplatePromptGenerator4IC2(TemplatePromptGenerator4IC1):
         with open(self.bin_descr_path, "r") as f:
             bins_description = f.read()
         prompt = (
-            # TODO: instr memo bounds; pass in current instr memo??
+            # TODO: pass in current instr memo??
             f"We are working with a CPU capable of executing RISC-V instructions. "
             f"The CPU's instruction memory is defined within the address range of "
             f"{self.IMEM_LB} to {self.IMEM_UB}, where 0x00100098 is currently the return instruction "
@@ -232,8 +233,10 @@ class TemplatePromptGenerator4IC2(TemplatePromptGenerator4IC1):
             "BINS DESCRIPTION\n"
             f"{bins_description}"
             "------\n"
-            "Please generate a list, which can be empty if necessary, of address-instruction "
-            "pairs in 32-bit hexadecimal format to update the CPU's memory, ensuring "
-            "it covers the specified bins upon resuming execution from the current PC. \n"
+            f"Following the bins description, generate a list, which can be empty if "
+            f"necessary, of address-instruction pairs $(a, i)$ in 32-bit hexadecimal format "
+            f"to update the CPU's memory, ensuring it covers the specified bins upon resuming "
+            f"execution from the current PC. Make sure the addresses $a$ are in the range of "
+            f"{self.IMEM_LB} to {self.IMEM_UB}, and the instructions $i$ are valid RISC-V instruction codes.\n"
         )
         return prompt
