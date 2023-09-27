@@ -271,7 +271,6 @@ class LLMAgent(BaseAgent):
 
             stimuli = self.stimulus_filter(self.extractor(response))
 
-            # TODO: debug
             update_invalid = self._check_update_invalid(response, stimuli)
             if update_invalid:
                 f_ = 2

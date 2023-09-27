@@ -44,7 +44,7 @@ class InstructionMonitor:
 
             if (
                 self.last_insn is not None and
-                (last_insn := Encoding(self.last_insn.value).typed()) is not None
+                (last_insn := Encoding(self.last_insn).typed()) is not None
             ):
                 for insn_cov in insn.sample_cross_coverage(last_insn):
                     self.coverage_db.instructions[mnemonic][insn_cov] += 1
