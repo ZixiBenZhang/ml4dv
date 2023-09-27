@@ -99,13 +99,13 @@ def main():
             stimulus.insn_mem_updates = agent.generate_next_value(
                 g_dut_state, g_coverage, is_ic=True
             )
-            # print(f"Generated updates: {stimulus.insn_mem_updates}")
+            print(f"Generated updates: {stimulus.insn_mem_updates}\n")
             ibex_state, coverage = stimulus_sender.send_stimulus(stimulus)
             g_dut_state.set(ibex_state)
             g_coverage.set(coverage)
 
             if ibex_state.last_pc is not None:
-                print(f"{ibex_state.last_pc:08x} {ibex_state.last_insn:08x}")
+                print(f"DUT state: {ibex_state.last_pc:08x} {ibex_state.last_insn:08x}\n")
 
         stimulus.finish = True
         _, final_coverage = stimulus_sender.send_stimulus(stimulus)
