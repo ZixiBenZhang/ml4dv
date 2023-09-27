@@ -40,7 +40,9 @@ class ICExtractor(BaseExtractor):
         )
         updates = list(
             map(
-                lambda t: tuple(map(lambda x: int(x, 16), t[1:-1].split(",")))[:2],
+                lambda t: tuple(map(
+                    lambda x: int(x, 16), t[1:-1].split(",") if t[1] != "'" else t[2:-2].split(",")
+                ))[:2],
                 pairs,
             )
         )
