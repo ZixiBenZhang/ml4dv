@@ -36,7 +36,7 @@ class ICExtractor(BaseExtractor):
 
     def __call__(self, text: str) -> List[Tuple[int, int]]:
         pairs: List[str] = list(
-            re.findall(r"\('?0x[\da-fA-F]+'?, ?'?0x[\da-fA-F]+'?\)", text, re.I)
+            re.findall(r"\(\"?'?0x[\da-fA-F]+'?\"?, ?\"?'?0x[\da-fA-F]+'?\"?\)", text, re.I)
         )
         updates = list(
             map(
