@@ -97,7 +97,7 @@ def main():
     with closing(StimulusSender(f"tcp://{server_ip_port}")) as stimulus_sender:
         while not agent.end_simulation(g_dut_state, g_coverage):
             stimulus.insn_mem_updates = agent.generate_next_value(
-                g_dut_state, g_coverage
+                g_dut_state, g_coverage, is_ic=True
             )
             print(f"Generated updates: {stimulus.insn_mem_updates}")
             ibex_state, coverage = stimulus_sender.send_stimulus(stimulus)

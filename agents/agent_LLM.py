@@ -124,15 +124,15 @@ class LLMAgent(BaseAgent):
         return stimulus
 
     def generate_next_value(
-        self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase
+        self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase, is_ic=False,
     ) -> Union[int, List[Tuple[int, int]], None]:
 
-        # if coverage_database.get() is None:
-        #     return 0
+        if coverage_database.get() is None:
+            return 0 if not is_ic else []
 
         # When not first stimulus & need to generate new response
         # log coverage, update coverage of last msg, check need to reset
-        if coverage_database.get() is not None and len(self.stimuli_buffer) == 0 and self.state != "INIT":
+        if len(self.stimuli_buffer) == 0 and self.state != "INIT":
             coverage = coverage_database.get_coverage_plan()
             # Log coverage
             self.log_append({"role": "coverage", "content": coverage})
@@ -178,7 +178,7 @@ class LLMAgent(BaseAgent):
             # If gibberish
             # log coverage, update coverage of last msg, check need to reset
             if f_:
-                coverage = coverage_database.get_coverage_plan() if coverage_database.get() is not None else None
+                coverage = coverage_database.get_coverage_plan()
                 self.log_append({"role": "coverage", "content": coverage})
                 print(
                     f"Dialog #{self.dialog_index} Message #{self.msg_index} done, \n"
