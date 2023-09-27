@@ -93,14 +93,25 @@ class TemplatePromptGenerator4IC1(TemplatePromptGenerator):
                 "format (i.e. hex integers between 0x0 and 0xffffffff), with output format: "
                 "[(a, i), (b, j), (c, k), ...].\n"
             )
+        elif kwargs["update_invalid"]:
+            result_summary = (
+                "Your list of updates was invalid, either because the addresses are out-of-bound"
+                "or the instructions you provided are not valid RISC-V instructions. Try to amend "
+                "it in your new response. \n"
+                f"The CPU has executed numerous instructions following your last update. The last "
+                f"instruction performed was {kwargs['last_instr']}, and the program counter (PC) is "
+                f"presently set to {kwargs['current_pc']}. \n"
+            )
         else:
-            result_summary = "Thanks for your response.\n"
+            result_summary = (
+                f"Thanks for your response.\n"
+                f"The CPU has successfully executed numerous instructions following your update. "
+                f"The last instruction performed was {kwargs['last_instr']}, and the program counter (PC) is "
+                f"presently set to {kwargs['current_pc']}. \n"
+            )
 
         # TODO: pass in current instr memo??
         result_summary += (
-            f"The CPU has successfully executed numerous instructions following your update. "
-            f"The last instruction performed was {kwargs['last_instr']}, and the program counter (PC) is "
-            f"presently set to {kwargs['current_pc']}. \n"
             f"You will now observe the bins haven't been achieved by the CPU, and proceed to "
             f"generate another list, which can be empty if necessary, "
             f"of address-instruction pairs to further modify the CPU's memory, ensuring it "

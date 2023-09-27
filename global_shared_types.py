@@ -209,7 +209,7 @@ class GlobalDUTState:
     def get_pc(self):
         if isinstance(self._dut_state, ICDS):
             if self._dut_state.last_pc is None:
-                return None
+                return "\"invalid\" since the CPU has tried to execute invalid instruction(s)."
             return hex(self._dut_state.last_pc)
         else:
             return hex(0x00100080)

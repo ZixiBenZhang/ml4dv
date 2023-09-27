@@ -216,12 +216,14 @@ class LLMAgent(BaseAgent):
                 prompt = self.prompt_generator.generate_iterative_prompt(
                     coverage_database,
                     # gibbering
-                    response_invalid=f_,
+                    response_invalid=(f_ == 1),
                     # asking for long response
-                    warmed_up=(
-                        len(self.history_cov_rate) >= 4
-                        and self.history_cov_rate[-1] - self.history_cov_rate[-4] >= 50
-                    ),
+                    # warmed_up=(
+                    #     len(self.history_cov_rate) >= 4
+                    #     and self.history_cov_rate[-1] - self.history_cov_rate[-4] >= 50
+                    # ),
+                    # invalid update
+                    update_invalid=(f_ == 2),
                     current_pc=dut_state.get_pc(),
                     last_instr=dut_state.get_last_instr(),
                 )
@@ -270,6 +272,11 @@ class LLMAgent(BaseAgent):
             stimuli = self.stimulus_filter(self.extractor(response))
             self.stimuli_buffer.extend(stimuli)
 
+            update_invalid = self._check_update_invalid(response, stimuli)
+            if update_invalid:
+                f_ = 2
+                continue
+
         return self._get_next_value_from_buffer()
 
     def _check_gibberish(self, response: str) -> bool:
@@ -286,6 +293,11 @@ class LLMAgent(BaseAgent):
         if cnt > round(len(lines) / 3 * 2):
             return True
         return False
+
+    def _check_update_invalid(self, response: str, stimuli: List[List[Tuple[int, int]]]) -> bool:
+        if not isinstance(self.stimulus_filter, ICFilter):
+            return False
+        return len(stimuli[0]) == 0 and len(response) > 10
 
     def log_headers(self):
         for logger in self.loggers:

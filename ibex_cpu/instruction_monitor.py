@@ -31,8 +31,8 @@ class InstructionMonitor:
 
     def sample_insn_coverage(self):
         if self.insn_valid.value == 0:
-            self.last_pc = None
-            self.last_insn = None
+            # self.last_pc = None
+            # self.last_insn = None
             return
 
         insn = Encoding(self.insn.value).typed()
