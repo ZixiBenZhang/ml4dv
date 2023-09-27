@@ -183,7 +183,7 @@ class LLMAgent(BaseAgent):
                 print(
                     f"Dialog #{self.dialog_index} Message #{self.msg_index} done, \n"
                     f"Total msg cnt: {self.total_msg_cnt} \n"
-                    f"Gibberish response"
+                    f"Gibberish response" if f_ == 1 else f"Invalid updates"
                 )
 
                 # Update best_message of LLM
@@ -296,6 +296,7 @@ class LLMAgent(BaseAgent):
 
     def _check_update_invalid(self, response: str, stimuli: List[List[Tuple[int, int]]]) -> bool:
         if not isinstance(self.stimulus_filter, ICFilter):
+            print("DE")
             return False
         return len(stimuli[0]) == 0 and len(response) > 10
 
