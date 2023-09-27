@@ -178,7 +178,7 @@ class LLMAgent(BaseAgent):
             # If gibberish
             # log coverage, update coverage of last msg, check need to reset
             if f_:
-                coverage = coverage_database.get_coverage_plan()
+                coverage = coverage_database.get_coverage_plan() if coverage_database is not None else None
                 self.log_append({"role": "coverage", "content": coverage})
                 print(
                     f"Dialog #{self.dialog_index} Message #{self.msg_index} done, \n"
