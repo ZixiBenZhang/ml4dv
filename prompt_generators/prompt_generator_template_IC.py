@@ -202,8 +202,8 @@ class TemplatePromptGenerator4IC1(TemplatePromptGenerator):
                 f"pairs in 32-bit hexadecimal format to further update the CPU's memory, "
                 f"ensuring it covers the specified unreached bins (i.e. test cases) upon resuming "
                 f"execution from the current PC. Make sure the addresses are in the range of "
-                f"{self.IMEM_LB} to {self.IMEM_UB}, and the instructions are valid RISC-V "
-                f"instruction codes. We encourage you to attempt more types of operations. \n"
+                f"{self.IMEM_LB} to {self.IMEM_UB}, and the instructions are valid R-type, S-type, "
+                f"or J-type instructions. We encourage you to attempt diverse variety of operations. \n"
             )
         return iter_question
 
@@ -249,7 +249,7 @@ class TemplatePromptGenerator4IC2(TemplatePromptGenerator4IC1):
             f"necessary, of address-instruction pairs $(a, i)$ in 32-bit hexadecimal format "
             f"to update the CPU's memory, ensuring it covers the specified bins upon resuming "
             f"execution from the current PC. Make sure the addresses $a$ are in the range of "
-            f"{self.IMEM_LB} to {self.IMEM_UB}, and the instructions $i$ are VALID RISC-V "
-            f"instruction codes. We encourage you to attempt more types of operations. \n"
+            f"{self.IMEM_LB} to {self.IMEM_UB}, and the instructions $i$ are VALID R-type, S-type, "
+            f"or J-type instructions. We encourage you to attempt diverse variety of operations. \n"
         )
         return prompt

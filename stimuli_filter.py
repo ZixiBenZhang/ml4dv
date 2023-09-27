@@ -1,4 +1,5 @@
 from typing import List, Tuple, Any
+from ibex_cpu.instructions import Encoding
 
 
 class BaseFilter:
@@ -27,7 +28,7 @@ class ICFilter(BaseFilter):
             filter(
                 lambda p: self.lower_bound <= p[0] <= self.upper_bound
                 and self.lower_bound <= p[1] <= self.upper_bound
-                and p[1] != 0,
+                and Encoding(p[1]).typed() is not None,
                 updates,
             )
         )]
