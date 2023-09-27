@@ -270,13 +270,14 @@ class LLMAgent(BaseAgent):
                 continue
 
             stimuli = self.stimulus_filter(self.extractor(response))
-            self.stimuli_buffer.extend(stimuli)
 
             # TODO: debug
             update_invalid = self._check_update_invalid(response, stimuli)
             if update_invalid:
                 f_ = 2
                 continue
+
+            self.stimuli_buffer.extend(stimuli)
 
         return self._get_next_value_from_buffer()
 
@@ -298,7 +299,6 @@ class LLMAgent(BaseAgent):
     def _check_update_invalid(self, response: str, stimuli: List[List[Tuple[int, int]]]) -> bool:
         print(f"checking invalid update: response {len(response)}, stimuli[0] {len(stimuli[0])}")
         if not isinstance(self.stimulus_filter, ICFilter):
-            print("DE")
             return False
         return len(stimuli[0]) == 0 and len(response) > 10
 
