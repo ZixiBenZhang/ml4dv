@@ -208,13 +208,17 @@ class GlobalDUTState:
 
     def get_pc(self):
         if isinstance(self._dut_state, ICDS):
-            return self._dut_state.last_pc
+            if self._dut_state.last_pc is None:
+                return None
+            return hex(self._dut_state.last_pc)
         else:
-            return None
+            return hex(0x00100080)
 
     def get_last_instr(self):
         if isinstance(self._dut_state, ICDS):
-            return self._dut_state.last_insn
+            if self._dut_state.last_insn is None:
+                return None
+            return hex(self._dut_state.last_insn)
         else:
             return None
 

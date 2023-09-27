@@ -237,6 +237,6 @@ class TemplatePromptGenerator4IC2(TemplatePromptGenerator4IC1):
             f"necessary, of address-instruction pairs $(a, i)$ in 32-bit hexadecimal format "
             f"to update the CPU's memory, ensuring it covers the specified bins upon resuming "
             f"execution from the current PC. Make sure the addresses $a$ are in the range of "
-            f"{self.IMEM_LB} to {self.IMEM_UB}, and the instructions $i$ are valid RISC-V instruction codes.\n"
+            f"{self.IMEM_LB} to {self.IMEM_UB}, and the instructions $i$ are VALID RISC-V instruction codes.\n"
         )
         return prompt

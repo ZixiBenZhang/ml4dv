@@ -26,7 +26,8 @@ class ICFilter(BaseFilter):
         return [list(
             filter(
                 lambda p: self.lower_bound <= p[0] <= self.upper_bound
-                and self.lower_bound <= p[1] <= self.upper_bound,
+                and self.lower_bound <= p[1] <= self.upper_bound
+                and p[1] != 0,
                 updates,
             )
         )]
