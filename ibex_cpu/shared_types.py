@@ -29,7 +29,7 @@ class CoverageDatabase:
             for ((prev_instr, cov), num) in x_covs.items()
         )
         generator = chain(cov_generator, xcov_generator)
-        return dict(sorted(generator, key=lambda cov: cov[0]))
+        return dict(generator)
 
     def get_coverage_vector(self) -> list[int]:
         return list(self.get_coverage_dict().values())
