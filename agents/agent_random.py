@@ -34,7 +34,7 @@ class RandomAgent4IC(RandomAgent):
     def generate_next_value(
         self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase
     ):
-        addr = int(dut_state.get_pc(), 16) + 4
+        addr = int(dut_state.get_pc(), 16)
         instr = random.getrandbits(32)
 
         if self.current_cycle % 10000 == 0:
