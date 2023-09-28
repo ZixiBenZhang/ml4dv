@@ -233,20 +233,20 @@ def budget_experiment():
                 f"BUDGET left: {BUDGET.total_budget} tokens\n"
             )
 
-        print("\n******** FINAL RESULT ********\n")
-        for entry in data:
-            print(
-                f"Trial #{entry[0]}, Msg cnt: {entry[1]}, Token cnt: {entry[2]}, Coverage: {entry[3]}"
-            )
-        min_hit_id = np.argmin([entry[3] for entry in data])
-        max_hit_id = np.argmax([entry[3] for entry in data])
+    print("\n******** FINAL RESULT ********\n")
+    for entry in data:
         print(
-            f"\n"
-            f"Total trial cnt: {trial_cnt}\n"
-            f"Total token cnt: {INIT_BUDGET - BUDGET.total_budget}\n"
-            f"Min coverage: {data[min_hit_id][3]} by trial #{data[min_hit_id][0]}\n"
-            f"Max coverage: {data[max_hit_id][3]} by trial #{data[max_hit_id][0]}\n"
+            f"Trial #{entry[0]}, Msg cnt: {entry[1]}, Token cnt: {entry[2]}, Coverage: {entry[3]}"
         )
+    min_hit_id = np.argmin([entry[3] for entry in data])
+    max_hit_id = np.argmax([entry[3] for entry in data])
+    print(
+        f"\n"
+        f"Total trial cnt: {trial_cnt}\n"
+        f"Total token cnt: {INIT_BUDGET - BUDGET.total_budget}\n"
+        f"Min coverage: {data[min_hit_id][3]} by trial #{data[min_hit_id][0]}\n"
+        f"Max coverage: {data[max_hit_id][3]} by trial #{data[max_hit_id][0]}\n"
+    )
 
 
 if __name__ == "__main__":
