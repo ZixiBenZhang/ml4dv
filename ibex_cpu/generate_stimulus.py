@@ -252,4 +252,4 @@ def budget_experiment():
 
 
 if __name__ == "__main__":
-    main()
+    budget_experiment()
