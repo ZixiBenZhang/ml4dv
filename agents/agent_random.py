@@ -34,8 +34,8 @@ class RandomAgent4IC(RandomAgent):
     def generate_next_value(
         self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase
     ):
-        addr = dut_state.get_pc() + 4
-        instr = random.getrandbits(32)
+        addr = hex(int(dut_state.get_pc(), 16) + 4)
+        instr = hex(random.getrandbits(32))
 
         if self.current_cycle % 10000 == 0:
             print(f"Generated {self.current_cycle} stimuli\n")
