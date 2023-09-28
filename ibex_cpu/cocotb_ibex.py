@@ -157,25 +157,26 @@ async def basic_test(dut):
 
     server_port = input("Please enter server's port (e.g. 5050, 5555): ")
 
-    dut.data_gnt_i.value = 0
-    dut.data_rvalid_i.value = 0
+    while True:
+        dut.data_gnt_i.value = 0
+        dut.data_rvalid_i.value = 0
 
-    imem_agent = MemAgent(dut, "instr", handle_writes=False)
-    dmem_agent = MemAgent(dut, "data", handle_writes=True)
-    ins_mon = InstructionMonitor(dut)
-    imem_agent.load_bin("test_prog.bin", 0x100080)
+        imem_agent = MemAgent(dut, "instr", handle_writes=False)
+        dmem_agent = MemAgent(dut, "data", handle_writes=True)
+        ins_mon = InstructionMonitor(dut)
+        imem_agent.load_bin("test_prog.bin", 0x100080)
 
-    cocotb.start_soon(Clock(dut.clk_i, 10, units="ns").start())
-    await do_reset(dut)
-    cocotb.start_soon(imem_agent.run_mem())
-    cocotb.start_soon(dmem_agent.run_mem())
-    cocotb.start_soon(update_magic_loc(dut, dmem_agent))
+        cocotb.start_soon(Clock(dut.clk_i, 10, units="ns").start())
+        await do_reset(dut)
+        cocotb.start_soon(imem_agent.run_mem())
+        cocotb.start_soon(dmem_agent.run_mem())
+        cocotb.start_soon(update_magic_loc(dut, dmem_agent))
 
-    await ClockCycles(dut.clk_i, 1)
-
-    sim_ctrl = SimulationController(dut, ins_mon, imem_agent, f"tcp://*:{server_port}")
-    with closing(sim_ctrl) as simulation_controller:
-        cocotb.start_soon(simulation_controller.controller_loop())
-
-        await simulation_controller.end_simulation_event.wait()
         await ClockCycles(dut.clk_i, 1)
+
+        sim_ctrl = SimulationController(dut, ins_mon, imem_agent, f"tcp://*:{server_port}")
+        with closing(sim_ctrl) as simulation_controller:
+            cocotb.start_soon(simulation_controller.controller_loop())
+
+            await simulation_controller.end_simulation_event.wait()
+            await ClockCycles(dut.clk_i, 1)
