@@ -185,6 +185,8 @@ class GlobalCoverageDatabase:
 class GlobalDUTState:
     def __init__(self):
         self._dut_state = None
+        self.prev_valid_pc = None
+        self.prev_valid_instr = None
 
     def get(self):
         return self._dut_state
@@ -209,15 +211,19 @@ class GlobalDUTState:
     def get_pc(self):
         if isinstance(self._dut_state, ICDS):
             if self._dut_state.last_pc is None:
-                return "\"invalid\" since the CPU has tried to execute invalid instruction(s)."
+                # return "\"invalid\" since the CPU has tried to execute invalid instruction(s)."
+                return hex(self.prev_valid_pc)
+            self.prev_valid_pc = self._dut_state.last_pc
             return hex(self._dut_state.last_pc)
         else:
+            self.prev_valid_pc = 0x00100080
             return hex(0x00100080)
 
     def get_last_instr(self):
         if isinstance(self._dut_state, ICDS):
             if self._dut_state.last_insn is None:
-                return None
+                return hex(self.prev_valid_instr)
+            self.prev_valid_instr = self._dut_state.last_insn
             return hex(self._dut_state.last_insn)
         else:
             return None
