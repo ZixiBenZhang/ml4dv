@@ -224,7 +224,7 @@ class GlobalDUTState:
     def get_last_instr(self):
         if isinstance(self._dut_state, ICDS):
             if self._dut_state.last_insn is None:
-                return hex(self.prev_valid_instr)
+                return None if self.prev_valid_instr is None else hex(self.prev_valid_instr)
             self.prev_valid_instr = self._dut_state.last_insn
             return hex(self._dut_state.last_insn)
         else:
