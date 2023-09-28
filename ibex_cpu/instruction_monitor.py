@@ -40,9 +40,10 @@ class InstructionMonitor:
         if insn is not None:
             try:
                 mnemonic = insn.instruction()
-            except AssertionError:
-                self.last_pc = None
-                self.insn = None
+            except AssertionError:  # Valid RISC-V instruction, but not in instruction.py
+                # self.last_pc = None
+                # self.insn = None
+                print(f"Valid RISC-V instruction {hex(insn.encoding)}, but not in instruction.py \n")
                 return
 
             for coverpoint in insn.sample_coverage():
