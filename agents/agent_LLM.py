@@ -173,7 +173,7 @@ class LLMAgent(BaseAgent):
                 and self.token_budget.no_budget()
             ):
                 # return 0 (same as None), so entering end_simulation and stops in next loop
-                return 0
+                return 0 if not is_ic else []
 
             # If gibberish
             # log coverage, update coverage of last msg, check need to reset
@@ -277,6 +277,7 @@ class LLMAgent(BaseAgent):
                 continue
 
             self.stimuli_buffer.extend(stimuli)
+            # print(f"Response: {response}\nStimuli: {stimuli[0]}\n")
 
         return self._get_next_value_from_buffer()
 

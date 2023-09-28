@@ -64,6 +64,7 @@ def main():
     )
 
     stimulus_generator = ChatGPT(
+        max_gen_tokens=800,
         system_prompt=prompt_generator.generate_system_prompt(),
         best_iter_buffer_resetting="STABLE",
         compress_msg_algo="best 3",
