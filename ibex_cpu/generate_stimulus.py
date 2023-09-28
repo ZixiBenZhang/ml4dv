@@ -101,7 +101,10 @@ def main():
             stimulus.insn_mem_updates = agent.generate_next_value(
                 g_dut_state, g_coverage, is_ic=True
             )
-            print(f"Generated updates[:10]: {list(map(lambda p: (hex(p[0]), hex(p[1])),stimulus.insn_mem_updates))[:10]}\n")
+            print(
+                f"Generated updates[:10]: "
+                f"{list(map(lambda p: (hex(p[0]), hex(p[1])),stimulus.insn_mem_updates))[:10]}\n"
+            )
             ibex_state, coverage = stimulus_sender.send_stimulus(stimulus)
             g_dut_state.set(ibex_state)
             g_coverage.set(coverage)
@@ -112,6 +115,9 @@ def main():
         stimulus.finish = True
         _, final_coverage = stimulus_sender.send_stimulus(stimulus)
         final_coverage.output()
+
+        g_coverage.set(final_coverage)
+        print(f"Final coverage rate: {g_coverage.get_coverage_rate()}")
 
 
 def budget_experiment():
@@ -152,7 +158,7 @@ def budget_experiment():
         )
 
         stimulus_generator = ChatGPT(
-            max_gen_tokens=800,
+            max_gen_tokens=1000,
             system_prompt=prompt_generator.generate_system_prompt(),
             best_iter_buffer_resetting="STABLE",
             compress_msg_algo="best 3",
@@ -174,10 +180,9 @@ def budget_experiment():
             [logger_txt, logger_csv],
             dialog_bound=1000,
             rst_plan=rst_plan_ORDINARY,
+            token_budget=BUDGET,
         )
         print("Agent successfully built\n")
-
-        # agent = DumbAgent4IC()
 
         stimulus = Stimulus(insn_mem_updates=[], finish=False)
         g_dut_state = GlobalDUTState()
@@ -189,7 +194,9 @@ def budget_experiment():
                     g_dut_state, g_coverage, is_ic=True
                 )
                 print(
-                    f"Generated updates[:10]: {list(map(lambda p: (hex(p[0]), hex(p[1])), stimulus.insn_mem_updates))[:10]}\n")
+                    f"Generated updates[:4]: "
+                    f"{list(map(lambda p: (hex(p[0]), hex(p[1])), stimulus.insn_mem_updates))[:4]}\n"
+                )
                 ibex_state, coverage = stimulus_sender.send_stimulus(stimulus)
                 g_dut_state.set(ibex_state)
                 g_coverage.set(coverage)
