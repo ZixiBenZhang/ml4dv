@@ -203,8 +203,8 @@ class TemplatePromptGenerator4IC1(TemplatePromptGenerator):
                 f"ensuring it covers the specified unreached bins (i.e. test cases) upon resuming "
                 f"execution from the current PC. Make sure the addresses are in the range of "
                 f"{self.IMEM_LB} to {self.IMEM_UB}, and the instructions are valid R-type, S-type, "
-                f"or J-type instructions. We encourage you to update addresses into diverse variety "
-                f"of operations. \n"
+                f"or J-type instructions. We encourage you to update addresses near the current PC, "
+                f"and update them into diverse variety of operations. \n"
             )
         return iter_question
 
@@ -251,7 +251,7 @@ class TemplatePromptGenerator4IC2(TemplatePromptGenerator4IC1):
             f"to update the CPU's memory, ensuring it covers the specified bins upon resuming "
             f"execution from the current PC. Make sure the addresses $a$ are in the range of "
             f"{self.IMEM_LB} to {self.IMEM_UB}, and the instructions $i$ are VALID R-type, S-type, "
-            f"or J-type instructions. We encourage you to update addresses into diverse variety "
-            f"of operations. \n"
+            f"or J-type instructions. We encourage you to update addresses near the current PC, "
+            f"and update them into diverse variety of operations. \n"
         )
         return prompt
