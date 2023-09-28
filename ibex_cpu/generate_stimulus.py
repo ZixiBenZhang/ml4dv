@@ -74,6 +74,7 @@ def random_experiment():
 
             if ibex_state.last_pc is not None:
                 print(f"DUT state: {ibex_state.last_pc:08x} {ibex_state.last_insn:08x}\n")
+                input()
 
         stimulus.finish = True
         _, final_coverage = stimulus_sender.send_stimulus(stimulus)
