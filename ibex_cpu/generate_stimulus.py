@@ -68,6 +68,10 @@ def random_experiment():
             stimulus.insn_mem_updates = agent.generate_next_value(
                 g_dut_state, g_coverage
             )
+            print(
+                f"Generated updates[:4]: "
+                f"{list(map(lambda p: (hex(p[0]), hex(p[1])), stimulus.insn_mem_updates))[:4]}\n"
+            )
             ibex_state, coverage = stimulus_sender.send_stimulus(stimulus)
             g_dut_state.set(ibex_state)
             g_coverage.set(coverage)
