@@ -34,11 +34,11 @@ class RandomAgent4IC(RandomAgent):
     def generate_next_value(
         self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase
     ):
-        pc = dut_state.get_pc()
+        addr = dut_state.get_pc() + 4
         instr = random.getrandbits(32)
 
         if self.current_cycle % 10000 == 0:
             print(f"Generated {self.current_cycle} stimuli\n")
         self.current_cycle += 1
 
-        return [(pc, instr)]
+        return [(addr, instr)]
