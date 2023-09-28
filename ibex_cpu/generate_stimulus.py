@@ -123,10 +123,10 @@ def main():
 def budget_experiment():
     print("Running budget experiment on IC...")
 
-    INIT_BUDGET = 10000000
+    INIT_BUDGET = 100000
     print(f"Start with BUDGET={INIT_BUDGET}\n")
 
-    BUDGET = Budget(budget_per_trial=INIT_BUDGET, total_budget=INIT_BUDGET)
+    BUDGET = Budget(budget_per_trial=20000, total_budget=INIT_BUDGET)
 
     server_ip_port = input(
         "Please enter server's IP and port (e.g. 127.0.0.1:5050, 128.232.65.218:5555): "
