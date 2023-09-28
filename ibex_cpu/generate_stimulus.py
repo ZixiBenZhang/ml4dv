@@ -68,7 +68,7 @@ def main():
         max_gen_tokens=800,
         system_prompt=prompt_generator.generate_system_prompt(),
         best_iter_buffer_resetting="STABLE",
-        compress_msg_algo="best 3",
+        compress_msg_algo="recent 3",
         prioritise_harder_bins=False,
     )
     extractor = ICExtractor()
@@ -86,7 +86,7 @@ def main():
         stimulus_filter,
         [logger_txt, logger_csv],
         dialog_bound=700,
-        rst_plan=rst_plan_FAST,
+        rst_plan=rst_plan_ORDINARY,
     )
     print("Agent successfully built\n")
 
@@ -179,7 +179,7 @@ def budget_experiment():
             stimulus_filter,
             [logger_txt, logger_csv],
             dialog_bound=1000,
-            rst_plan=rst_plan_FAST,
+            rst_plan=rst_plan_ORDINARY,
             token_budget=BUDGET,
         )
         print("Agent successfully built\n")
@@ -252,4 +252,4 @@ def budget_experiment():
 
 
 if __name__ == "__main__":
-    budget_experiment()
+    main()
