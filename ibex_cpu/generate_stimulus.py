@@ -85,7 +85,7 @@ def main():
         stimulus_filter,
         [logger_txt, logger_csv],
         dialog_bound=700,
-        rst_plan=rst_plan_ORDINARY,
+        rst_plan=rst_plan_FAST,
     )
     print("Agent successfully built\n")
 
@@ -100,7 +100,7 @@ def main():
             stimulus.insn_mem_updates = agent.generate_next_value(
                 g_dut_state, g_coverage, is_ic=True
             )
-            print(f"Generated updates: {stimulus.insn_mem_updates}\n")
+            print(f"Generated updates[:10]: {list(map(lambda p: (hex(p[0]), hex(p[1])),stimulus.insn_mem_updates))[:10]}\n")
             ibex_state, coverage = stimulus_sender.send_stimulus(stimulus)
             g_dut_state.set(ibex_state)
             g_coverage.set(coverage)
