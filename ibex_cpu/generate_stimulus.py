@@ -168,8 +168,8 @@ def budget_experiment():
         stimulus_filter = ICFilter(0x0, 0xFFFFFFFF)
 
         # build loggers
-        logger_txt = TXTLogger(f"{prefix}{t}.txt")
-        logger_csv = CSVLogger(f"{prefix}{t}.csv")
+        logger_txt = TXTLogger(f"{prefix}{t}_trial_{trial_cnt}.txt")
+        logger_csv = CSVLogger(f"{prefix}{t}_trial_{trial_cnt}.csv")
 
         # create agent
         agent = LLMAgent(
