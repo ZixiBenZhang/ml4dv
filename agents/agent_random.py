@@ -25,3 +25,20 @@ class RandomAgent(BaseAgent):
             print(f"Generated {self.current_cycle} stimuli\n")
         self.current_cycle += 1
         return random.getrandbits(32)
+
+
+class RandomAgent4IC(RandomAgent):
+    def __init__(self, total_cycle=1000000, seed=0):
+        super().__init__(total_cycle=1000000, seed=0)
+
+    def generate_next_value(
+        self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase
+    ):
+        pc = dut_state.get_pc()
+        instr = random.getrandbits(32)
+
+        if self.current_cycle % 10000 == 0:
+            print(f"Generated {self.current_cycle} stimuli\n")
+        self.current_cycle += 1
+
+        return [(pc, instr)]

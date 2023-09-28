@@ -43,7 +43,7 @@ class InstructionMonitor:
             except AssertionError:  # Valid RISC-V instruction, but not in instruction.py
                 # self.last_pc = None
                 # self.insn = None
-                print(f"Valid RISC-V instruction {hex(insn.encoding)}, but not in instruction.py \n")
+                print(f">>>>> Valid RISC-V instruction {hex(insn.encoding)}, but not in instruction.py \n")
                 return
 
             for coverpoint in insn.sample_coverage():

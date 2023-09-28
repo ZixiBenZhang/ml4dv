@@ -14,6 +14,7 @@ sys.path.insert(0, os.path.dirname(directory))
 
 from agents.agent_LLM import *
 from agents.agent_IC_dumb import *
+from agents.agent_random import *
 from loggers.logger_csv import CSVLogger
 from loggers.logger_txt import TXTLogger
 from models.llm_gpt import ChatGPT
@@ -45,6 +46,41 @@ class StimulusSender:
     def close(self):
         if self.socket:
             self.socket.close()
+
+
+def random_experiment():
+    print("Running random experiment on IC...")
+
+    server_ip_port = input(
+        "Please enter server's IP and port (e.g. 127.0.0.1:5050, 128.232.65.218:5555): "
+    )
+
+    CYCLES = 1000000
+
+    agent = RandomAgent4IC(total_cycle=CYCLES, seed=datetime.now().timestamp())
+
+    stimulus = Stimulus(insn_mem_updates=[], finish=False)
+    g_dut_state = GlobalDUTState()
+    g_coverage = GlobalCoverageDatabase()
+
+    with closing(StimulusSender(f"tcp://{server_ip_port}")) as stimulus_sender:
+        while not agent.end_simulation(g_dut_state, g_coverage):
+            stimulus.insn_mem_updates = agent.generate_next_value(
+                g_dut_state, g_coverage
+            )
+            ibex_state, coverage = stimulus_sender.send_stimulus(stimulus)
+            g_dut_state.set(ibex_state)
+            g_coverage.set(coverage)
+
+            if ibex_state.last_pc is not None:
+                print(f"DUT state: {ibex_state.last_pc:08x} {ibex_state.last_insn:08x}\n")
+
+        stimulus.finish = True
+        _, final_coverage = stimulus_sender.send_stimulus(stimulus)
+        final_coverage.output()
+
+        g_coverage.set(final_coverage)
+        print(f"Final coverage rate: {g_coverage.get_coverage_rate()}")
 
 
 def main():
@@ -252,4 +288,4 @@ def budget_experiment():
 
 
 if __name__ == "__main__":
-    budget_experiment()
+    random_experiment()
