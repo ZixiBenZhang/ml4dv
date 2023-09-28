@@ -212,6 +212,8 @@ class GlobalDUTState:
         if isinstance(self._dut_state, ICDS):
             if self._dut_state.last_pc is None:
                 # return "\"invalid\" since the CPU has tried to execute invalid instruction(s)."
+                if self.prev_valid_pc is None:
+                    self.prev_valid_pc = 0x00100080
                 return hex(self.prev_valid_pc)
             self.prev_valid_pc = self._dut_state.last_pc
             return hex(self._dut_state.last_pc)
