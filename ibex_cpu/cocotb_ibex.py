@@ -125,6 +125,7 @@ class SimulationController:
                 if not isinstance(stimulus_obj, Stimulus):
                     assert False, "Saw bad stimulus message"
 
+                # TODO: debugging insn_mem_updates is int
                 for addr, data in stimulus_obj.insn_mem_updates:
                     self.imem_agent.write_mem(addr, data)
 
