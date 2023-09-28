@@ -38,7 +38,13 @@ class InstructionMonitor:
         insn = Encoding(self.insn.value).typed()
 
         if insn is not None:
-            mnemonic = insn.instruction()
+            try:
+                mnemonic = insn.instruction()
+            except AssertionError:
+                self.last_pc = None
+                self.insn = None
+                return
+
             for coverpoint in insn.sample_coverage():
                 self.coverage_db.instructions[mnemonic][coverpoint] += 1
 
