@@ -105,10 +105,10 @@ def main():
     )
 
     stimulus_generator = ChatGPT(
-        max_gen_tokens=800,
+        max_gen_tokens=1000,
         system_prompt=prompt_generator.generate_system_prompt(),
         best_iter_buffer_resetting="STABLE",
-        compress_msg_algo="recent 3",
+        compress_msg_algo="best 2 recent 1",
         prioritise_harder_bins=False,
     )
     extractor = ICExtractor()
@@ -126,7 +126,7 @@ def main():
         stimulus_filter,
         [logger_txt, logger_csv],
         dialog_bound=700,
-        rst_plan=rst_plan_ORDINARY,
+        rst_plan=rst_plan_FAST,
     )
     print("Agent successfully built\n")
 
@@ -292,4 +292,4 @@ def budget_experiment():
 
 
 if __name__ == "__main__":
-    budget_experiment()
+    main()
