@@ -6,7 +6,7 @@ This project provides a framework for incorporating LLMs in test stimuli generat
 generating inputs for testing a device). The goal is to generate stimuli to cover most of the test bins 
 (i.e. test cases) from a predefined coverage plan with the LLM using as few tokens as possible.
 
-This project contains three device-under-tests (DUTs):
+This project contains three design-under-tests (DUTs):
 1. __Stride detector__: a device that detects single- and double-stride patterns. 
 This kind of design is the core of data prefetchers for CPUs. 
 2. __*Ibex* instruction decoder__: a RISC-V instruction decoder.
