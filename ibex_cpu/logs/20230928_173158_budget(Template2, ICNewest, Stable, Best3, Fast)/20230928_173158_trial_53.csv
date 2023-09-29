@@ -1,0 +1,588 @@
+Model,gpt-3.5-turbo-0613,SYSTEM,"Please output a list of pairs of hexadecimal integers only, each integer between 0x0 and 0xffffffff. 
+Do not give any explanations. 
+Output format: [(a, i), (b, j), (c, k), ...].",temperature,0.4,top_p,1,Prompter,TemplatePromptGenerator4IC2,Extractor,ICExtractor
+Total Message#,Dialog #,Message #,Total Token Cnt,USER,Input Token Cnt,ASSISTANT,Output Token Cnt,Action,Coverage Rate,Coverage Plan
+1,1,1,1400,"""We are working with a CPU capable of executing RISC-V instructions. The CPU's instruction memory is defined within the address range of 0x00100080 to 0x00100480, where 0x00100098 is currently the return instruction of the process. The program counter (PC) is currently set to 0x100080. 
+Our objective is to update the CPU's instruction memory with a sequence of 32-bit addresses and corresponding 32-bit instructions. The goal is to ensure that, when the CPU resumes executing instructions from the current PC, it covers the bins (i.e. test cases) that are of interest to us. 
+Here's the description of the bins that are of interest to us:
+------
+BINS DESCRIPTION
+- There are 32 register files available, with index from 0 to 31.
+- Register 0 is denoted as ""zero"", and its content is always 0.
+- There are 14 available types of operations:
+---
+OPERATIONS
+  - R-type:
+    - ADD: addition between two register files
+    - SUB: subtraction between two register files
+    - AND: logical operation AND between two register files
+    - OR: logical operation OR between two register files
+    - XOR: logical operation XOR between two register files
+    - SLL: logical shift left a register file by number of bits equal to another register file
+    - SRL: logical shift right a register file by number of bits equal to another register file
+    - SRA: arithmetic shift right a register file by number of bits equal to another register file
+    - SLT: make comparison between two register files; if the first one is smaller, write 1 to a register file, otherwise write 0
+    - SLTU: make comparison between two unsigned register files; if the first one is smaller, write 1 to a register file, otherwise write 0
+  - S-type:
+    - SW: store a word (a 32-bit value) from a register file to the data memory at the address equal to a register file
+    - SH: store a half-word (a 16-bit value) from a register file to the data memory at the address equal to a register file
+    - SB: load a byte (an 8-bit value) from a register file to the data memory at the address equal to a register file
+  - J-type:
+    - JAL: store the address of next instruction as the return address in a register file, then jump (increase PC) by an immediate (i.e. constant value)
+---
+
+- BIN type 1: Make the CPU perform each operation at least once.
+- BIN type 2: For each R-type or J-type operation, make the CPU execute an instruction with register zero as the destination register (rd).
+- BIN type 3: For each R-type or S-type operation, make the CPU execute an instruction with register zero as one of the source registers (rs).
+- BIN type 4: For each R-type or S-type operation, make the CPU execute an instruction where both source registers are the same register file.
+- BIN type 5: For the JAL operation, make the CPU execute both forward jumps and backward jumps.
+
+- Read-after-Write (RaW) hazard: happens when the current instruction reads from a register which the previous instruction wrote to.
+- BIN type 6: For each R-type or S-type operation following an R-type or J-type operation, make the CPU execute two instructions that would cause an RaW hazard.
+------
+Following the bins description, generate a list, which can be empty if necessary, of address-instruction pairs $(a, i)$ in 32-bit hexadecimal format to update the CPU's memory, ensuring it covers the specified bins upon resuming execution from the current PC. Make sure the addresses $a$ are in the range of 0x00100080 to 0x00100480, and the instructions $i$ are VALID R-type, S-type, or J-type instructions. We encourage you to make updates near the current PC (0x100080), and update addresses into diverse variety of operations. 
+""",921,"""[(0x100080, 0x00000000), (0x100084, 0x00100013), (0x100088, 0x00208193), (0x10008c, 0x00310113), (0x100090, 0x00410133), (0x100094, 0x005101B3), (0x100098, 0x00610193), (0x10009c, 0x00710113), (0x1000a0, 0x00810133), (0x1000a4, 0x009101B3), (0x1000a8, 0x00a10193), (0x1000ac, 0x00b10113), (0x1000b0, 0x00c10133), (0x1000b4, 0x00d101B3), (0x1000b8, 0x00e10193), (0x1000bc, 0x00f10113), (0x1000c0, 0x01010133), (0x1000c4, 0x011101B3), (0x1000c8, 0x01210193), (0x1000cc, 0x01310113), (0x1000d0, 0x01410133), (0x1000d4, 0x015101B3), (0x1000d8, 0x01610193), (0x1000dc, 0x01710113), (0x1000e0, 0x01810133), (0x1000e4, 0x019101B3), (0x1000e8, 0x01a10193), (0x1000ec, 0x01b10113), (0x1000f0, 0x01c10133), (0x1000f4, 0x01d101B3), (0x1000f8, 0x01e10193), (0x1000fc, 0x01f10113)]""",479,none,0,{}
+2,1,2,2318,"""Thanks for your response.
+The CPU has successfully executed numerous instructions following your update. The last instruction performed was None, and the program counter (PC) is presently set to 0x100080. 
+You will now observe the bins haven't been achieved by the CPU, and proceed to generate another list, which can be empty if necessary, of address-instruction pairs to further modify the CPU's memory, ensuring it covers the previously unreached bins (i.e. test cases) upon resuming execution from the current PC.
+Here are some of the unreached bins:
+------
+UNREACHED BINS
+- add_seen: the CPU hasn't performed the operation add.
+- add_zero_dst: the CPU hasn't executed an instruction that performs the operation add with register zero as the destination register.
+- or_zero_dst: the CPU hasn't executed an instruction that performs the operation or with register zero as the destination register.
+- xor_zero_src: the CPU hasn't executed an instruction that performs the operation xor with register zero as one of the source registers.
+- sw_seen: the CPU hasn't performed the operation sw.
+- sub->or_raw_hazard: the CPU hasn't perform a sub operation followed by a or operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+- jal->xor_raw_hazard: the CPU hasn't perform a jal operation followed by a xor operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+------
+Please generate a list, which can be empty if necessary, of address-instruction pairs in 32-bit hexadecimal format to further update the CPU's memory, ensuring it covers the specified unreached bins (i.e. test cases) upon resuming execution from the current PC. Make sure the addresses are in the range of 0x00100080 to 0x00100480, and the instructions are valid R-type, S-type, or J-type instructions. We encourage you to make updates near the current PC (0x100080), and update addresses into diverse variety of operations. 
+""",1850,"""[(0x100100, 0x01c08067), (0x100104, 0x01c09067), (0x100108, 0x01c0a067), (0x10010c, 0x01c0b067), (0x100110, 0x01c0c067), (0x100114, 0x01c0d067), (0x100118, 0x01c0e067), (0x10011c, 0x01c0f067), (0x100120, 0x01c10067), (0x100124, 0x01c11067), (0x100128, 0x01c12067), (0x10012c, 0x01c13067), (0x100130, 0x01c14067), (0x100134, 0x01c15067), (0x100138, 0x01c16067), (0x10013c, 0x01c17067), (0x100140, 0x01c18067), (0x100144, 0x01c19067), (0x100148, 0x01c1a067), (0x10014c, 0x01c1b067), (0x100150, 0x01c1c067), (0x100154, 0x01c1d067), (0x100158, 0x01c1e067), (0x10015c, 0x01c1f067), (0x100160, 0x01c20067), (0x100164, 0x01c21067), (0x100168, 0x01c22067), (0x10016c, 0x01c23067), (0x100170, 0x01c24067), (0x100174, 0x01c25067), (0x100178, 0x01c26067), (0x10017c, 0x01c27067)]""",468,none,0,{}
+3,1,3,3282,"""Your list of updates was invalid, either because the addresses are out-of-boundor the instructions you provided are not valid R-type, S-type, or J-type RISC-V instructions. Try to amend it in your new response. 
+The CPU has executed numerous instructions following your last update. The last instruction performed was None, and the program counter (PC) is presently set to 0x100080. 
+You will now observe the bins haven't been achieved by the CPU, and proceed to generate another list, which can be empty if necessary, of address-instruction pairs to further modify the CPU's memory, ensuring it covers the previously unreached bins (i.e. test cases) upon resuming execution from the current PC.
+Here are some of the unreached bins:
+------
+UNREACHED BINS
+- add_seen: the CPU hasn't performed the operation add.
+- add_zero_dst: the CPU hasn't executed an instruction that performs the operation add with register zero as the destination register.
+- and_zero_src: the CPU hasn't executed an instruction that performs the operation and with register zero as one of the source registers.
+- and_same_src: the CPU hasn't executed an instruction that performs the operation and with same source registers.
+- sub_zero_src: the CPU hasn't executed an instruction that performs the operation sub with register zero as one of the source registers.
+- jal->sw_raw_hazard: the CPU hasn't perform a jal operation followed by a sw operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+- and->or_raw_hazard: the CPU hasn't perform a and operation followed by a or operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+------
+Please generate a list, which can be empty if necessary, of address-instruction pairs in 32-bit hexadecimal format to further update the CPU's memory, ensuring it covers the specified unreached bins (i.e. test cases) upon resuming execution from the current PC. Make sure the addresses are in the range of 0x00100080 to 0x00100480, and the instructions are valid R-type, S-type, or J-type instructions. We encourage you to make updates near the current PC (0x100080), and update addresses into diverse variety of operations. 
+""",2821,"""[(0x100080, 0x00c08067), (0x100084, 0x00108013), (0x100088, 0x00010133), (0x10008c, 0x00010133), (0x100090, 0x00010133), (0x100094, 0x00010133), (0x100098, 0x00010133), (0x10009c, 0x00010133), (0x1000a0, 0x00010133), (0x1000a4, 0x00010133), (0x1000a8, 0x00010133), (0x1000ac, 0x00010133), (0x1000b0, 0x00010133), (0x1000b4, 0x00010133), (0x1000b8, 0x00010133), (0x1000bc, 0x00010133), (0x1000c0, 0x00010133), (0x1000c4, 0x00010133), (0x1000c8, 0x00010133), (0x1000cc, 0x00010133), (0x1000d0, 0x00010133), (0x1000d4, 0x00010133), (0x1000d8, 0x00010133), (0x1000dc, 0x00010133), (0x1000e0, 0x00010133), (0x1000e4, 0x00010133), (0x1000e8, 0x00010133), (0x1000ec, 0x00010133), (0x1000f0, 0x00010133), (0x1000f4, 0x00010133), (0x1000f8, 0x00010133), (0x1000fc, 0x00010133)]""",461,none,0,{}
+4,1,4,4140,"""Thanks for your response.
+The CPU has successfully executed numerous instructions following your update. The last instruction performed was 0xa00293, and the program counter (PC) is presently set to 0x100080. 
+You will now observe the bins haven't been achieved by the CPU, and proceed to generate another list, which can be empty if necessary, of address-instruction pairs to further modify the CPU's memory, ensuring it covers the previously unreached bins (i.e. test cases) upon resuming execution from the current PC.
+Here are some of the unreached bins:
+------
+UNREACHED BINS
+- add_seen: the CPU hasn't performed the operation add.
+- add_zero_dst: the CPU hasn't executed an instruction that performs the operation add with register zero as the destination register.
+- sll_zero_dst: the CPU hasn't executed an instruction that performs the operation sll with register zero as the destination register.
+- srl_seen: the CPU hasn't performed the operation srl.
+- sra_seen: the CPU hasn't performed the operation sra.
+- or->sh_raw_hazard: the CPU hasn't perform a or operation followed by a sh operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+- sltu->sh_raw_hazard: the CPU hasn't perform a sltu operation followed by a sh operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+------
+Please generate a list, which can be empty if necessary, of address-instruction pairs in 32-bit hexadecimal format to further update the CPU's memory, ensuring it covers the specified unreached bins (i.e. test cases) upon resuming execution from the current PC. Make sure the addresses are in the range of 0x00100080 to 0x00100480, and the instructions are valid R-type, S-type, or J-type instructions. We encourage you to make updates near the current PC (0x100080), and update addresses into diverse variety of operations. 
+""",3730,"""[(0x100100, 0x00008013), (0x100104, 0x00008013), (0x100108, 0x00008013), (0x10010c, 0x00008013), (0x100110, 0x00008013), (0x100114, 0x00008013), (0x100118, 0x00008013), (0x10011c, 0x00008013), (0x100120, 0x00008013), (0x100124, 0x00008013), (0x100128, 0x00008013), (0x10012c, 0x00008013), (0x100130, 0x00008013), (0x100134, 0x00008013), (0x100138, 0x00008013), (0x10013c, 0x00008013), (0x100140, 0x00008013), (0x100144, 0x00008013), (0x100148, 0x00008013), (0x10014c, 0x00008013), (0x100150, 0x00008013), (0x100154, 0x00008013), (0x100158, 0x00008013), (0x10015c, 0x00008013), (0x100160, 0x00008013), (0x100164, 0x00008013), (0x100168, 0x00008013), (0x10016c, 0x00008013), (0x100170, 0x00008013), (0x100174, 0x00008013), (0x100178, 0x00008013)]""",410,reset,0,{}
+5,2,1,1381,"""We are working with a CPU capable of executing RISC-V instructions. The CPU's instruction memory is defined within the address range of 0x00100080 to 0x00100480, where 0x00100098 is currently the return instruction of the process. The program counter (PC) is currently set to 0x100080. 
+Our objective is to update the CPU's instruction memory with a sequence of 32-bit addresses and corresponding 32-bit instructions. The goal is to ensure that, when the CPU resumes executing instructions from the current PC, it covers the bins (i.e. test cases) that are of interest to us. 
+Here's the description of the bins that are of interest to us:
+------
+BINS DESCRIPTION
+- There are 32 register files available, with index from 0 to 31.
+- Register 0 is denoted as ""zero"", and its content is always 0.
+- There are 14 available types of operations:
+---
+OPERATIONS
+  - R-type:
+    - ADD: addition between two register files
+    - SUB: subtraction between two register files
+    - AND: logical operation AND between two register files
+    - OR: logical operation OR between two register files
+    - XOR: logical operation XOR between two register files
+    - SLL: logical shift left a register file by number of bits equal to another register file
+    - SRL: logical shift right a register file by number of bits equal to another register file
+    - SRA: arithmetic shift right a register file by number of bits equal to another register file
+    - SLT: make comparison between two register files; if the first one is smaller, write 1 to a register file, otherwise write 0
+    - SLTU: make comparison between two unsigned register files; if the first one is smaller, write 1 to a register file, otherwise write 0
+  - S-type:
+    - SW: store a word (a 32-bit value) from a register file to the data memory at the address equal to a register file
+    - SH: store a half-word (a 16-bit value) from a register file to the data memory at the address equal to a register file
+    - SB: load a byte (an 8-bit value) from a register file to the data memory at the address equal to a register file
+  - J-type:
+    - JAL: store the address of next instruction as the return address in a register file, then jump (increase PC) by an immediate (i.e. constant value)
+---
+
+- BIN type 1: Make the CPU perform each operation at least once.
+- BIN type 2: For each R-type or J-type operation, make the CPU execute an instruction with register zero as the destination register (rd).
+- BIN type 3: For each R-type or S-type operation, make the CPU execute an instruction with register zero as one of the source registers (rs).
+- BIN type 4: For each R-type or S-type operation, make the CPU execute an instruction where both source registers are the same register file.
+- BIN type 5: For the JAL operation, make the CPU execute both forward jumps and backward jumps.
+
+- Read-after-Write (RaW) hazard: happens when the current instruction reads from a register which the previous instruction wrote to.
+- BIN type 6: For each R-type or S-type operation following an R-type or J-type operation, make the CPU execute two instructions that would cause an RaW hazard.
+------
+Following the bins description, generate a list, which can be empty if necessary, of address-instruction pairs $(a, i)$ in 32-bit hexadecimal format to update the CPU's memory, ensuring it covers the specified bins upon resuming execution from the current PC. Make sure the addresses $a$ are in the range of 0x00100080 to 0x00100480, and the instructions $i$ are VALID R-type, S-type, or J-type instructions. We encourage you to make updates near the current PC (0x100080), and update addresses into diverse variety of operations. 
+""",921,"""[(0x100080, 0x00000000), (0x100084, 0x00000000), (0x100088, 0x00000000), (0x10008c, 0x00000000), (0x100090, 0x00000000), (0x100094, 0x00000000), (0x100098, 0x00000000), (0x10009c, 0x00000000), (0x1000a0, 0x00000000), (0x1000a4, 0x00000000), (0x1000a8, 0x00000000), (0x1000ac, 0x00000000), (0x1000b0, 0x00000000), (0x1000b4, 0x00000000), (0x1000b8, 0x00000000), (0x1000bc, 0x00000000), (0x1000c0, 0x00000000), (0x1000c4, 0x00000000), (0x1000c8, 0x00000000), (0x1000cc, 0x00000000), (0x1000d0, 0x00000000), (0x1000d4, 0x00000000), (0x1000d8, 0x00000000), (0x1000dc, 0x00000000), (0x1000e0, 0x00000000), (0x1000e4, 0x00000000), (0x1000e8, 0x00000000), (0x1000ec, 0x00000000), (0x1000f0, 0x00000000), (0x1000f4, 0x00000000), (0x1000f8, 0x00000000), (0x1000fc, 0x00000000)]""",460,none,0,{}
+6,2,2,2328,"""Your list of updates was invalid, either because the addresses are out-of-boundor the instructions you provided are not valid R-type, S-type, or J-type RISC-V instructions. Try to amend it in your new response. 
+The CPU has executed numerous instructions following your last update. The last instruction performed was 0xa00293, and the program counter (PC) is presently set to 0x100080. 
+You will now observe the bins haven't been achieved by the CPU, and proceed to generate another list, which can be empty if necessary, of address-instruction pairs to further modify the CPU's memory, ensuring it covers the previously unreached bins (i.e. test cases) upon resuming execution from the current PC.
+Here are some of the unreached bins:
+------
+UNREACHED BINS
+- add_seen: the CPU hasn't performed the operation add.
+- add_zero_dst: the CPU hasn't executed an instruction that performs the operation add with register zero as the destination register.
+- jal_seen: the CPU hasn't performed the operation jal.
+- slt_zero_dst: the CPU hasn't executed an instruction that performs the operation slt with register zero as the destination register.
+- sb_seen: the CPU hasn't performed the operation sb.
+- jal->add_raw_hazard: the CPU hasn't perform a jal operation followed by a add operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+- add->srl_raw_hazard: the CPU hasn't perform a add operation followed by a srl operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+------
+Please generate a list, which can be empty if necessary, of address-instruction pairs in 32-bit hexadecimal format to further update the CPU's memory, ensuring it covers the specified unreached bins (i.e. test cases) upon resuming execution from the current PC. Make sure the addresses are in the range of 0x00100080 to 0x00100480, and the instructions are valid R-type, S-type, or J-type instructions. We encourage you to make updates near the current PC (0x100080), and update addresses into diverse variety of operations. 
+""",1867,"""[(0x100080, 0x00a00293), (0x100084, 0x00000000), (0x100088, 0x00000000), (0x10008c, 0x00000000), (0x100090, 0x00000000), (0x100094, 0x00000000), (0x100098, 0x00000000), (0x10009c, 0x00000000), (0x1000a0, 0x00000000), (0x1000a4, 0x00000000), (0x1000a8, 0x00000000), (0x1000ac, 0x00000000), (0x1000b0, 0x00000000), (0x1000b4, 0x00000000), (0x1000b8, 0x00000000), (0x1000bc, 0x00000000), (0x1000c0, 0x00000000), (0x1000c4, 0x00000000), (0x1000c8, 0x00000000), (0x1000cc, 0x00000000), (0x1000d0, 0x00000000), (0x1000d4, 0x00000000), (0x1000d8, 0x00000000), (0x1000dc, 0x00000000), (0x1000e0, 0x00000000), (0x1000e4, 0x00000000), (0x1000e8, 0x00000000), (0x1000ec, 0x00000000), (0x1000f0, 0x00000000), (0x1000f4, 0x00000000), (0x1000f8, 0x00000000), (0x1000fc, 0x00000000)]""",461,none,0,{}
+7,2,3,3287,"""Your list of updates was invalid, either because the addresses are out-of-boundor the instructions you provided are not valid R-type, S-type, or J-type RISC-V instructions. Try to amend it in your new response. 
+The CPU has executed numerous instructions following your last update. The last instruction performed was 0xa00293, and the program counter (PC) is presently set to 0x100080. 
+You will now observe the bins haven't been achieved by the CPU, and proceed to generate another list, which can be empty if necessary, of address-instruction pairs to further modify the CPU's memory, ensuring it covers the previously unreached bins (i.e. test cases) upon resuming execution from the current PC.
+Here are some of the unreached bins:
+------
+UNREACHED BINS
+- add_seen: the CPU hasn't performed the operation add.
+- add_zero_dst: the CPU hasn't executed an instruction that performs the operation add with register zero as the destination register.
+- srl_same_src: the CPU hasn't executed an instruction that performs the operation srl with same source registers.
+- sb_zero_src: the CPU hasn't executed an instruction that performs the operation sb with register zero as one of the source registers.
+- sll_seen: the CPU hasn't performed the operation sll.
+- slt->and_raw_hazard: the CPU hasn't perform a slt operation followed by a and operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+- jal->or_raw_hazard: the CPU hasn't perform a jal operation followed by a or operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+------
+Please generate a list, which can be empty if necessary, of address-instruction pairs in 32-bit hexadecimal format to further update the CPU's memory, ensuring it covers the specified unreached bins (i.e. test cases) upon resuming execution from the current PC. Make sure the addresses are in the range of 0x00100080 to 0x00100480, and the instructions are valid R-type, S-type, or J-type instructions. We encourage you to make updates near the current PC (0x100080), and update addresses into diverse variety of operations. 
+""",2827,"""[(0x100080, 0x00000013), (0x100084, 0x00000000), (0x100088, 0x00000000), (0x10008c, 0x00000000), (0x100090, 0x00000000), (0x100094, 0x00000000), (0x100098, 0x00000000), (0x10009c, 0x00000000), (0x1000a0, 0x00000000), (0x1000a4, 0x00000000), (0x1000a8, 0x00000000), (0x1000ac, 0x00000000), (0x1000b0, 0x00000000), (0x1000b4, 0x00000000), (0x1000b8, 0x00000000), (0x1000bc, 0x00000000), (0x1000c0, 0x00000000), (0x1000c4, 0x00000000), (0x1000c8, 0x00000000), (0x1000cc, 0x00000000), (0x1000d0, 0x00000000), (0x1000d4, 0x00000000), (0x1000d8, 0x00000000), (0x1000dc, 0x00000000), (0x1000e0, 0x00000000), (0x1000e4, 0x00000000), (0x1000e8, 0x00000000), (0x1000ec, 0x00000000), (0x1000f0, 0x00000000), (0x1000f4, 0x00000000), (0x1000f8, 0x00000000), (0x1000fc, 0x00000000)]""",460,none,0,{}
+8,2,4,4259,"""Your list of updates was invalid, either because the addresses are out-of-boundor the instructions you provided are not valid R-type, S-type, or J-type RISC-V instructions. Try to amend it in your new response. 
+The CPU has executed numerous instructions following your last update. The last instruction performed was 0xa00293, and the program counter (PC) is presently set to 0x100080. 
+You will now observe the bins haven't been achieved by the CPU, and proceed to generate another list, which can be empty if necessary, of address-instruction pairs to further modify the CPU's memory, ensuring it covers the previously unreached bins (i.e. test cases) upon resuming execution from the current PC.
+Here are some of the unreached bins:
+------
+UNREACHED BINS
+- add_seen: the CPU hasn't performed the operation add.
+- add_zero_dst: the CPU hasn't executed an instruction that performs the operation add with register zero as the destination register.
+- sll_zero_src: the CPU hasn't executed an instruction that performs the operation sll with register zero as one of the source registers.
+- sll_same_src: the CPU hasn't executed an instruction that performs the operation sll with same source registers.
+- sub_zero_dst: the CPU hasn't executed an instruction that performs the operation sub with register zero as the destination register.
+- srl->slt_raw_hazard: the CPU hasn't perform a srl operation followed by a slt operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+- add->sub_raw_hazard: the CPU hasn't perform a add operation followed by a sub operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+------
+Please generate a list, which can be empty if necessary, of address-instruction pairs in 32-bit hexadecimal format to further update the CPU's memory, ensuring it covers the specified unreached bins (i.e. test cases) upon resuming execution from the current PC. Make sure the addresses are in the range of 0x00100080 to 0x00100480, and the instructions are valid R-type, S-type, or J-type instructions. We encourage you to make updates near the current PC (0x100080), and update addresses into diverse variety of operations. 
+""",3799,"""[(0x100080, 0x00000033), (0x100084, 0x00000000), (0x100088, 0x00000000), (0x10008c, 0x00000000), (0x100090, 0x00000000), (0x100094, 0x00000000), (0x100098, 0x00000000), (0x10009c, 0x00000000), (0x1000a0, 0x00000000), (0x1000a4, 0x00000000), (0x1000a8, 0x00000000), (0x1000ac, 0x00000000), (0x1000b0, 0x00000000), (0x1000b4, 0x00000000), (0x1000b8, 0x00000000), (0x1000bc, 0x00000000), (0x1000c0, 0x00000000), (0x1000c4, 0x00000000), (0x1000c8, 0x00000000), (0x1000cc, 0x00000000), (0x1000d0, 0x00000000), (0x1000d4, 0x00000000), (0x1000d8, 0x00000000), (0x1000dc, 0x00000000), (0x1000e0, 0x00000000), (0x1000e4, 0x00000000), (0x1000e8, 0x00000000), (0x1000ec, 0x00000000), (0x1000f0, 0x00000000), (0x1000f4, 0x00000000), (0x1000f8, 0x00000000), (0x1000fc, 0x00000000)]""",460,reset,0,{}
+9,3,1,1921,"""We are working with a CPU capable of executing RISC-V instructions. The CPU's instruction memory is defined within the address range of 0x00100080 to 0x00100480, where 0x00100098 is currently the return instruction of the process. The program counter (PC) is currently set to 0x100080. 
+Our objective is to update the CPU's instruction memory with a sequence of 32-bit addresses and corresponding 32-bit instructions. The goal is to ensure that, when the CPU resumes executing instructions from the current PC, it covers the bins (i.e. test cases) that are of interest to us. 
+Here's the description of the bins that are of interest to us:
+------
+BINS DESCRIPTION
+- There are 32 register files available, with index from 0 to 31.
+- Register 0 is denoted as ""zero"", and its content is always 0.
+- There are 14 available types of operations:
+---
+OPERATIONS
+  - R-type:
+    - ADD: addition between two register files
+    - SUB: subtraction between two register files
+    - AND: logical operation AND between two register files
+    - OR: logical operation OR between two register files
+    - XOR: logical operation XOR between two register files
+    - SLL: logical shift left a register file by number of bits equal to another register file
+    - SRL: logical shift right a register file by number of bits equal to another register file
+    - SRA: arithmetic shift right a register file by number of bits equal to another register file
+    - SLT: make comparison between two register files; if the first one is smaller, write 1 to a register file, otherwise write 0
+    - SLTU: make comparison between two unsigned register files; if the first one is smaller, write 1 to a register file, otherwise write 0
+  - S-type:
+    - SW: store a word (a 32-bit value) from a register file to the data memory at the address equal to a register file
+    - SH: store a half-word (a 16-bit value) from a register file to the data memory at the address equal to a register file
+    - SB: load a byte (an 8-bit value) from a register file to the data memory at the address equal to a register file
+  - J-type:
+    - JAL: store the address of next instruction as the return address in a register file, then jump (increase PC) by an immediate (i.e. constant value)
+---
+
+- BIN type 1: Make the CPU perform each operation at least once.
+- BIN type 2: For each R-type or J-type operation, make the CPU execute an instruction with register zero as the destination register (rd).
+- BIN type 3: For each R-type or S-type operation, make the CPU execute an instruction with register zero as one of the source registers (rs).
+- BIN type 4: For each R-type or S-type operation, make the CPU execute an instruction where both source registers are the same register file.
+- BIN type 5: For the JAL operation, make the CPU execute both forward jumps and backward jumps.
+
+- Read-after-Write (RaW) hazard: happens when the current instruction reads from a register which the previous instruction wrote to.
+- BIN type 6: For each R-type or S-type operation following an R-type or J-type operation, make the CPU execute two instructions that would cause an RaW hazard.
+------
+Following the bins description, generate a list, which can be empty if necessary, of address-instruction pairs $(a, i)$ in 32-bit hexadecimal format to update the CPU's memory, ensuring it covers the specified bins upon resuming execution from the current PC. Make sure the addresses $a$ are in the range of 0x00100080 to 0x00100480, and the instructions $i$ are VALID R-type, S-type, or J-type instructions. We encourage you to make updates near the current PC (0x100080), and update addresses into diverse variety of operations. 
+""",921,"""[(0x100080, 0x00000000), (0x100084, 0x00100013), (0x100088, 0x00200193), (0x10008c, 0x00300213), (0x100090, 0x00400333), (0x100094, 0x00500433), (0x100098, 0x00600533), (0x10009c, 0x00700633), (0x1000a0, 0x00800733), (0x1000a4, 0x00900833), (0x1000a8, 0x00a00933), (0x1000ac, 0x00b00a33), (0x1000b0, 0x00c00b33), (0x1000b4, 0x00d00c33), (0x1000b8, 0x00e00d33), (0x1000bc, 0x00f00e33), (0x1000c0, 0x01000f33), (0x1000c4, 0x01101033), (0x1000c8, 0x01201133), (0x1000cc, 0x01301233), (0x1000d0, 0x01401333), (0x1000d4, 0x01501433), (0x1000d8, 0x01601533), (0x1000dc, 0x01701633), (0x1000e0, 0x01801733), (0x1000e4, 0x01901833), (0x1000e8, 0x01a01933), (0x1000ec, 0x01b01a33), (0x1000f0, 0x01c01b33), (0x1000f4, 0x01d01c33), (0x1000f8, 0x01e01d33), (0x1000fc, 0x01f01e33), (0x100100, 0x02001f33), (0x100104, 0x02102033), (0x100108, 0x02202133), (0x10010c, 0x02302233), (0x100110, 0x02402333), (0x100114, 0x02502433), (0x100118, 0x02602533), (0x10011c, 0x02702633), (0x100120, 0x02802733), (0x100124, 0x02902833), (0x100128, 0x02a02933), (0x10012c, 0x02b02a33), (0x100130, 0x02c02b33), (0x100134, 0x02d02c33), (0x100138, 0x02e02d33), (0x10013c, 0x02f02e33), (0x100140, 0x03002f33), (0x100144, 0x03103033), (0x100148, 0x03203133), (0x10014c, 0x03303233), (0x100150, 0x03403333), (0x100154, 0x03503433), (0x100158, 0x03603533), (0x10015c, 0x03703633), (0x100160, 0x03803733), (0x100164, 0x03903833), (0x100168, 0x03a03933), (0x10016c, 0x03b03a33), (0x100170, 0x03c03b33), (0x100174, 0x03d03c33), (0x100178, 0x03e03d33), (0x10017c, 0x03f03e33), (0x100180, 0x04003f33), (0x100184, 0x04104033), (0x100188, 0x04204133), (0x10018c, 0x04304233), (0x100190, 0x04404333), (0""",1000,none,0,{}
+10,3,2,3379,"""Thanks for your response.
+The CPU has successfully executed numerous instructions following your update. The last instruction performed was 0x1400313, and the program counter (PC) is presently set to 0x100084. 
+You will now observe the bins haven't been achieved by the CPU, and proceed to generate another list, which can be empty if necessary, of address-instruction pairs to further modify the CPU's memory, ensuring it covers the previously unreached bins (i.e. test cases) upon resuming execution from the current PC.
+Here are some of the unreached bins:
+------
+UNREACHED BINS
+- add_seen: the CPU hasn't performed the operation add.
+- add_zero_dst: the CPU hasn't executed an instruction that performs the operation add with register zero as the destination register.
+- add_same_src: the CPU hasn't executed an instruction that performs the operation add with same source registers.
+- add_zero_src: the CPU hasn't executed an instruction that performs the operation add with register zero as one of the source registers.
+- sll_seen: the CPU hasn't performed the operation sll.
+- sub->sw_raw_hazard: the CPU hasn't perform a sub operation followed by a sw operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+- sltu->sra_raw_hazard: the CPU hasn't perform a sltu operation followed by a sra operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+------
+Please generate a list, which can be empty if necessary, of address-instruction pairs in 32-bit hexadecimal format to further update the CPU's memory, ensuring it covers the specified unreached bins (i.e. test cases) upon resuming execution from the current PC. Make sure the addresses are in the range of 0x00100080 to 0x00100480, and the instructions are valid R-type, S-type, or J-type instructions. We encourage you to make updates near the current PC (0x100084), and update addresses into diverse variety of operations. 
+""",2379,"""[(0x100084, 0x04504433), (0x100088, 0x04604533), (0x10008c, 0x04704633), (0x100090, 0x04804733), (0x100094, 0x04904833), (0x100098, 0x04a04933), (0x10009c, 0x04b04a33), (0x1000a0, 0x04c04b33), (0x1000a4, 0x04d04c33), (0x1000a8, 0x04e04d33), (0x1000ac, 0x04f04e33), (0x1000b0, 0x05004f33), (0x1000b4, 0x05105033), (0x1000b8, 0x05205133), (0x1000bc, 0x05305233), (0x1000c0, 0x05405333), (0x1000c4, 0x05505433), (0x1000c8, 0x05605533), (0x1000cc, 0x05705633), (0x1000d0, 0x05805733), (0x1000d4, 0x05905833), (0x1000d8, 0x05a05933), (0x1000dc, 0x05b05a33), (0x1000e0, 0x05c05b33), (0x1000e4, 0x05d05c33), (0x1000e8, 0x05e05d33), (0x1000ec, 0x05f05e33), (0x1000f0, 0x06005f33), (0x1000f4, 0x06106033), (0x1000f8, 0x06206133), (0x1000fc, 0x06306233), (0x100100, 0x06406333), (0x100104, 0x06506433), (0x100108, 0x06606533), (0x10010c, 0x06706633), (0x100110, 0x06806733), (0x100114, 0x06906833), (0x100118, 0x06a06933), (0x10011c, 0x06b06a33), (0x100120, 0x06c06b33), (0x100124, 0x06d06c33), (0x100128, 0x06e06d33), (0x10012c, 0x06f06e33), (0x100130, 0x07006f33), (0x100134, 0x07107033), (0x100138, 0x07207133), (0x10013c, 0x07307233), (0x100140, 0x07407333), (0x100144, 0x07507433), (0x100148, 0x07607533), (0x10014c, 0x07707633), (0x100150, 0x07807733), (0x100154, 0x07907833), (0x100158, 0x07a07933), (0x10015c, 0x07b07a33), (0x100160, 0x07c07b33), (0x100164, 0x07d07c33), (0x100168, 0x07e07d33), (0x10016c, 0x07f07e33), (0x100170, 0x08007f33), (0x100174, 0x08108033), (0x100178, 0x08208133), (0x10017c, 0x08308233), (0x100180, 0x08408333), (0x100184, 0x08508433), (0x100188, 0x08608533), (0x10018c, 0x08708633), (0x100190, 0x08808733), (0x100194, 0x08908833), (0""",1000,none,0,{}
+11,3,3,4851,"""Thanks for your response.
+The CPU has successfully executed numerous instructions following your update. The last instruction performed was 0x1400313, and the program counter (PC) is presently set to 0x100084. 
+You will now observe the bins haven't been achieved by the CPU, and proceed to generate another list, which can be empty if necessary, of address-instruction pairs to further modify the CPU's memory, ensuring it covers the previously unreached bins (i.e. test cases) upon resuming execution from the current PC.
+Here are some of the unreached bins:
+------
+UNREACHED BINS
+- add_seen: the CPU hasn't performed the operation add.
+- add_zero_dst: the CPU hasn't executed an instruction that performs the operation add with register zero as the destination register.
+- add_same_src: the CPU hasn't executed an instruction that performs the operation add with same source registers.
+- or_zero_src: the CPU hasn't executed an instruction that performs the operation or with register zero as one of the source registers.
+- srl_zero_src: the CPU hasn't executed an instruction that performs the operation srl with register zero as one of the source registers.
+- and->sra_raw_hazard: the CPU hasn't perform a and operation followed by a sra operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+- srl->sw_raw_hazard: the CPU hasn't perform a srl operation followed by a sw operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+------
+Please generate a list, which can be empty if necessary, of address-instruction pairs in 32-bit hexadecimal format to further update the CPU's memory, ensuring it covers the specified unreached bins (i.e. test cases) upon resuming execution from the current PC. Make sure the addresses are in the range of 0x00100080 to 0x00100480, and the instructions are valid R-type, S-type, or J-type instructions. We encourage you to make updates near the current PC (0x100084), and update addresses into diverse variety of operations. 
+""",3851,"""[(0x100084, 0x08a08933), (0x100088, 0x08b08a33), (0x10008c, 0x08c08b33), (0x100090, 0x08d08c33), (0x100094, 0x08e08d33), (0x100098, 0x08f08e33), (0x10009c, 0x09008f33), (0x1000a0, 0x09109033), (0x1000a4, 0x09209133), (0x1000a8, 0x09309233), (0x1000ac, 0x09409333), (0x1000b0, 0x09509433), (0x1000b4, 0x09609533), (0x1000b8, 0x09709633), (0x1000bc, 0x09809733), (0x1000c0, 0x09909833), (0x1000c4, 0x09a09933), (0x1000c8, 0x09b09a33), (0x1000cc, 0x09c09b33), (0x1000d0, 0x09d09c33), (0x1000d4, 0x09e09d33), (0x1000d8, 0x09f09e33), (0x1000dc, 0x0a009f33), (0x1000e0, 0x0a10a033), (0x1000e4, 0x0a20a133), (0x1000e8, 0x0a30a233), (0x1000ec, 0x0a40a333), (0x1000f0, 0x0a50a433), (0x1000f4, 0x0a60a533), (0x1000f8, 0x0a70a633), (0x1000fc, 0x0a80a733), (0x100100, 0x0a90a833), (0x100104, 0x0aa0a933), (0x100108, 0x0ab0aa33), (0x10010c, 0x0ac0ab33), (0x100110, 0x0ad0ac33), (0x100114, 0x0ae0ad33), (0x100118, 0x0af0ae33), (0x10011c, 0x0b00af33), (0x100120, 0x0b10b033), (0x100124, 0x0b20b133), (0x100128, 0x0b30b233), (0x10012c, 0x0b40b333), (0x100130, 0x0b50b433), (0x100134, 0x0b60b533), (0x100138, 0x0b70b633), (0x10013c, 0x0b80b733), (0x100140, 0x0b90b833), (0x100144, 0x0ba0b933), (0x100148, 0x0bb0ba33), (0x10014c, 0x0bc0bb33), (0x100150, 0x0bd0bc33), (0x100154, 0x0be0bd33), (0x100158, 0x0bf0be33), (0x10015c, 0x0c00bf33), (0x100160, 0x0c10c033), (0x100164, 0x0c20c133), (0x100168, 0x0c30c233), (0x10016c, 0x0c40c333), (0x100170, 0x0c50c433), (0x100174, 0x0c60c533), (0x100178, 0x0c70c633), (0x10017c, 0x0c80c733), (0x100180, 0x0c90c833), (0x100184, 0x""",1000,none,0,{}
+12,3,4,6318,"""Thanks for your response.
+The CPU has successfully executed numerous instructions following your update. The last instruction performed was 0x1400313, and the program counter (PC) is presently set to 0x100084. 
+You will now observe the bins haven't been achieved by the CPU, and proceed to generate another list, which can be empty if necessary, of address-instruction pairs to further modify the CPU's memory, ensuring it covers the previously unreached bins (i.e. test cases) upon resuming execution from the current PC.
+Here are some of the unreached bins:
+------
+UNREACHED BINS
+- add_seen: the CPU hasn't performed the operation add.
+- add_zero_dst: the CPU hasn't executed an instruction that performs the operation add with register zero as the destination register.
+- or_same_src: the CPU hasn't executed an instruction that performs the operation or with same source registers.
+- srl_zero_src: the CPU hasn't executed an instruction that performs the operation srl with register zero as one of the source registers.
+- srl_same_src: the CPU hasn't executed an instruction that performs the operation srl with same source registers.
+- and->sll_raw_hazard: the CPU hasn't perform a and operation followed by a sll operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+- add->add_raw_hazard: the CPU hasn't perform a add operation followed by a add operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+------
+Please generate a list, which can be empty if necessary, of address-instruction pairs in 32-bit hexadecimal format to further update the CPU's memory, ensuring it covers the specified unreached bins (i.e. test cases) upon resuming execution from the current PC. Make sure the addresses are in the range of 0x00100080 to 0x00100480, and the instructions are valid R-type, S-type, or J-type instructions. We encourage you to make updates near the current PC (0x100084), and update addresses into diverse variety of operations. 
+""",5318,"""[(0x100084, 0x0c90c833), (0x100088, 0x0ca0c933), (0x10008c, 0x0cb0ca33), (0x100090, 0x0cc0cb33), (0x100094, 0x0cd0cc33), (0x100098, 0x0ce0cd33), (0x10009c, 0x0cf0ce33), (0x1000a0, 0x0d00cf33), (0x1000a4, 0x0d10d033), (0x1000a8, 0x0d20d133), (0x1000ac, 0x0d30d233), (0x1000b0, 0x0d40d333), (0x1000b4, 0x0d50d433), (0x1000b8, 0x0d60d533), (0x1000bc, 0x0d70d633), (0x1000c0, 0x0d80d733), (0x1000c4, 0x0d90d833), (0x1000c8, 0x0da0d933), (0x1000cc, 0x0db0da33), (0x1000d0, 0x0dc0db33), (0x1000d4, 0x0dd0dc33), (0x1000d8, 0x0de0dd33), (0x1000dc, 0x0df0de33), (0x1000e0, 0x0e00df33), (0x1000e4, 0x0e10e033), (0x1000e8, 0x0e20e133), (0x1000ec, 0x0e30e233), (0x1000f0, 0x0e40e333), (0x1000f4, 0x0e50e433), (0x1000f8, 0x0e60e533), (0x1000fc, 0x0e70e633), (0x100100, 0x0e80e733), (0x100104, 0x0e90e833), (0x100108, 0x0ea0e933), (0x10010c, 0x0eb0ea33), (0x100110, 0x0ec0eb33), (0x100114, 0x0ed0ec33), (0x100118, 0x0ee0ed33), (0x10011c, 0x0ef0ee33), (0x100120, 0x0f00ef33), (0x100124, 0x0f10f033), (0x100128, 0x0f20f133), (0x10012c, 0x0f30f233), (0x100130, 0x0f40f333), (0x100134, 0x0f50f433), (0x100138, 0x0f60f533), (0x10013c, 0x0f70f633), (0x100140, 0x0f80f733), (0x100144, 0x0f90f833), (0x100148, 0x0fa0f933), (0x10014c, 0x0fb0fa33), (0x100150, 0x0fc0fb33), (0x100154, 0x0fd0fc33), (0x100158, 0x0fe0fd33), (0x10015c, 0x0ff0fe33), (0x100160, 0x1000ff33), (0x100164, 0x10110033), (0x100168, 0x10210133), (0x10016c, 0x10310233), (0x100170, 0x10410333), (0x100174, 0x10510433), (0x100178, 0x10610533), (0x10017c, 0x10710633), (0x100180, 0x10810733), (0x100184""",1000,reset,0,{}
+13,4,1,1850,"""We are working with a CPU capable of executing RISC-V instructions. The CPU's instruction memory is defined within the address range of 0x00100080 to 0x00100480, where 0x00100098 is currently the return instruction of the process. The program counter (PC) is currently set to 0x100084. 
+Our objective is to update the CPU's instruction memory with a sequence of 32-bit addresses and corresponding 32-bit instructions. The goal is to ensure that, when the CPU resumes executing instructions from the current PC, it covers the bins (i.e. test cases) that are of interest to us. 
+Here's the description of the bins that are of interest to us:
+------
+BINS DESCRIPTION
+- There are 32 register files available, with index from 0 to 31.
+- Register 0 is denoted as ""zero"", and its content is always 0.
+- There are 14 available types of operations:
+---
+OPERATIONS
+  - R-type:
+    - ADD: addition between two register files
+    - SUB: subtraction between two register files
+    - AND: logical operation AND between two register files
+    - OR: logical operation OR between two register files
+    - XOR: logical operation XOR between two register files
+    - SLL: logical shift left a register file by number of bits equal to another register file
+    - SRL: logical shift right a register file by number of bits equal to another register file
+    - SRA: arithmetic shift right a register file by number of bits equal to another register file
+    - SLT: make comparison between two register files; if the first one is smaller, write 1 to a register file, otherwise write 0
+    - SLTU: make comparison between two unsigned register files; if the first one is smaller, write 1 to a register file, otherwise write 0
+  - S-type:
+    - SW: store a word (a 32-bit value) from a register file to the data memory at the address equal to a register file
+    - SH: store a half-word (a 16-bit value) from a register file to the data memory at the address equal to a register file
+    - SB: load a byte (an 8-bit value) from a register file to the data memory at the address equal to a register file
+  - J-type:
+    - JAL: store the address of next instruction as the return address in a register file, then jump (increase PC) by an immediate (i.e. constant value)
+---
+
+- BIN type 1: Make the CPU perform each operation at least once.
+- BIN type 2: For each R-type or J-type operation, make the CPU execute an instruction with register zero as the destination register (rd).
+- BIN type 3: For each R-type or S-type operation, make the CPU execute an instruction with register zero as one of the source registers (rs).
+- BIN type 4: For each R-type or S-type operation, make the CPU execute an instruction where both source registers are the same register file.
+- BIN type 5: For the JAL operation, make the CPU execute both forward jumps and backward jumps.
+
+- Read-after-Write (RaW) hazard: happens when the current instruction reads from a register which the previous instruction wrote to.
+- BIN type 6: For each R-type or S-type operation following an R-type or J-type operation, make the CPU execute two instructions that would cause an RaW hazard.
+------
+Following the bins description, generate a list, which can be empty if necessary, of address-instruction pairs $(a, i)$ in 32-bit hexadecimal format to update the CPU's memory, ensuring it covers the specified bins upon resuming execution from the current PC. Make sure the addresses $a$ are in the range of 0x00100080 to 0x00100480, and the instructions $i$ are VALID R-type, S-type, or J-type instructions. We encourage you to make updates near the current PC (0x100084), and update addresses into diverse variety of operations. 
+""",921,"""[(0x100084, 0x00000000), (0x100088, 0x001303b3), (0x10008c, 0x00030333), (0x100090, 0x001303b3), (0x100094, 0x00030333), (0x100098, 0x001303b3), (0x10009c, 0x00030333), (0x1000a0, 0x001303b3), (0x1000a4, 0x00030333), (0x1000a8, 0x001303b3), (0x1000ac, 0x00030333), (0x1000b0, 0x001303b3), (0x1000b4, 0x00030333), (0x1000b8, 0x001303b3), (0x1000bc, 0x00030333), (0x1000c0, 0x001303b3), (0x1000c4, 0x00030333), (0x1000c8, 0x001303b3), (0x1000cc, 0x00030333), (0x1000d0, 0x001303b3), (0x1000d4, 0x00030333), (0x1000d8, 0x001303b3), (0x1000dc, 0x00030333), (0x1000e0, 0x001303b3), (0x1000e4, 0x00030333), (0x1000e8, 0x001303b3), (0x1000ec, 0x00030333), (0x1000f0, 0x001303b3), (0x1000f4, 0x00030333), (0x1000f8, 0x001303b3), (0x1000fc, 0x00030333), (0x100100, 0x001303b3), (0x100104, 0x00030333), (0x100108, 0x001303b3), (0x10010c, 0x00030333), (0x100110, 0x001303b3), (0x100114, 0x00030333), (0x100118, 0x001303b3), (0x10011c, 0x00030333), (0x100120, 0x001303b3), (0x100124, 0x00030333), (0x100128, 0x001303b3), (0x10012c, 0x00030333), (0x100130, 0x001303b3), (0x100134, 0x00030333), (0x100138, 0x001303b3), (0x10013c, 0x00030333), (0x100140, 0x001303b3), (0x100144, 0x00030333), (0x100148, 0x001303b3), (0x10014c, 0x00030333), (0x100150, 0x001303b3), (0x100154, 0x00030333), (0x100158, 0x001303b3), (0x10015c, 0x00030333), (0x100160, 0x001303b3), (0x100164, 0x00030333), (0x100168, 0x001303b3), (0x10016c, 0x00030333), (0x100170, 0x001303b3), (0x100174, 0x00030333), (0x100178, 0x001303b3), (0x10017c, 0x00030333), (0x100180, 0x001303b3), (0x100184, 0x00030333)]""",929,none,0,{}
+14,4,2,3298,"""Thanks for your response.
+The CPU has successfully executed numerous instructions following your update. The last instruction performed was 0x1400313, and the program counter (PC) is presently set to 0x100084. 
+You will now observe the bins haven't been achieved by the CPU, and proceed to generate another list, which can be empty if necessary, of address-instruction pairs to further modify the CPU's memory, ensuring it covers the previously unreached bins (i.e. test cases) upon resuming execution from the current PC.
+Here are some of the unreached bins:
+------
+UNREACHED BINS
+- add_seen: the CPU hasn't performed the operation add.
+- add_zero_dst: the CPU hasn't executed an instruction that performs the operation add with register zero as the destination register.
+- sub_seen: the CPU hasn't performed the operation sub.
+- or_seen: the CPU hasn't performed the operation or.
+- sw_zero_src: the CPU hasn't executed an instruction that performs the operation sw with register zero as one of the source registers.
+- and->sltu_raw_hazard: the CPU hasn't perform a and operation followed by a sltu operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+- sltu->slt_raw_hazard: the CPU hasn't perform a sltu operation followed by a slt operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+------
+Please generate a list, which can be empty if necessary, of address-instruction pairs in 32-bit hexadecimal format to further update the CPU's memory, ensuring it covers the specified unreached bins (i.e. test cases) upon resuming execution from the current PC. Make sure the addresses are in the range of 0x00100080 to 0x00100480, and the instructions are valid R-type, S-type, or J-type instructions. We encourage you to make updates near the current PC (0x100084), and update addresses into diverse variety of operations. 
+""",2298,"""[(0x100188, 0x00030333), (0x10018c, 0x00030333), (0x100190, 0x00030333), (0x100194, 0x00030333), (0x100198, 0x00030333), (0x10019c, 0x00030333), (0x1001a0, 0x00030333), (0x1001a4, 0x00030333), (0x1001a8, 0x00030333), (0x1001ac, 0x00030333), (0x1001b0, 0x00030333), (0x1001b4, 0x00030333), (0x1001b8, 0x00030333), (0x1001bc, 0x00030333), (0x1001c0, 0x00030333), (0x1001c4, 0x00030333), (0x1001c8, 0x00030333), (0x1001cc, 0x00030333), (0x1001d0, 0x00030333), (0x1001d4, 0x00030333), (0x1001d8, 0x00030333), (0x1001dc, 0x00030333), (0x1001e0, 0x00030333), (0x1001e4, 0x00030333), (0x1001e8, 0x00030333), (0x1001ec, 0x00030333), (0x1001f0, 0x00030333), (0x1001f4, 0x00030333), (0x1001f8, 0x00030333), (0x1001fc, 0x00030333), (0x100200, 0x00030333), (0x100204, 0x00030333), (0x100208, 0x00030333), (0x10020c, 0x00030333), (0x100210, 0x00030333), (0x100214, 0x00030333), (0x100218, 0x00030333), (0x10021c, 0x00030333), (0x100220, 0x00030333), (0x100224, 0x00030333), (0x100228, 0x00030333), (0x10022c, 0x00030333), (0x100230, 0x00030333), (0x100234, 0x00030333), (0x100238, 0x00030333), (0x10023c, 0x00030333), (0x100240, 0x00030333), (0x100244, 0x00030333), (0x100248, 0x00030333), (0x10024c, 0x00030333), (0x100250, 0x00030333), (0x100254, 0x00030333), (0x100258, 0x00030333), (0x10025c, 0x00030333), (0x100260, 0x00030333), (0x100264, 0x00030333), (0x100268, 0x00030333), (0x10026c, 0x00030333), (0x100270, 0x00030333), (0x100274, 0x00030333), (0x100278, 0x00030333), (0x10027c, 0x00030333), (0x100280, 0x00030333), (0x100284, 0x00030333), (0x100288, 0x00030333), (0x10028c, 0x00030333), (0x100290, 0x00030333), (0x100294, 0x00030333), (0x100298, 0x00030333), (0x10029c, 0x00030333), (0x1002a0, 0x00030333), (0x1002a4, 0x00030333), (0x1002a""",1000,none,0,{}
+15,4,3,4742,"""Thanks for your response.
+The CPU has successfully executed numerous instructions following your update. The last instruction performed was 0x1400313, and the program counter (PC) is presently set to 0x100084. 
+You will now observe the bins haven't been achieved by the CPU, and proceed to generate another list, which can be empty if necessary, of address-instruction pairs to further modify the CPU's memory, ensuring it covers the previously unreached bins (i.e. test cases) upon resuming execution from the current PC.
+Here are some of the unreached bins:
+------
+UNREACHED BINS
+- add_seen: the CPU hasn't performed the operation add.
+- add_zero_dst: the CPU hasn't executed an instruction that performs the operation add with register zero as the destination register.
+- sub_same_src: the CPU hasn't executed an instruction that performs the operation sub with same source registers.
+- sltu_seen: the CPU hasn't performed the operation sltu.
+- sra_seen: the CPU hasn't performed the operation sra.
+- xor->add_raw_hazard: the CPU hasn't perform a xor operation followed by a add operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+- or->sltu_raw_hazard: the CPU hasn't perform a or operation followed by a sltu operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+------
+Please generate a list, which can be empty if necessary, of address-instruction pairs in 32-bit hexadecimal format to further update the CPU's memory, ensuring it covers the specified unreached bins (i.e. test cases) upon resuming execution from the current PC. Make sure the addresses are in the range of 0x00100080 to 0x00100480, and the instructions are valid R-type, S-type, or J-type instructions. We encourage you to make updates near the current PC (0x100084), and update addresses into diverse variety of operations. 
+""",3742,"""[(0x1002a8, 0x00030333), (0x1002ac, 0x00030333), (0x1002b0, 0x00030333), (0x1002b4, 0x00030333), (0x1002b8, 0x00030333), (0x1002bc, 0x00030333), (0x1002c0, 0x00030333), (0x1002c4, 0x00030333), (0x1002c8, 0x00030333), (0x1002cc, 0x00030333), (0x1002d0, 0x00030333), (0x1002d4, 0x00030333), (0x1002d8, 0x00030333), (0x1002dc, 0x00030333), (0x1002e0, 0x00030333), (0x1002e4, 0x00030333), (0x1002e8, 0x00030333), (0x1002ec, 0x00030333), (0x1002f0, 0x00030333), (0x1002f4, 0x00030333), (0x1002f8, 0x00030333), (0x1002fc, 0x00030333), (0x100300, 0x00030333), (0x100304, 0x00030333), (0x100308, 0x00030333), (0x10030c, 0x00030333), (0x100310, 0x00030333), (0x100314, 0x00030333), (0x100318, 0x00030333), (0x10031c, 0x00030333), (0x100320, 0x00030333), (0x100324, 0x00030333), (0x100328, 0x00030333), (0x10032c, 0x00030333), (0x100330, 0x00030333), (0x100334, 0x00030333), (0x100338, 0x00030333), (0x10033c, 0x00030333), (0x100340, 0x00030333), (0x100344, 0x00030333), (0x100348, 0x00030333), (0x10034c, 0x00030333), (0x100350, 0x00030333), (0x100354, 0x00030333), (0x100358, 0x00030333), (0x10035c, 0x00030333), (0x100360, 0x00030333), (0x100364, 0x00030333), (0x100368, 0x00030333), (0x10036c, 0x00030333), (0x100370, 0x00030333), (0x100374, 0x00030333), (0x100378, 0x00030333), (0x10037c, 0x00030333), (0x100380, 0x00030333), (0x100384, 0x00030333), (0x100388, 0x00030333), (0x10038c, 0x00030333), (0x100390, 0x00030333), (0x100394, 0x00030333), (0x100398, 0x00030333), (0x10039c, 0x00030333), (0x1003a0, 0x00030333), (0x1003a4, 0x00030333), (0x1003a8, 0x00030333), (0x1003ac, 0x00030333), (0x1003b0, 0x00030333), (0x1003b4, 0x00030333), (0x1003b8, 0x00030333), (0x1003bc, 0x00030333), (0x1003c0, 0x00030333), (0x1003c4, 0x000303""",1000,none,0,{}
+16,4,4,5845,"""Thanks for your response.
+The CPU has successfully executed numerous instructions following your update. The last instruction performed was 0xc0001073, and the program counter (PC) is presently set to 0x100000. 
+You will now observe the bins haven't been achieved by the CPU, and proceed to generate another list, which can be empty if necessary, of address-instruction pairs to further modify the CPU's memory, ensuring it covers the previously unreached bins (i.e. test cases) upon resuming execution from the current PC.
+Here are some of the unreached bins:
+------
+UNREACHED BINS
+- add_seen: the CPU hasn't performed the operation add.
+- add_zero_dst: the CPU hasn't executed an instruction that performs the operation add with register zero as the destination register.
+- sll_zero_src: the CPU hasn't executed an instruction that performs the operation sll with register zero as one of the source registers.
+- sll_same_src: the CPU hasn't executed an instruction that performs the operation sll with same source registers.
+- sll_seen: the CPU hasn't performed the operation sll.
+- or->sll_raw_hazard: the CPU hasn't perform a or operation followed by a sll operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+- add->sh_raw_hazard: the CPU hasn't perform a add operation followed by a sh operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+------
+Please generate a list, which can be empty if necessary, of address-instruction pairs in 32-bit hexadecimal format to further update the CPU's memory, ensuring it covers the specified unreached bins (i.e. test cases) upon resuming execution from the current PC. Make sure the addresses are in the range of 0x00100080 to 0x00100480, and the instructions are valid R-type, S-type, or J-type instructions. We encourage you to make updates near the current PC (0x100000), and update addresses into diverse variety of operations. 
+""",5202,"""[(0x1003c8, 0x00030333), (0x1003cc, 0x00030333), (0x1003d0, 0x00030333), (0x1003d4, 0x00030333), (0x1003d8, 0x00030333), (0x1003dc, 0x00030333), (0x1003e0, 0x00030333), (0x1003e4, 0x00030333), (0x1003e8, 0x00030333), (0x1003ec, 0x00030333), (0x1003f0, 0x00030333), (0x1003f4, 0x00030333), (0x1003f8, 0x00030333), (0x1003fc, 0x00030333), (0x100400, 0x00030333), (0x100404, 0x00030333), (0x100408, 0x00030333), (0x10040c, 0x00030333), (0x100410, 0x00030333), (0x100414, 0x00030333), (0x100418, 0x00030333), (0x10041c, 0x00030333), (0x100420, 0x00030333), (0x100424, 0x00030333), (0x100428, 0x00030333), (0x10042c, 0x00030333), (0x100430, 0x00030333), (0x100434, 0x00030333), (0x100438, 0x00030333), (0x10043c, 0x00030333), (0x100440, 0x00030333), (0x100444, 0x00030333), (0x100448, 0x00030333), (0x10044c, 0x00030333), (0x100450, 0x00030333), (0x100454, 0x00030333), (0x100458, 0x00030333), (0x10045c, 0x00030333), (0x100460, 0x00030333), (0x100464, 0x00030333), (0x100468, 0x00030333), (0x10046c, 0x00030333), (0x100470, 0x00030333), (0x100474, 0x00030333), (0x100478, 0x00030333), (0x10047c, 0x00030333), (0x100480, 0x00030333)]""",643,reset,0,{}
+17,5,1,1921,"""We are working with a CPU capable of executing RISC-V instructions. The CPU's instruction memory is defined within the address range of 0x00100080 to 0x00100480, where 0x00100098 is currently the return instruction of the process. The program counter (PC) is currently set to 0x100000. 
+Our objective is to update the CPU's instruction memory with a sequence of 32-bit addresses and corresponding 32-bit instructions. The goal is to ensure that, when the CPU resumes executing instructions from the current PC, it covers the bins (i.e. test cases) that are of interest to us. 
+Here's the description of the bins that are of interest to us:
+------
+BINS DESCRIPTION
+- There are 32 register files available, with index from 0 to 31.
+- Register 0 is denoted as ""zero"", and its content is always 0.
+- There are 14 available types of operations:
+---
+OPERATIONS
+  - R-type:
+    - ADD: addition between two register files
+    - SUB: subtraction between two register files
+    - AND: logical operation AND between two register files
+    - OR: logical operation OR between two register files
+    - XOR: logical operation XOR between two register files
+    - SLL: logical shift left a register file by number of bits equal to another register file
+    - SRL: logical shift right a register file by number of bits equal to another register file
+    - SRA: arithmetic shift right a register file by number of bits equal to another register file
+    - SLT: make comparison between two register files; if the first one is smaller, write 1 to a register file, otherwise write 0
+    - SLTU: make comparison between two unsigned register files; if the first one is smaller, write 1 to a register file, otherwise write 0
+  - S-type:
+    - SW: store a word (a 32-bit value) from a register file to the data memory at the address equal to a register file
+    - SH: store a half-word (a 16-bit value) from a register file to the data memory at the address equal to a register file
+    - SB: load a byte (an 8-bit value) from a register file to the data memory at the address equal to a register file
+  - J-type:
+    - JAL: store the address of next instruction as the return address in a register file, then jump (increase PC) by an immediate (i.e. constant value)
+---
+
+- BIN type 1: Make the CPU perform each operation at least once.
+- BIN type 2: For each R-type or J-type operation, make the CPU execute an instruction with register zero as the destination register (rd).
+- BIN type 3: For each R-type or S-type operation, make the CPU execute an instruction with register zero as one of the source registers (rs).
+- BIN type 4: For each R-type or S-type operation, make the CPU execute an instruction where both source registers are the same register file.
+- BIN type 5: For the JAL operation, make the CPU execute both forward jumps and backward jumps.
+
+- Read-after-Write (RaW) hazard: happens when the current instruction reads from a register which the previous instruction wrote to.
+- BIN type 6: For each R-type or S-type operation following an R-type or J-type operation, make the CPU execute two instructions that would cause an RaW hazard.
+------
+Following the bins description, generate a list, which can be empty if necessary, of address-instruction pairs $(a, i)$ in 32-bit hexadecimal format to update the CPU's memory, ensuring it covers the specified bins upon resuming execution from the current PC. Make sure the addresses $a$ are in the range of 0x00100080 to 0x00100480, and the instructions $i$ are VALID R-type, S-type, or J-type instructions. We encourage you to make updates near the current PC (0x100000), and update addresses into diverse variety of operations. 
+""",921,"""[(0x00100080, 0x00c00093), (0x00100084, 0x00008067), (0x00100088, 0x000081b3), (0x0010008c, 0x00008233), (0x00100090, 0x000082b3), (0x00100094, 0x00008313), (0x00100098, 0x0000006f), (0x0010009c, 0x0000006f), (0x001000a0, 0x0000006f), (0x001000a4, 0x0000006f), (0x001000a8, 0x0000006f), (0x001000ac, 0x0000006f), (0x001000b0, 0x0000006f), (0x001000b4, 0x0000006f), (0x001000b8, 0x0000006f), (0x001000bc, 0x0000006f), (0x001000c0, 0x0000006f), (0x001000c4, 0x0000006f), (0x001000c8, 0x0000006f), (0x001000cc, 0x0000006f), (0x001000d0, 0x0000006f), (0x001000d4, 0x0000006f), (0x001000d8, 0x0000006f), (0x001000dc, 0x0000006f), (0x001000e0, 0x0000006f), (0x001000e4, 0x0000006f), (0x001000e8, 0x0000006f), (0x001000ec, 0x0000006f), (0x001000f0, 0x0000006f), (0x001000f4, 0x0000006f), (0x001000f8, 0x0000006f), (0x001000fc, 0x0000006f), (0x00100100, 0x0000006f), (0x00100104, 0x0000006f), (0x00100108, 0x0000006f), (0x0010010c, 0x0000006f), (0x00100110, 0x0000006f), (0x00100114, 0x0000006f), (0x00100118, 0x0000006f), (0x0010011c, 0x0000006f), (0x00100120, 0x0000006f), (0x00100124, 0x0000006f), (0x00100128, 0x0000006f), (0x0010012c, 0x0000006f), (0x00100130, 0x0000006f), (0x00100134, 0x0000006f), (0x00100138, 0x0000006f), (0x0010013c, 0x0000006f), (0x00100140, 0x0000006f), (0x00100144, 0x0000006f), (0x00100148, 0x0000006f), (0x0010014c, 0x0000006f), (0x00100150, 0x0000006f), (0x00100154, 0x0000006f), (0x00100158, 0x0000006f), (0x0010015c, 0x0000006f), (0x00100160, 0x0000006f), (0x00100164, 0x0000006f), (0x00100168, 0x0000006f), (0x0010016c, 0x0000006f), (0x00100170, 0x0000006f), (0x00100174, 0x0000006f), (0x00100178, 0x0000006f), (0x0010017c, 0x0000006f), (0x00100180, 0x0000006f),""",1000,none,0,{}
+18,5,2,3380,"""Thanks for your response.
+The CPU has successfully executed numerous instructions following your update. The last instruction performed was 0xc0001073, and the program counter (PC) is presently set to 0x100000. 
+You will now observe the bins haven't been achieved by the CPU, and proceed to generate another list, which can be empty if necessary, of address-instruction pairs to further modify the CPU's memory, ensuring it covers the previously unreached bins (i.e. test cases) upon resuming execution from the current PC.
+Here are some of the unreached bins:
+------
+UNREACHED BINS
+- add_seen: the CPU hasn't performed the operation add.
+- add_zero_dst: the CPU hasn't executed an instruction that performs the operation add with register zero as the destination register.
+- or_zero_src: the CPU hasn't executed an instruction that performs the operation or with register zero as one of the source registers.
+- and_zero_src: the CPU hasn't executed an instruction that performs the operation and with register zero as one of the source registers.
+- sh_seen: the CPU hasn't performed the operation sh.
+- or->add_raw_hazard: the CPU hasn't perform a or operation followed by a add operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+- sltu->and_raw_hazard: the CPU hasn't perform a sltu operation followed by a and operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+------
+Please generate a list, which can be empty if necessary, of address-instruction pairs in 32-bit hexadecimal format to further update the CPU's memory, ensuring it covers the specified unreached bins (i.e. test cases) upon resuming execution from the current PC. Make sure the addresses are in the range of 0x00100080 to 0x00100480, and the instructions are valid R-type, S-type, or J-type instructions. We encourage you to make updates near the current PC (0x100000), and update addresses into diverse variety of operations. 
+""",2380,"""[(0x00100184, 0x00c00013), (0x00100188, 0x00000013), (0x0010018c, 0x00000013), (0x00100190, 0x00000013), (0x00100194, 0x00000013), (0x00100198, 0x00000013), (0x0010019c, 0x00000013), (0x001001a0, 0x00000013), (0x001001a4, 0x00000013), (0x001001a8, 0x00000013), (0x001001ac, 0x00000013), (0x001001b0, 0x00000013), (0x001001b4, 0x00000013), (0x001001b8, 0x00000013), (0x001001bc, 0x00000013), (0x001001c0, 0x00000013), (0x001001c4, 0x00000013), (0x001001c8, 0x00000013), (0x001001cc, 0x00000013), (0x001001d0, 0x00000013), (0x001001d4, 0x00000013), (0x001001d8, 0x00000013), (0x001001dc, 0x00000013), (0x001001e0, 0x00000013), (0x001001e4, 0x00000013), (0x001001e8, 0x00000013), (0x001001ec, 0x00000013), (0x001001f0, 0x00000013), (0x001001f4, 0x00000013), (0x001001f8, 0x00000013), (0x001001fc, 0x00000013), (0x00100200, 0x00000013), (0x00100204, 0x00000013), (0x00100208, 0x00000013), (0x0010020c, 0x00000013), (0x00100210, 0x00000013), (0x00100214, 0x00000013), (0x00100218, 0x00000013), (0x0010021c, 0x00000013), (0x00100220, 0x00000013), (0x00100224, 0x00000013), (0x00100228, 0x00000013), (0x0010022c, 0x00000013), (0x00100230, 0x00000013), (0x00100234, 0x00000013), (0x00100238, 0x00000013), (0x0010023c, 0x00000013), (0x00100240, 0x00000013), (0x00100244, 0x00000013), (0x00100248, 0x00000013), (0x0010024c, 0x00000013), (0x00100250, 0x00000013), (0x00100254, 0x00000013), (0x00100258, 0x00000013), (0x0010025c, 0x00000013), (0x00100260, 0x00000013), (0x00100264, 0x00000013), (0x00100268, 0x00000013), (0x0010026c, 0x00000013), (0x00100270, 0x00000013), (0x00100274, 0x00000013), (0x00100278, 0x00000013), (0x0010027c, 0x00000013), (0x00100280, 0x00000013), (0x00100284, 0x00000013), (0x00100288, 0x00000013), (0x0010028c, 0x00000013), (0x00100290, 0x00000013), (0x00100294, 0x00000013), (0x001""",1000,none,0,{}
+19,5,3,4896,"""Your list of updates was invalid, either because the addresses are out-of-boundor the instructions you provided are not valid R-type, S-type, or J-type RISC-V instructions. Try to amend it in your new response. 
+The CPU has executed numerous instructions following your last update. The last instruction performed was 0xc0001073, and the program counter (PC) is presently set to 0x100000. 
+You will now observe the bins haven't been achieved by the CPU, and proceed to generate another list, which can be empty if necessary, of address-instruction pairs to further modify the CPU's memory, ensuring it covers the previously unreached bins (i.e. test cases) upon resuming execution from the current PC.
+Here are some of the unreached bins:
+------
+UNREACHED BINS
+- add_seen: the CPU hasn't performed the operation add.
+- add_zero_dst: the CPU hasn't executed an instruction that performs the operation add with register zero as the destination register.
+- sltu_zero_src: the CPU hasn't executed an instruction that performs the operation sltu with register zero as one of the source registers.
+- sw_zero_src: the CPU hasn't executed an instruction that performs the operation sw with register zero as one of the source registers.
+- and_same_src: the CPU hasn't executed an instruction that performs the operation and with same source registers.
+- jal->sltu_raw_hazard: the CPU hasn't perform a jal operation followed by a sltu operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+- slt->srl_raw_hazard: the CPU hasn't perform a slt operation followed by a srl operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+------
+Please generate a list, which can be empty if necessary, of address-instruction pairs in 32-bit hexadecimal format to further update the CPU's memory, ensuring it covers the specified unreached bins (i.e. test cases) upon resuming execution from the current PC. Make sure the addresses are in the range of 0x00100080 to 0x00100480, and the instructions are valid R-type, S-type, or J-type instructions. We encourage you to make updates near the current PC (0x100000), and update addresses into diverse variety of operations. 
+""",3896,"""[(0x00100200, 0x00c00033), (0x00100204, 0x00000033), (0x00100208, 0x00000033), (0x0010020c, 0x00000033), (0x00100210, 0x00000033), (0x00100214, 0x00000033), (0x00100218, 0x00000033), (0x0010021c, 0x00000033), (0x00100220, 0x00000033), (0x00100224, 0x00000033), (0x00100228, 0x00000033), (0x0010022c, 0x00000033), (0x00100230, 0x00000033), (0x00100234, 0x00000033), (0x00100238, 0x00000033), (0x0010023c, 0x00000033), (0x00100240, 0x00000033), (0x00100244, 0x00000033), (0x00100248, 0x00000033), (0x0010024c, 0x00000033), (0x00100250, 0x00000033), (0x00100254, 0x00000033), (0x00100258, 0x00000033), (0x0010025c, 0x00000033), (0x00100260, 0x00000033), (0x00100264, 0x00000033), (0x00100268, 0x00000033), (0x0010026c, 0x00000033), (0x00100270, 0x00000033), (0x00100274, 0x00000033), (0x00100278, 0x00000033), (0x0010027c, 0x00000033), (0x00100280, 0x00000033), (0x00100284, 0x00000033), (0x00100288, 0x00000033), (0x0010028c, 0x00000033), (0x00100290, 0x00000033), (0x00100294, 0x00000033), (0x00100298, 0x00000033), (0x0010029c, 0x00000033), (0x001002a0, 0x00000033), (0x001002a4, 0x00000033), (0x001002a8, 0x00000033), (0x001002ac, 0x00000033), (0x001002b0, 0x00000033), (0x001002b4, 0x00000033), (0x001002b8, 0x00000033), (0x001002bc, 0x00000033), (0x001002c0, 0x00000033), (0x001002c4, 0x00000033), (0x001002c8, 0x00000033), (0x001002cc, 0x00000033), (0x001002d0, 0x00000033), (0x001002d4, 0x00000033), (0x001002d8, 0x00000033), (0x001002dc, 0x00000033), (0x001002e0, 0x00000033), (0x001002e4, 0x00000033), (0x001002e8, 0x00000033), (0x001002ec, 0x00000033), (0x001002f0, 0x00000033), (0x001002f4, 0x00000033), (0x001002f8, 0x00000033), (0x001002fc, 0x00000033), (0x00100300, 0x00000033), (0x00100304, 0x00000033), (0x00100308, 0x00000033), (0x0010030c, 0x00000033), (0x00100310, 0x00000033), (0x001""",1000,none,0,{}
+20,5,4,6370,"""Thanks for your response.
+The CPU has successfully executed numerous instructions following your update. The last instruction performed was 0xc0001073, and the program counter (PC) is presently set to 0x100000. 
+You will now observe the bins haven't been achieved by the CPU, and proceed to generate another list, which can be empty if necessary, of address-instruction pairs to further modify the CPU's memory, ensuring it covers the previously unreached bins (i.e. test cases) upon resuming execution from the current PC.
+Here are some of the unreached bins:
+------
+UNREACHED BINS
+- add_seen: the CPU hasn't performed the operation add.
+- add_zero_dst: the CPU hasn't executed an instruction that performs the operation add with register zero as the destination register.
+- slt_zero_src: the CPU hasn't executed an instruction that performs the operation slt with register zero as one of the source registers.
+- sb_zero_src: the CPU hasn't executed an instruction that performs the operation sb with register zero as one of the source registers.
+- xor_same_src: the CPU hasn't executed an instruction that performs the operation xor with same source registers.
+- srl->add_raw_hazard: the CPU hasn't perform a srl operation followed by a add operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+- sll->srl_raw_hazard: the CPU hasn't perform a sll operation followed by a srl operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+------
+Please generate a list, which can be empty if necessary, of address-instruction pairs in 32-bit hexadecimal format to further update the CPU's memory, ensuring it covers the specified unreached bins (i.e. test cases) upon resuming execution from the current PC. Make sure the addresses are in the range of 0x00100080 to 0x00100480, and the instructions are valid R-type, S-type, or J-type instructions. We encourage you to make updates near the current PC (0x100000), and update addresses into diverse variety of operations. 
+""",5370,"""[(0x00100300, 0x00c00033), (0x00100304, 0x00000033), (0x00100308, 0x00000033), (0x0010030c, 0x00000033), (0x00100310, 0x00000033), (0x00100314, 0x00000033), (0x00100318, 0x00000033), (0x0010031c, 0x00000033), (0x00100320, 0x00000033), (0x00100324, 0x00000033), (0x00100328, 0x00000033), (0x0010032c, 0x00000033), (0x00100330, 0x00000033), (0x00100334, 0x00000033), (0x00100338, 0x00000033), (0x0010033c, 0x00000033), (0x00100340, 0x00000033), (0x00100344, 0x00000033), (0x00100348, 0x00000033), (0x0010034c, 0x00000033), (0x00100350, 0x00000033), (0x00100354, 0x00000033), (0x00100358, 0x00000033), (0x0010035c, 0x00000033), (0x00100360, 0x00000033), (0x00100364, 0x00000033), (0x00100368, 0x00000033), (0x0010036c, 0x00000033), (0x00100370, 0x00000033), (0x00100374, 0x00000033), (0x00100378, 0x00000033), (0x0010037c, 0x00000033), (0x00100380, 0x00000033), (0x00100384, 0x00000033), (0x00100388, 0x00000033), (0x0010038c, 0x00000033), (0x00100390, 0x00000033), (0x00100394, 0x00000033), (0x00100398, 0x00000033), (0x0010039c, 0x00000033), (0x001003a0, 0x00000033), (0x001003a4, 0x00000033), (0x001003a8, 0x00000033), (0x001003ac, 0x00000033), (0x001003b0, 0x00000033), (0x001003b4, 0x00000033), (0x001003b8, 0x00000033), (0x001003bc, 0x00000033), (0x001003c0, 0x00000033), (0x001003c4, 0x00000033), (0x001003c8, 0x00000033), (0x001003cc, 0x00000033), (0x001003d0, 0x00000033), (0x001003d4, 0x00000033), (0x001003d8, 0x00000033), (0x001003dc, 0x00000033), (0x001003e0, 0x00000033), (0x001003e4, 0x00000033), (0x001003e8, 0x00000033), (0x001003ec, 0x00000033), (0x001003f0, 0x00000033), (0x001003f4, 0x00000033), (0x001003f8, 0x00000033), (0x001003fc, 0x00000033), (0x00100400, 0x00000033), (0x00100404, 0x00000033), (0x00100408, 0x00000033), (0x0010040c, 0x00000033), (0x00100410, 0x00000033), (0x001""",1000,reset,0,{}
+21,6,1,1345,"""We are working with a CPU capable of executing RISC-V instructions. The CPU's instruction memory is defined within the address range of 0x00100080 to 0x00100480, where 0x00100098 is currently the return instruction of the process. The program counter (PC) is currently set to 0x100000. 
+Our objective is to update the CPU's instruction memory with a sequence of 32-bit addresses and corresponding 32-bit instructions. The goal is to ensure that, when the CPU resumes executing instructions from the current PC, it covers the bins (i.e. test cases) that are of interest to us. 
+Here's the description of the bins that are of interest to us:
+------
+BINS DESCRIPTION
+- There are 32 register files available, with index from 0 to 31.
+- Register 0 is denoted as ""zero"", and its content is always 0.
+- There are 14 available types of operations:
+---
+OPERATIONS
+  - R-type:
+    - ADD: addition between two register files
+    - SUB: subtraction between two register files
+    - AND: logical operation AND between two register files
+    - OR: logical operation OR between two register files
+    - XOR: logical operation XOR between two register files
+    - SLL: logical shift left a register file by number of bits equal to another register file
+    - SRL: logical shift right a register file by number of bits equal to another register file
+    - SRA: arithmetic shift right a register file by number of bits equal to another register file
+    - SLT: make comparison between two register files; if the first one is smaller, write 1 to a register file, otherwise write 0
+    - SLTU: make comparison between two unsigned register files; if the first one is smaller, write 1 to a register file, otherwise write 0
+  - S-type:
+    - SW: store a word (a 32-bit value) from a register file to the data memory at the address equal to a register file
+    - SH: store a half-word (a 16-bit value) from a register file to the data memory at the address equal to a register file
+    - SB: load a byte (an 8-bit value) from a register file to the data memory at the address equal to a register file
+  - J-type:
+    - JAL: store the address of next instruction as the return address in a register file, then jump (increase PC) by an immediate (i.e. constant value)
+---
+
+- BIN type 1: Make the CPU perform each operation at least once.
+- BIN type 2: For each R-type or J-type operation, make the CPU execute an instruction with register zero as the destination register (rd).
+- BIN type 3: For each R-type or S-type operation, make the CPU execute an instruction with register zero as one of the source registers (rs).
+- BIN type 4: For each R-type or S-type operation, make the CPU execute an instruction where both source registers are the same register file.
+- BIN type 5: For the JAL operation, make the CPU execute both forward jumps and backward jumps.
+
+- Read-after-Write (RaW) hazard: happens when the current instruction reads from a register which the previous instruction wrote to.
+- BIN type 6: For each R-type or S-type operation following an R-type or J-type operation, make the CPU execute two instructions that would cause an RaW hazard.
+------
+Following the bins description, generate a list, which can be empty if necessary, of address-instruction pairs $(a, i)$ in 32-bit hexadecimal format to update the CPU's memory, ensuring it covers the specified bins upon resuming execution from the current PC. Make sure the addresses $a$ are in the range of 0x00100080 to 0x00100480, and the instructions $i$ are VALID R-type, S-type, or J-type instructions. We encourage you to make updates near the current PC (0x100000), and update addresses into diverse variety of operations. 
+""",921,"""[(0x100000, 0x00000000), (0x100004, 0x00000000), (0x100008, 0x00000000), (0x10000C, 0x00000000), (0x100010, 0x00000000), (0x100014, 0x00000000), (0x100018, 0x00000000), (0x10001C, 0x00000000), (0x100020, 0x00000000), (0x100024, 0x00000000), (0x100028, 0x00000000), (0x10002C, 0x00000000), (0x100030, 0x00000000), (0x100034, 0x00000000), (0x100038, 0x00000000), (0x10003C, 0x00000000), (0x100040, 0x00000000), (0x100044, 0x00000000), (0x100048, 0x00000000), (0x10004C, 0x00000000), (0x100050, 0x00000000), (0x100054, 0x00000000), (0x100058, 0x00000000), (0x10005C, 0x00000000), (0x100060, 0x00000000), (0x100064, 0x00000000), (0x100068, 0x00000000), (0x10006C, 0x00000000), (0x100070, 0x00000000), (0x100074, 0x00000000), (0x100078, 0x00000000), (0x10007C, 0x00000000)]""",424,none,0,{}
+22,6,2,2309,"""Your list of updates was invalid, either because the addresses are out-of-boundor the instructions you provided are not valid R-type, S-type, or J-type RISC-V instructions. Try to amend it in your new response. 
+The CPU has executed numerous instructions following your last update. The last instruction performed was 0xc0001073, and the program counter (PC) is presently set to 0x100000. 
+You will now observe the bins haven't been achieved by the CPU, and proceed to generate another list, which can be empty if necessary, of address-instruction pairs to further modify the CPU's memory, ensuring it covers the previously unreached bins (i.e. test cases) upon resuming execution from the current PC.
+Here are some of the unreached bins:
+------
+UNREACHED BINS
+- add_seen: the CPU hasn't performed the operation add.
+- add_zero_dst: the CPU hasn't executed an instruction that performs the operation add with register zero as the destination register.
+- slt_zero_dst: the CPU hasn't executed an instruction that performs the operation slt with register zero as the destination register.
+- or_seen: the CPU hasn't performed the operation or.
+- sra_zero_dst: the CPU hasn't executed an instruction that performs the operation sra with register zero as the destination register.
+- and->sb_raw_hazard: the CPU hasn't perform a and operation followed by a sb operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+- srl->sra_raw_hazard: the CPU hasn't perform a srl operation followed by a sra operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+------
+Please generate a list, which can be empty if necessary, of address-instruction pairs in 32-bit hexadecimal format to further update the CPU's memory, ensuring it covers the specified unreached bins (i.e. test cases) upon resuming execution from the current PC. Make sure the addresses are in the range of 0x00100080 to 0x00100480, and the instructions are valid R-type, S-type, or J-type instructions. We encourage you to make updates near the current PC (0x100000), and update addresses into diverse variety of operations. 
+""",1848,"""[(0x100080, 0x00c00013), (0x100084, 0x00000000), (0x100088, 0x00000000), (0x10008C, 0x00000000), (0x100090, 0x00000000), (0x100094, 0x00000000), (0x100098, 0x00000000), (0x10009C, 0x00000000), (0x1000A0, 0x00000000), (0x1000A4, 0x00000000), (0x1000A8, 0x00000000), (0x1000AC, 0x00000000), (0x1000B0, 0x00000000), (0x1000B4, 0x00000000), (0x1000B8, 0x00000000), (0x1000BC, 0x00000000), (0x1000C0, 0x00000000), (0x1000C4, 0x00000000), (0x1000C8, 0x00000000), (0x1000CC, 0x00000000), (0x1000D0, 0x00000000), (0x1000D4, 0x00000000), (0x1000D8, 0x00000000), (0x1000DC, 0x00000000), (0x1000E0, 0x00000000), (0x1000E4, 0x00000000), (0x1000E8, 0x00000000), (0x1000EC, 0x00000000), (0x1000F0, 0x00000000), (0x1000F4, 0x00000000), (0x1000F8, 0x00000000), (0x1000FC, 0x00000000)]""",461,none,0,{}
+23,6,3,3278,"""Your list of updates was invalid, either because the addresses are out-of-boundor the instructions you provided are not valid R-type, S-type, or J-type RISC-V instructions. Try to amend it in your new response. 
+The CPU has executed numerous instructions following your last update. The last instruction performed was 0xc0001073, and the program counter (PC) is presently set to 0x100000. 
+You will now observe the bins haven't been achieved by the CPU, and proceed to generate another list, which can be empty if necessary, of address-instruction pairs to further modify the CPU's memory, ensuring it covers the previously unreached bins (i.e. test cases) upon resuming execution from the current PC.
+Here are some of the unreached bins:
+------
+UNREACHED BINS
+- add_seen: the CPU hasn't performed the operation add.
+- add_zero_dst: the CPU hasn't executed an instruction that performs the operation add with register zero as the destination register.
+- and_same_src: the CPU hasn't executed an instruction that performs the operation and with same source registers.
+- add_zero_src: the CPU hasn't executed an instruction that performs the operation add with register zero as one of the source registers.
+- sra_same_src: the CPU hasn't executed an instruction that performs the operation sra with same source registers.
+- slt->add_raw_hazard: the CPU hasn't perform a slt operation followed by a add operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+- sub->sra_raw_hazard: the CPU hasn't perform a sub operation followed by a sra operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+------
+Please generate a list, which can be empty if necessary, of address-instruction pairs in 32-bit hexadecimal format to further update the CPU's memory, ensuring it covers the specified unreached bins (i.e. test cases) upon resuming execution from the current PC. Make sure the addresses are in the range of 0x00100080 to 0x00100480, and the instructions are valid R-type, S-type, or J-type instructions. We encourage you to make updates near the current PC (0x100000), and update addresses into diverse variety of operations. 
+""",2818,"""[(0x100080, 0x00000013), (0x100084, 0x00000000), (0x100088, 0x00000000), (0x10008C, 0x00000000), (0x100090, 0x00000000), (0x100094, 0x00000000), (0x100098, 0x00000000), (0x10009C, 0x00000000), (0x1000A0, 0x00000000), (0x1000A4, 0x00000000), (0x1000A8, 0x00000000), (0x1000AC, 0x00000000), (0x1000B0, 0x00000000), (0x1000B4, 0x00000000), (0x1000B8, 0x00000000), (0x1000BC, 0x00000000), (0x1000C0, 0x00000000), (0x1000C4, 0x00000000), (0x1000C8, 0x00000000), (0x1000CC, 0x00000000), (0x1000D0, 0x00000000), (0x1000D4, 0x00000000), (0x1000D8, 0x00000000), (0x1000DC, 0x00000000), (0x1000E0, 0x00000000), (0x1000E4, 0x00000000), (0x1000E8, 0x00000000), (0x1000EC, 0x00000000), (0x1000F0, 0x00000000), (0x1000F4, 0x00000000), (0x1000F8, 0x00000000), (0x1000FC, 0x00000000)]""",460,none,0,{}
+24,6,4,4250,"""Your list of updates was invalid, either because the addresses are out-of-boundor the instructions you provided are not valid R-type, S-type, or J-type RISC-V instructions. Try to amend it in your new response. 
+The CPU has executed numerous instructions following your last update. The last instruction performed was 0xc0001073, and the program counter (PC) is presently set to 0x100000. 
+You will now observe the bins haven't been achieved by the CPU, and proceed to generate another list, which can be empty if necessary, of address-instruction pairs to further modify the CPU's memory, ensuring it covers the previously unreached bins (i.e. test cases) upon resuming execution from the current PC.
+Here are some of the unreached bins:
+------
+UNREACHED BINS
+- add_seen: the CPU hasn't performed the operation add.
+- add_zero_dst: the CPU hasn't executed an instruction that performs the operation add with register zero as the destination register.
+- sll_same_src: the CPU hasn't executed an instruction that performs the operation sll with same source registers.
+- xor_zero_src: the CPU hasn't executed an instruction that performs the operation xor with register zero as one of the source registers.
+- sltu_same_src: the CPU hasn't executed an instruction that performs the operation sltu with same source registers.
+- sra->sw_raw_hazard: the CPU hasn't perform a sra operation followed by a sw operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+- sltu->slt_raw_hazard: the CPU hasn't perform a sltu operation followed by a slt operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+------
+Please generate a list, which can be empty if necessary, of address-instruction pairs in 32-bit hexadecimal format to further update the CPU's memory, ensuring it covers the specified unreached bins (i.e. test cases) upon resuming execution from the current PC. Make sure the addresses are in the range of 0x00100080 to 0x00100480, and the instructions are valid R-type, S-type, or J-type instructions. We encourage you to make updates near the current PC (0x100000), and update addresses into diverse variety of operations. 
+""",3790,"""[(0x100080, 0x00000033), (0x100084, 0x00000000), (0x100088, 0x00000000), (0x10008C, 0x00000000), (0x100090, 0x00000000), (0x100094, 0x00000000), (0x100098, 0x00000000), (0x10009C, 0x00000000), (0x1000A0, 0x00000000), (0x1000A4, 0x00000000), (0x1000A8, 0x00000000), (0x1000AC, 0x00000000), (0x1000B0, 0x00000000), (0x1000B4, 0x00000000), (0x1000B8, 0x00000000), (0x1000BC, 0x00000000), (0x1000C0, 0x00000000), (0x1000C4, 0x00000000), (0x1000C8, 0x00000000), (0x1000CC, 0x00000000), (0x1000D0, 0x00000000), (0x1000D4, 0x00000000), (0x1000D8, 0x00000000), (0x1000DC, 0x00000000), (0x1000E0, 0x00000000), (0x1000E4, 0x00000000), (0x1000E8, 0x00000000), (0x1000EC, 0x00000000), (0x1000F0, 0x00000000), (0x1000F4, 0x00000000), (0x1000F8, 0x00000000), (0x1000FC, 0x00000000)]""",460,reset,0,{}
+25,7,1,1921,"""We are working with a CPU capable of executing RISC-V instructions. The CPU's instruction memory is defined within the address range of 0x00100080 to 0x00100480, where 0x00100098 is currently the return instruction of the process. The program counter (PC) is currently set to 0x100000. 
+Our objective is to update the CPU's instruction memory with a sequence of 32-bit addresses and corresponding 32-bit instructions. The goal is to ensure that, when the CPU resumes executing instructions from the current PC, it covers the bins (i.e. test cases) that are of interest to us. 
+Here's the description of the bins that are of interest to us:
+------
+BINS DESCRIPTION
+- There are 32 register files available, with index from 0 to 31.
+- Register 0 is denoted as ""zero"", and its content is always 0.
+- There are 14 available types of operations:
+---
+OPERATIONS
+  - R-type:
+    - ADD: addition between two register files
+    - SUB: subtraction between two register files
+    - AND: logical operation AND between two register files
+    - OR: logical operation OR between two register files
+    - XOR: logical operation XOR between two register files
+    - SLL: logical shift left a register file by number of bits equal to another register file
+    - SRL: logical shift right a register file by number of bits equal to another register file
+    - SRA: arithmetic shift right a register file by number of bits equal to another register file
+    - SLT: make comparison between two register files; if the first one is smaller, write 1 to a register file, otherwise write 0
+    - SLTU: make comparison between two unsigned register files; if the first one is smaller, write 1 to a register file, otherwise write 0
+  - S-type:
+    - SW: store a word (a 32-bit value) from a register file to the data memory at the address equal to a register file
+    - SH: store a half-word (a 16-bit value) from a register file to the data memory at the address equal to a register file
+    - SB: load a byte (an 8-bit value) from a register file to the data memory at the address equal to a register file
+  - J-type:
+    - JAL: store the address of next instruction as the return address in a register file, then jump (increase PC) by an immediate (i.e. constant value)
+---
+
+- BIN type 1: Make the CPU perform each operation at least once.
+- BIN type 2: For each R-type or J-type operation, make the CPU execute an instruction with register zero as the destination register (rd).
+- BIN type 3: For each R-type or S-type operation, make the CPU execute an instruction with register zero as one of the source registers (rs).
+- BIN type 4: For each R-type or S-type operation, make the CPU execute an instruction where both source registers are the same register file.
+- BIN type 5: For the JAL operation, make the CPU execute both forward jumps and backward jumps.
+
+- Read-after-Write (RaW) hazard: happens when the current instruction reads from a register which the previous instruction wrote to.
+- BIN type 6: For each R-type or S-type operation following an R-type or J-type operation, make the CPU execute two instructions that would cause an RaW hazard.
+------
+Following the bins description, generate a list, which can be empty if necessary, of address-instruction pairs $(a, i)$ in 32-bit hexadecimal format to update the CPU's memory, ensuring it covers the specified bins upon resuming execution from the current PC. Make sure the addresses $a$ are in the range of 0x00100080 to 0x00100480, and the instructions $i$ are VALID R-type, S-type, or J-type instructions. We encourage you to make updates near the current PC (0x100000), and update addresses into diverse variety of operations. 
+""",921,"""[(0x00100080, 0x00000000), (0x00100084, 0x00000000), (0x00100088, 0x00000000), (0x0010008c, 0x00000000), (0x00100090, 0x00000000), (0x00100094, 0x00000000), (0x00100098, 0x00000000), (0x0010009c, 0x00000000), (0x001000a0, 0x00000000), (0x001000a4, 0x00000000), (0x001000a8, 0x00000000), (0x001000ac, 0x00000000), (0x001000b0, 0x00000000), (0x001000b4, 0x00000000), (0x001000b8, 0x00000000), (0x001000bc, 0x00000000), (0x001000c0, 0x00000000), (0x001000c4, 0x00000000), (0x001000c8, 0x00000000), (0x001000cc, 0x00000000), (0x001000d0, 0x00000000), (0x001000d4, 0x00000000), (0x001000d8, 0x00000000), (0x001000dc, 0x00000000), (0x001000e0, 0x00000000), (0x001000e4, 0x00000000), (0x001000e8, 0x00000000), (0x001000ec, 0x00000000), (0x001000f0, 0x00000000), (0x001000f4, 0x00000000), (0x001000f8, 0x00000000), (0x001000fc, 0x00000000), (0x00100100, 0x00000000), (0x00100104, 0x00000000), (0x00100108, 0x00000000), (0x0010010c, 0x00000000), (0x00100110, 0x00000000), (0x00100114, 0x00000000), (0x00100118, 0x00000000), (0x0010011c, 0x00000000), (0x00100120, 0x00000000), (0x00100124, 0x00000000), (0x00100128, 0x00000000), (0x0010012c, 0x00000000), (0x00100130, 0x00000000), (0x00100134, 0x00000000), (0x00100138, 0x00000000), (0x0010013c, 0x00000000), (0x00100140, 0x00000000), (0x00100144, 0x00000000), (0x00100148, 0x00000000), (0x0010014c, 0x00000000), (0x00100150, 0x00000000), (0x00100154, 0x00000000), (0x00100158, 0x00000000), (0x0010015c, 0x00000000), (0x00100160, 0x00000000), (0x00100164, 0x00000000), (0x00100168, 0x00000000), (0x0010016c, 0x00000000), (0x00100170, 0x00000000), (0x00100174, 0x00000000), (0x00100178, 0x00000000), (0x0010017c, 0x00000000), (0x00100180, 0x00000000), (0x00100184, 0x00000000), (0x00100188, 0x00000000), (0x0010018c, 0x00000000), (0x00100190, 0x00000000), (0x001001""",1000,none,0,{}
+26,7,2,3443,"""Your list of updates was invalid, either because the addresses are out-of-boundor the instructions you provided are not valid R-type, S-type, or J-type RISC-V instructions. Try to amend it in your new response. 
+The CPU has executed numerous instructions following your last update. The last instruction performed was 0xc0001073, and the program counter (PC) is presently set to 0x100000. 
+You will now observe the bins haven't been achieved by the CPU, and proceed to generate another list, which can be empty if necessary, of address-instruction pairs to further modify the CPU's memory, ensuring it covers the previously unreached bins (i.e. test cases) upon resuming execution from the current PC.
+Here are some of the unreached bins:
+------
+UNREACHED BINS
+- add_seen: the CPU hasn't performed the operation add.
+- add_zero_dst: the CPU hasn't executed an instruction that performs the operation add with register zero as the destination register.
+- sra_zero_dst: the CPU hasn't executed an instruction that performs the operation sra with register zero as the destination register.
+- srl_zero_src: the CPU hasn't executed an instruction that performs the operation srl with register zero as one of the source registers.
+- sra_zero_src: the CPU hasn't executed an instruction that performs the operation sra with register zero as one of the source registers.
+- sra->slt_raw_hazard: the CPU hasn't perform a sra operation followed by a slt operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+- xor->sltu_raw_hazard: the CPU hasn't perform a xor operation followed by a sltu operation with RaW hazard, in which the second operation has a source register that is the same as the destination register of the first operation.
+------
+Please generate a list, which can be empty if necessary, of address-instruction pairs in 32-bit hexadecimal format to further update the CPU's memory, ensuring it covers the specified unreached bins (i.e. test cases) upon resuming execution from the current PC. Make sure the addresses are in the range of 0x00100080 to 0x00100480, and the instructions are valid R-type, S-type, or J-type instructions. We encourage you to make updates near the current PC (0x100000), and update addresses into diverse variety of operations. 
+""",2443,"""[(0x00100180, 0x00c00013), (0x00100184, 0x00000000), (0x00100188, 0x00000000), (0x0010018c, 0x00000000), (0x00100190, 0x00000000), (0x00100194, 0x00000000), (0x00100198, 0x00000000), (0x0010019c, 0x00000000), (0x001001a0, 0x00000000), (0x001001a4, 0x00000000), (0x001001a8, 0x00000000), (0x001001ac, 0x00000000), (0x001001b0, 0x00000000), (0x001001b4, 0x00000000), (0x001001b8, 0x00000000), (0x001001bc, 0x00000000), (0x001001c0, 0x00000000), (0x001001c4, 0x00000000), (0x001001c8, 0x00000000), (0x001001cc, 0x00000000), (0x001001d0, 0x00000000), (0x001001d4, 0x00000000), (0x001001d8, 0x00000000), (0x001001dc, 0x00000000), (0x001001e0, 0x00000000), (0x001001e4, 0x00000000), (0x001001e8, 0x00000000), (0x001001ec, 0x00000000), (0x001001f0, 0x00000000), (0x001001f4, 0x00000000), (0x001001f8, 0x00000000), (0x001001fc, 0x00000000), (0x00100200, 0x00000000), (0x00100204, 0x00000000), (0x00100208, 0x00000000), (0x0010020c, 0x00000000), (0x00100210, 0x00000000), (0x00100214, 0x00000000), (0x00100218, 0x00000000), (0x0010021c, 0x00000000), (0x00100220, 0x00000000), (0x00100224, 0x00000000), (0x00100228, 0x00000000), (0x0010022c, 0x00000000), (0x00100230, 0x00000000), (0x00100234, 0x00000000), (0x00100238, 0x00000000), (0x0010023c, 0x00000000), (0x00100240, 0x00000000), (0x00100244, 0x00000000), (0x00100248, 0x00000000), (0x0010024c, 0x00000000), (0x00100250, 0x00000000), (0x00100254, 0x00000000), (0x00100258, 0x00000000), (0x0010025c, 0x00000000), (0x00100260, 0x00000000), (0x00100264, 0x00000000), (0x00100268, 0x00000000), (0x0010026c, 0x00000000), (0x00100270, 0x00000000), (0x00100274, 0x00000000), (0x00100278, 0x00000000), (0x0010027c, 0x00000000), (0x00100280, 0x00000000), (0x00100284, 0x00000000), (0x00100288, 0x00000000), (0x0010028c, 0x00000000), (0x00100290, 0x00000000), (0x001""",1000,model converged,0,{}
