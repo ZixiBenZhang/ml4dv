@@ -54,6 +54,30 @@ To specify experiment and strategies for stimulus generation on the client side,
 
 For detailed information, see `README` files of each module.
 
+## Stimulus generation agents
+
+---
+
+The stimulus generation agent that utilises LLM is defined in `./agents/agent_LLM.py`. It consists of five components:
+- Prompt generator: for generating system messages, initial queries, and iterative queries according to different templates and DUTs.
+  - Defined in `./prompt_generators`.
+  - They specify the "_Missed-bin sampling_" methods.
+- Stimulus generator: the LLM, which takes in a prompt together with previous conversation and responds with a text.
+  - Defined in `./models`. OpenAI's models and Llama 2 are provided.
+  - They specify the "_Best-iterative-message sampling_" methods and the "_Best-iterative-message resetting_" plans.
+- Extractor: for extracting numbers from the text response.
+  - Defined in `./stimuli_extractor.py`
+- Filter: for filtering out invalid numbers
+  - Defined in `./stimuli_filter.py`
+- Loggers: for logging prompts, responses, and coverage over experiment trials.
+  - Defined in `./loggers`. CSV and TXT loggers are provided.
+
+The "_Dialogue restarting_" plans are specified in `agent_LLM.py`.
+
+Please refer to `generate_stimulus.py` files for how to create and use the stimulus generation agent.
+
+
+
 ## Repository structure
 
 ---
@@ -64,7 +88,7 @@ Detailed structure:
 │  csv_helper.py                       # Utils for processing csv experiment logs
 │  flake.loc
 │  flake.nix
-│  global_shared_types.py              # Wrappers of CoverageDatabase and DUTState
+│  global_shared_types.py              # Wrappers of CoverageDatabase and DUTState of the three modules
 │  main.py                             # Testing script
 │  python-requirements.txt
 │  README.md
