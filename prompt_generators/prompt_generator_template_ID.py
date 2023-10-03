@@ -187,7 +187,7 @@ class TemplatePromptGenerator4ID1(TemplatePromptGenerator):
         return iter_question
 
 
-# Init as FixedPrompt, Iter as TemplatePrompt
+# Succinct task introduction: Init as FixedPrompt, Iter as TemplatePrompt
 class TemplatePromptGenerator4ID2(TemplatePromptGenerator4ID1):
     def __init__(
         self,
@@ -221,7 +221,7 @@ class TemplatePromptGenerator4ID2(TemplatePromptGenerator4ID1):
         return prompt
 
 
-# ask for long response when warmed up
+# Ask for long response when warmed up
 class TemplatePromptGenerator4ID3(TemplatePromptGenerator4ID2):
     def __init__(
         self,

@@ -156,11 +156,12 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
         self.prev_coverage = cur_coverage
         return iterative_prompt
 
+    '''Missed-bin sampling methods'''
     @staticmethod
     def _sample_missed_bins_ORIGINAL(
         missed_bins: List[str], coverage_rate: Tuple[int, int]
     ) -> List[str]:
-        # ORIGINAL
+        # ORIGINAL (degraded)
         if len(missed_bins) >= 40:
             missed_bins = np.concatenate(
                 [
@@ -183,7 +184,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
     def _sample_missed_bins_NEWEST(
         missed_bins: List[str], coverage_rate: Tuple[int, int]
     ) -> List[str]:
-        # NEWEST
+        # NEWEST: Coverpoint Type-based Sampling for prefetcher bins
         if len(missed_bins) >= 40:
             if coverage_rate[0] / coverage_rate[1] <= 1 / 20:  # easier bins
                 missed_bins = np.concatenate(
@@ -212,7 +213,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
     def _sample_missed_bins_RANDOM(
         missed_bins: List[str], coverage_rate: Tuple[int, int]
     ) -> List[str]:
-        # RANDOM
+        # RANDOM: Pure Random Sampling
         if len(missed_bins) >= 40:
             missed_bins = np.random.choice(missed_bins, 7, replace=False)
         elif len(missed_bins) >= 5:
@@ -225,7 +226,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
     def _sample_missed_bins_IDNEWEST(
         missed_bins: List[str], coverage_rate: Tuple[int, int]
     ) -> List[str]:
-        # ID NEWEST
+        # ID NEWEST: Coverpoint Type-based Sampling for Ibex decoder bins
         if len(missed_bins) >= 40:
             if coverage_rate[0] / coverage_rate[1] <= 1 / 20:  # easier bins
                 missed_bins = np.concatenate(
@@ -308,6 +309,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
     def _sample_missed_bins_IDAdaNew(
         self, missed_bins: List[str], coverage_rate: Tuple[int, int]
     ) -> List[str]:
+        # ID Adaptive Newest: Mixed Pure Random & Coverpoint Type-based Sampling for Ibex decoder bins
         if coverage_rate[0] < 300:
             return self._sample_missed_bins_IDNEWEST(missed_bins, coverage_rate)
         else:
@@ -317,7 +319,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
     def _sample_missed_bins_ICNEWEST(
         missed_bins: List[str], coverage_rate: Tuple[int, int]
     ) -> List[str]:
-        # IC NEWEST
+        # IC NEWEST: Coverpoint Type-based Sampling for Ibex CPU bins
         if len(missed_bins) >= 40:
             if coverage_rate[0] / coverage_rate[1] <= 1 / 4:  # easier bins
                 missed_bins = np.concatenate(

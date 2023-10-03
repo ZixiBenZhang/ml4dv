@@ -338,7 +338,7 @@ class TemplatePromptGenerator4SD2(TemplatePromptGenerator):
         return iter_question
 
 
-# Analogy template prompting
+# Analogy template prompting, see ./examples_SD_analogue/bins_description.txt
 class TemplatePromptGenerator4SDAnalog(TemplatePromptGenerator):
     def __init__(
         self,

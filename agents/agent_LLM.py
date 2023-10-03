@@ -17,15 +17,15 @@ from stimuli_filter import *
 
 class LLMAgent(BaseAgent):
     def __init__(
-        self,
-        prompt_generator: BasePromptGenerator,
-        stimulus_generator: BaseLLM,
-        stimulus_extractor: BaseExtractor,
-        stimulus_filter: BaseFilter,
-        loggers: List[BaseLogger],
-        dialog_bound: int = 650,
-        rst_plan: Callable[..., bool] = None,
-        token_budget: Union[Budget, None] = None,
+            self,
+            prompt_generator: BasePromptGenerator,
+            stimulus_generator: BaseLLM,
+            stimulus_extractor: BaseExtractor,
+            stimulus_filter: BaseFilter,
+            loggers: List[BaseLogger],
+            dialog_bound: int = 650,
+            rst_plan: Callable[..., bool] = None,
+            token_budget: Union[Budget, None] = None,
     ):
         super().__init__()
         self.prompt_generator = prompt_generator
@@ -66,7 +66,7 @@ class LLMAgent(BaseAgent):
         self.extractor.reset()
 
     def end_simulation(
-        self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase
+            self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase
     ):
         if coverage_database.get() is None:
             return False
@@ -97,9 +97,9 @@ class LLMAgent(BaseAgent):
             return True
 
         if (
-            self.token_budget is not None
-            and self.token_budget.no_budget()
-            and len(self.stimuli_buffer) == 0
+                self.token_budget is not None
+                and self.token_budget.no_budget()
+                and len(self.stimuli_buffer) == 0
         ):
             self.state = "DONE"
             self.log_append({"role": "coverage", "content": coverage})
@@ -111,10 +111,10 @@ class LLMAgent(BaseAgent):
 
     def _check_converge(self) -> bool:
         return (
-            len(self.all_history_cov_rate) >= 25
-            and self.all_history_cov_rate[-1] == self.all_history_cov_rate[-25]
-            or len(self.all_history_cov_rate) >= 40
-            and self.all_history_cov_rate[-1] - self.all_history_cov_rate[-40] <= 2
+                len(self.all_history_cov_rate) >= 25
+                and self.all_history_cov_rate[-1] == self.all_history_cov_rate[-25]
+                or len(self.all_history_cov_rate) >= 40
+                and self.all_history_cov_rate[-1] - self.all_history_cov_rate[-40] <= 2
         )
 
     def _get_next_value_from_buffer(self):
@@ -124,7 +124,7 @@ class LLMAgent(BaseAgent):
         return stimulus
 
     def generate_next_value(
-        self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase, is_ic=False,
+            self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase, is_ic=False,
     ) -> Union[int, List[Tuple[int, int]], None]:
 
         if coverage_database.get() is None:
@@ -167,10 +167,10 @@ class LLMAgent(BaseAgent):
         f_ = 0  # i.e. gibberish response
         while len(self.stimuli_buffer) == 0:
             if (
-                self.total_msg_cnt >= self.dialog_bound
-                or self._check_converge()
-                or self.token_budget is not None
-                and self.token_budget.no_budget()
+                    self.total_msg_cnt >= self.dialog_bound
+                    or self._check_converge()
+                    or self.token_budget is not None
+                    and self.token_budget.no_budget()
             ):
                 # return 0 (same as None), so entering end_simulation and stops in next loop
                 return 0 if not is_ic else []
@@ -388,8 +388,8 @@ class LLMAgent(BaseAgent):
                     logger.log[-1]["ASSISTANT"] = '"' + entry["content"] + '"'
                     logger.log[-1]["Output Token Cnt"] = entry["token cnt"]
                     logger.log[-1]["Total Token Cnt"] = (
-                        logger.log[-1]["Input Token Cnt"]
-                        + logger.log[-1]["Output Token Cnt"]
+                            logger.log[-1]["Input Token Cnt"]
+                            + logger.log[-1]["Output Token Cnt"]
                     )
                 elif entry["role"] == "coverage":
                     coverage_plan = {
@@ -407,25 +407,32 @@ class LLMAgent(BaseAgent):
             logger.save_log()
 
 
+'''Dialogue restarting plans'''
+
+
 def rst_plan_ORDINARY(cov_hist: List[int], all_cov_hist: List[int]) -> bool:
+    # Normal Tolerance
     epsilon = 3
     period = 7
     return len(cov_hist) >= period and cov_hist[-1] - cov_hist[-period] < epsilon
 
 
 def rst_plan_FAST(cov_hist: List[int], all_cov_hist: List[int]) -> bool:
+    # Low Tolerance
     epsilon = 3
     period = 4
     return len(cov_hist) >= period and cov_hist[-1] - cov_hist[-period] < epsilon
 
 
 def rst_plan_SLOW(cov_hist: List[int], all_cov_hist: List[int]) -> bool:
+    # High Tolerance, for IDADAS and IDAdaNew missed-bin sampling
     epsilon = 3
     period = 10
     return len(cov_hist) >= period and cov_hist[-1] - cov_hist[-period] < epsilon
 
 
 def rst_plan_IDADAR(cov_hist: List[int], all_cov_hist: List[int]) -> bool:
+    # Coverage Rate-based Tolerance for Ibex decoder bins
     epsilon = 3
     if all_cov_hist[-1] < 300:
         period = 4
@@ -435,6 +442,7 @@ def rst_plan_IDADAR(cov_hist: List[int], all_cov_hist: List[int]) -> bool:
 
 
 def rst_plan_IDAvoidConverge(cov_hist: List[int], all_cov_hist: List[int]) -> bool:
+    # If no new hits (nearly exhausted), FAST restart
     epsilon = 3
     t = 14
     if len(all_cov_hist) < t:
@@ -447,6 +455,7 @@ def rst_plan_IDAvoidConverge(cov_hist: List[int], all_cov_hist: List[int]) -> bo
 
 
 def rst_plan_IDAdaAvoidConverge(cov_hist: List[int], all_cov_hist: List[int]) -> bool:
+    # FAST restart when low coverage rate & when no new hits
     epsilon = 3
     t = 15
     if len(all_cov_hist) < t:
