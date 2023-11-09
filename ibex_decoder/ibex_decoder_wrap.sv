@@ -1,3 +1,7 @@
+// Copyright lowRISC contributors.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+
 module ibex_decoder_wrap(input [31:0] insn_i);
   ibex_decoder#(
     .BranchTargetALU(1)

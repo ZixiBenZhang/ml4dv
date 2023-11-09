@@ -1,5 +1,5 @@
-# Copyright Zixi Zhang
 # Copyright lowRISC contributors.
+# Copyright Zixi Zhang
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -90,7 +90,7 @@ class MemAgent:
                 self.rvalid.value = 1
 
                 if self.handle_writes and write_data:
-                    self.rdata.value = 0xDEADBAAD
+                    self.rdata.value = 0xdeadbaad
                     self.mem_dict[int(access_addr)] = int(write_data)
                 else:
                     self.rdata.value = self.mem_dict.get(
@@ -130,7 +130,6 @@ class SimulationController:
                 if not isinstance(stimulus_obj, Stimulus):
                     assert False, "Saw bad stimulus message"
 
-                # TODO: debugging insn_mem_updates is int
                 for addr, data in stimulus_obj.insn_mem_updates:
                     self.imem_agent.write_mem(addr, data)
 

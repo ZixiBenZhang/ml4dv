@@ -1,3 +1,7 @@
+// Copyright lowRISC contributors.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+
 module stride_detector #(parameter MAX_STRIDE_WIDTH=5) (
   input clk_i,
   input rst_ni,

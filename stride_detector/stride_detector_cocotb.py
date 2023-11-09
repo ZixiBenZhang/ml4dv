@@ -1,5 +1,5 @@
-# Copyright Zixi Zhang
 # Copyright lowRISC contributors.
+# Copyright Zixi Zhang
 # Licensed under the Apache License, Version 2.0, see LICENSE for details.
 # SPDX-License-Identifier: Apache-2.0
 
@@ -220,7 +220,7 @@ class SimulationController:
 
                 if stimulus_obj.value is None:
                     self.dut.valid_i.value = 0
-                    self.dut.value_i.value = 0xBAADDEAD
+                    self.dut.value_i.value = 0xbaaddead
                 else:
                     self.dut.valid_i.value = 1
                     self.dut.value_i.value = stimulus_obj.value

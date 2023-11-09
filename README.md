@@ -11,13 +11,16 @@ This project provides a framework for incorporating LLMs in test stimuli generat
 generating inputs for testing a device). The goal is to generate stimuli to cover most of the test bins 
 (i.e. test cases) from a predefined coverage plan with the LLM using as few tokens as possible.
 
-This project contains three design-under-tests (DUTs):
-1. __Stride detector__: a device that detects single- and double-stride patterns. 
-This kind of design is the core of data prefetchers for CPUs. 
-2. __*Ibex* instruction decoder__: a RISC-V instruction decoder.
-3. __*Ibex* CPU__: a RISC-V CPU, with instruction and data memory.
+This repository contains a number of designs along with cocotb testbenches to enable research into
+exploring ML techniques for DV. The three designs are:
 
-This project provides hardware descriptions and various design verification methods for each of the DUTs.
+- stride_detector - A mock design of the core of a prefetcher
+- ibex_decoder - A standalone instantiaton of the decoder from the Ibex RISC-V
+  core
+- ibex_cpu - The full Ibex RISC-V core
+
+This paper https://arxiv.org/abs/2310.04535 has used the designs from this
+repository.
 
 ## Getting started
 
@@ -193,8 +196,3 @@ Detailed structure:
     │
     └─logs
 ```
-
-## Reference
-
----
-<!--***-->
