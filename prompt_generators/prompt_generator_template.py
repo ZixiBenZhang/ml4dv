@@ -1,3 +1,7 @@
+# Copyright Zixi Zhang
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
 import numpy as np
 from prompt_generators.prompt_generator_base import *
 from abc import ABC
