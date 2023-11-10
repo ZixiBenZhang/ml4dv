@@ -21,36 +21,46 @@ class Cov(Enum):
     Cross Instruction Coverpoints:
       raw_hazard: Reads from  a register the previous instruction wrote to.
     """
-    SEEN = 'seen'
-    ZERO_DST = 'zero_dst'
-    ZERO_SRC = 'zero_src'
-    SAME_SRC = 'same_src'
-    BR_BACKWARDS = 'br_backwards'
-    BR_FORWARDS = 'br_forwards'
-    RAW_HAZARD = 'raw_hazard'
+
+    SEEN = "seen"
+    ZERO_DST = "zero_dst"
+    ZERO_SRC = "zero_src"
+    SAME_SRC = "same_src"
+    BR_BACKWARDS = "br_backwards"
+    BR_FORWARDS = "br_forwards"
+    RAW_HAZARD = "raw_hazard"
 
 
 class Instr(Enum):
-    ADD = 'add'
-    SUB = 'sub'
-    SLL = 'sll'
-    SLT = 'slt'
-    SLTU = 'sltu'
-    XOR = 'xor'
-    SRL = 'srl'
-    SRA = 'sra'
-    OR = 'or'
-    AND = 'and'
-    SB = 'sb'
-    SH = 'sh'
-    SW = 'sw'
-    JAL = 'jal'
+    ADD = "add"
+    SUB = "sub"
+    SLL = "sll"
+    SLT = "slt"
+    SLTU = "sltu"
+    XOR = "xor"
+    SRL = "srl"
+    SRA = "sra"
+    OR = "or"
+    AND = "and"
+    SB = "sb"
+    SH = "sh"
+    SW = "sw"
+    JAL = "jal"
 
-    def type(self) -> type['TypedInstruction']:
+    def type(self) -> type["TypedInstruction"]:
         match self:
-            case (Instr.ADD | Instr.SUB | Instr.SLL | Instr.SLT
-                  | Instr.SLTU | Instr.XOR | Instr.SRL | Instr.SRA
-                  | Instr.OR | Instr.AND):
+            case (
+                Instr.ADD
+                | Instr.SUB
+                | Instr.SLL
+                | Instr.SLT
+                | Instr.SLTU
+                | Instr.XOR
+                | Instr.SRL
+                | Instr.SRA
+                | Instr.OR
+                | Instr.AND
+            ):
                 return RInstruction
             case Instr.SB | Instr.SH | Instr.SW:
                 return SInstruction
@@ -62,8 +72,8 @@ class Instr(Enum):
 class Encoding:
     encoding: int
 
-    def typed(self) -> 'TypedInstruction | None':
-        match self.encoding & 0x7f:
+    def typed(self) -> "TypedInstruction | None":
+        match self.encoding & 0x7F:
             case 0b0110011:
                 return RInstruction(self.encoding)
             case 0b1101111:
@@ -92,7 +102,7 @@ class RInstruction(Encoding):
     rs2 = get_rs2
 
     def instruction(self) -> Instr:
-        match self.encoding & 0xfe007000:
+        match self.encoding & 0xFE007000:
             case 0x00000000:
                 return Instr.ADD
             case 0x40000000:
@@ -114,7 +124,7 @@ class RInstruction(Encoding):
             case 0x00007000:
                 return Instr.AND
             case _:
-                raise AssertionError('Invalid Instruction')
+                raise AssertionError("Invalid Instruction")
 
     @staticmethod
     def coverpoints() -> list[Cov]:
@@ -138,7 +148,9 @@ class RInstruction(Encoding):
             if instr.type() in {RInstruction, JInstruction}
         ]
 
-    def sample_cross_coverage(self, previous: 'TypedInstruction') -> list[tuple[Instr, Cov]]:
+    def sample_cross_coverage(
+        self, previous: "TypedInstruction"
+    ) -> list[tuple[Instr, Cov]]:
         out = []
         if isinstance(previous, RInstruction) or isinstance(previous, JInstruction):
             if previous.rd() in {self.rs1(), self.rs2()}:
@@ -159,14 +171,9 @@ class JInstruction(Encoding):
         imm11_11 = (e >> 20) & 0b1
         imm19_12 = (e >> 12) & 0xFF
         imm20_20 = (e >> 31) & 0b1
-        imm = (
-            (imm10_01 << 1)
-            | (imm11_11 << 11)
-            | (imm19_12 << 12)
-            | (imm20_20 << 20)
-        )
+        imm = (imm10_01 << 1) | (imm11_11 << 11) | (imm19_12 << 12) | (imm20_20 << 20)
         if imm20_20:
-            imm -= (1 << 21)
+            imm -= 1 << 21
         return imm
 
     @staticmethod
@@ -187,7 +194,9 @@ class JInstruction(Encoding):
     def cross_coverpoints() -> list[tuple[Instr, Cov]]:
         return []
 
-    def sample_cross_coverage(self, previous: 'TypedInstruction') -> list[tuple[Instr, Cov]]:
+    def sample_cross_coverage(
+        self, previous: "TypedInstruction"
+    ) -> list[tuple[Instr, Cov]]:
         return []
 
 
@@ -204,7 +213,7 @@ class SInstruction(Encoding):
             case 0x00002000:
                 return Instr.SW
             case _:
-                raise AssertionError('Invalid Instruction')
+                raise AssertionError("Invalid Instruction")
 
     def offset(self) -> int:
         """Inefficient and verbose extraction of offset."""
@@ -213,7 +222,7 @@ class SInstruction(Encoding):
         imm11_05 = (e >> 25) & 0x7F
         imm = imm04_00 | (imm11_05 << 5)
         if imm >> 11:
-            imm -= (1 << 12)
+            imm -= 1 << 12
         return imm
 
     @staticmethod
@@ -237,7 +246,9 @@ class SInstruction(Encoding):
         ]
         return []
 
-    def sample_cross_coverage(self, previous: 'TypedInstruction') -> list[tuple[Instr, Cov]]:
+    def sample_cross_coverage(
+        self, previous: "TypedInstruction"
+    ) -> list[tuple[Instr, Cov]]:
         out = []
         if isinstance(previous, RInstruction) or isinstance(previous, JInstruction):
             if previous.rd() in {self.rs1(), self.rs2()}:
@@ -251,9 +262,9 @@ TypedInstruction = RInstruction | JInstruction | SInstruction
 class TestInstructions(unittest.TestCase):
     def test_r_type(self) -> None:
         instr = [
-            (0x00000033, 'add', 0, 0, 0),
-            (0x01ee12b3, 'sll', 5, 28, 30),
-            (0x40678633, 'sub', 12, 15, 6),
+            (0x00000033, "add", 0, 0, 0),
+            (0x01EE12B3, "sll", 5, 28, 30),
+            (0x40678633, "sub", 12, 15, 6),
         ]
         for (enc, name, rd, rs1, rs2) in instr:
             i = Encoding(enc).typed()
@@ -266,8 +277,8 @@ class TestInstructions(unittest.TestCase):
 
     def test_j_type(self) -> None:
         instr = [
-            (0xc1cfa2ef, 'jal', 5, -23524),
-            (0x1d2010ef, 'jal', 1, 4562),
+            (0xC1CFA2EF, "jal", 5, -23524),
+            (0x1D2010EF, "jal", 1, 4562),
         ]
         for (enc, name, rd, offset) in instr:
             i = Encoding(enc).typed()
@@ -279,9 +290,9 @@ class TestInstructions(unittest.TestCase):
 
     def test_s_type(self) -> None:
         instr = [
-            (0xfc532f23, 'sw', 6, 5, -34),
-            (0x3aae1223, 'sh', 28, 10, 932),
-            (0xc4388e23, 'sb', 17, 3, -932),
+            (0xFC532F23, "sw", 6, 5, -34),
+            (0x3AAE1223, "sh", 28, 10, 932),
+            (0xC4388E23, "sb", 17, 3, -932),
         ]
         for (enc, name, rs1, rs2, offset) in instr:
             i = Encoding(enc).typed()
@@ -293,5 +304,5 @@ class TestInstructions(unittest.TestCase):
             self.assertEqual(offset, i.offset())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

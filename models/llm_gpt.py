@@ -22,8 +22,12 @@ class ChatGPT(BaseLLM):
         max_gen_tokens=600,
         best_iter_buffer_resetting: str = "STABLE",
         compress_msg_algo: str = "best 3",
-        prioritise_harder_bins: bool = True,
+        prioritise_harder_bins: bool = False,  # not needed if compress_msg_algo as "Successful Difficult Responses"
     ):
+        prioritise_harder_bins = (
+            prioritise_harder_bins
+            or compress_msg_algo == "Successful Difficult Responses"
+        )
         super().__init__(
             system_prompt, best_iter_buffer_resetting, prioritise_harder_bins
         )
@@ -53,15 +57,32 @@ class ChatGPT(BaseLLM):
         ] = self.__resolve_msg_compress_algo(compress_msg_algo)
 
     def __resolve_msg_compress_algo(self, compress_msg_algo) -> Callable:
-        if compress_msg_algo == "best 3":
+        if compress_msg_algo in [
+            "best 3",
+            "Successful Responses",
+            "Successful Difficult Responses",
+        ]:
             return self.__best_3
-        elif compress_msg_algo == "best 2 recent 1":
+        elif compress_msg_algo in [
+            "best 2 recent 1",
+            "Mixed Recent and Successful Responses",
+        ]:
             return self.__best_2_recent_1
-        elif compress_msg_algo == "recent 3":
+        elif compress_msg_algo in ["recent 3", "Recent Responses"]:
             return self.__recent_3
         else:
-            raise TypeError(
-                f"Invalid conversation compression algorithm {compress_msg_algo}."
+            methods = [
+                "recent 3",
+                "best 3",
+                "best 2 recent 1",
+                "Recent Responses",
+                "Mixed Recent and Successful Responses",
+                "Successful Responses",
+                "Successful Difficult Responses",
+            ]
+            raise ValueError(
+                f"Invalid conversation compression algorithm {compress_msg_algo}. \\"
+                f"Please use one of the following methods: {methods}"
             )
 
     def __str__(self):

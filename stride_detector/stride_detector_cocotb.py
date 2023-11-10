@@ -220,7 +220,7 @@ class SimulationController:
 
                 if stimulus_obj.value is None:
                     self.dut.valid_i.value = 0
-                    self.dut.value_i.value = 0xbaaddead
+                    self.dut.value_i.value = 0xBAADDEAD
                 else:
                     self.dut.valid_i.value = 1
                     self.dut.value_i.value = stimulus_obj.value

@@ -90,7 +90,7 @@ class MemAgent:
                 self.rvalid.value = 1
 
                 if self.handle_writes and write_data:
-                    self.rdata.value = 0xdeadbaad
+                    self.rdata.value = 0xDEADBAAD
                     self.mem_dict[int(access_addr)] = int(write_data)
                 else:
                     self.rdata.value = self.mem_dict.get(
@@ -178,7 +178,9 @@ async def basic_test(dut):
 
         await ClockCycles(dut.clk_i, 1)
 
-        sim_ctrl = SimulationController(dut, ins_mon, imem_agent, f"tcp://*:{server_port}")
+        sim_ctrl = SimulationController(
+            dut, ins_mon, imem_agent, f"tcp://*:{server_port}"
+        )
         with closing(sim_ctrl) as simulation_controller:
             cocotb.start_soon(simulation_controller.controller_loop())
 

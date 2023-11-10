@@ -28,11 +28,13 @@ class ICFilter(BaseFilter):
         self.upper_bound = upper_bound
 
     def __call__(self, updates: List[Tuple[int, int]]) -> List[List[Tuple[int, int]]]:
-        return [list(
-            filter(
-                lambda p: self.lower_bound <= p[0] <= self.upper_bound
-                and self.lower_bound <= p[1] <= self.upper_bound
-                and Encoding(p[1]).typed() is not None,
-                updates,
+        return [
+            list(
+                filter(
+                    lambda p: self.lower_bound <= p[0] <= self.upper_bound
+                    and self.lower_bound <= p[1] <= self.upper_bound
+                    and Encoding(p[1]).typed() is not None,
+                    updates,
+                )
             )
-        )]
+        ]
