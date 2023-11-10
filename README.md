@@ -5,7 +5,6 @@ SPDX-License-Identifier: Apache-2.0
 -->
 # LLM for Design Verification
 
----
 ___LLM4DV___ is a benchmarking framework utilising large language models in hardware design verification. 
 This project provides a framework for incorporating LLMs in test stimuli generation (i.e. 
 generating inputs for testing a device). The goal is to generate stimuli to cover most of the test bins 
@@ -24,7 +23,6 @@ repository.
 
 ## Getting started
 
----
 The simulation runs as a client-server model. The client side generates stimuli to the server. The server 
 side receives stimuli, computes coverage, and returns the DUT state and coverage back to the client.
 
@@ -64,7 +62,6 @@ For detailed information, see `README` files of each module.
 
 ## Stimulus generation agents
 
----
 
 The stimulus generation agent that utilises LLM is defined in `./agents/agent_LLM.py`. It consists of five components:
 - Prompt generator: for generating system messages, initial queries, and iterative queries according to different templates and DUTs.
@@ -88,7 +85,6 @@ Please refer to `generate_stimulus.py` files for how to create and use the stimu
 
 ## Repository structure
 
----
 
 Detailed structure:
 ```
