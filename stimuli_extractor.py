@@ -1,3 +1,7 @@
+# Copyright Zixi Zhang
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
 import re
 from abc import abstractmethod
 from typing import List, Tuple
@@ -36,13 +40,18 @@ class ICExtractor(BaseExtractor):
 
     def __call__(self, text: str) -> List[Tuple[int, int]]:
         pairs: List[str] = list(
-            re.findall(r"\(\"?'?0x[\da-fA-F]+'?\"?, ?\"?'?0x[\da-fA-F]+'?\"?\)", text, re.I)
+            re.findall(
+                r"\(\"?'?0x[\da-fA-F]+'?\"?, ?\"?'?0x[\da-fA-F]+'?\"?\)", text, re.I
+            )
         )
         updates = list(
             map(
-                lambda t: tuple(map(
-                    lambda x: int(x, 16), t[1:-1].replace("'", "").replace('"', '').split(",")
-                ))[:2],
+                lambda t: tuple(
+                    map(
+                        lambda x: int(x, 16),
+                        t[1:-1].replace("'", "").replace('"', "").split(","),
+                    )
+                )[:2],
                 pairs,
             )
         )

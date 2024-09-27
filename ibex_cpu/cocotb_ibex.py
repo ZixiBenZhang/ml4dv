@@ -1,3 +1,8 @@
+# Copyright lowRISC contributors.
+# Copyright Zixi Zhang
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
 import struct
 import zmq
 import os
@@ -125,7 +130,6 @@ class SimulationController:
                 if not isinstance(stimulus_obj, Stimulus):
                     assert False, "Saw bad stimulus message"
 
-                # TODO: debugging insn_mem_updates is int
                 for addr, data in stimulus_obj.insn_mem_updates:
                     self.imem_agent.write_mem(addr, data)
 
@@ -174,7 +178,9 @@ async def basic_test(dut):
 
         await ClockCycles(dut.clk_i, 1)
 
-        sim_ctrl = SimulationController(dut, ins_mon, imem_agent, f"tcp://*:{server_port}")
+        sim_ctrl = SimulationController(
+            dut, ins_mon, imem_agent, f"tcp://*:{server_port}"
+        )
         with closing(sim_ctrl) as simulation_controller:
             cocotb.start_soon(simulation_controller.controller_loop())
 

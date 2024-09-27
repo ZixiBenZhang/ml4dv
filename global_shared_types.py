@@ -1,3 +1,7 @@
+# Copyright Zixi Zhang
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
 import re
 from typing import *
 
@@ -224,7 +228,11 @@ class GlobalDUTState:
     def get_last_instr(self):
         if isinstance(self._dut_state, ICDS):
             if self._dut_state.last_insn is None:
-                return None if self.prev_valid_instr is None else hex(self.prev_valid_instr)
+                return (
+                    None
+                    if self.prev_valid_instr is None
+                    else hex(self.prev_valid_instr)
+                )
             self.prev_valid_instr = self._dut_state.last_insn
             return hex(self._dut_state.last_insn)
         else:

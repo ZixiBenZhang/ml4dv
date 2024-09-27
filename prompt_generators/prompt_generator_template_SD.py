@@ -1,3 +1,7 @@
+# Copyright Zixi Zhang
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
 from prompt_generators.prompt_generator_template import *
 
 BOUND = 523
@@ -338,7 +342,7 @@ class TemplatePromptGenerator4SD2(TemplatePromptGenerator):
         return iter_question
 
 
-# Analogy template prompting
+# Analogy template prompting, see ./examples_SD_analogue/bins_description.txt
 class TemplatePromptGenerator4SDAnalog(TemplatePromptGenerator):
     def __init__(
         self,

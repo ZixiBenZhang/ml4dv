@@ -1,4 +1,9 @@
 #!/bin/env python3
+# Copyright Zixi Zhang
+# Copyright lowRISC contributors.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
 import csv
 import time
 from datetime import datetime
@@ -126,7 +131,7 @@ def main():
         stimulus_filter,
         [logger_txt, logger_csv],
         dialog_bound=1000,
-        rst_plan=rst_plan_ORDINARY,
+        rst_plan=rst_plan_Normal_Tolerance,
     )
     print("Agent successfully built\n")
 
@@ -217,7 +222,7 @@ def budget_experiment():
             stimulus_filter,
             [logger_txt, logger_csv],
             dialog_bound=1000,
-            rst_plan=rst_plan_ORDINARY,
+            rst_plan=rst_plan_Normal_Tolerance,
             token_budget=BUDGET,
         )
         print("Agent successfully built\n")

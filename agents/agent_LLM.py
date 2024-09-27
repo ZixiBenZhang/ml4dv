@@ -1,3 +1,7 @@
+# Copyright Zixi Zhang
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
 from agents.agent_base import *
 from loggers.logger_base import BaseLogger
 from loggers.logger_csv import CSVLogger
@@ -124,7 +128,10 @@ class LLMAgent(BaseAgent):
         return stimulus
 
     def generate_next_value(
-        self, dut_state: GlobalDUTState, coverage_database: GlobalCoverageDatabase, is_ic=False,
+        self,
+        dut_state: GlobalDUTState,
+        coverage_database: GlobalCoverageDatabase,
+        is_ic=False,
     ) -> Union[int, List[Tuple[int, int]], None]:
 
         if coverage_database.get() is None:
@@ -183,7 +190,9 @@ class LLMAgent(BaseAgent):
                 print(
                     f"Dialog #{self.dialog_index} Message #{self.msg_index} done, \n"
                     f"Total msg cnt: {self.total_msg_cnt} \n"
-                    f"Gibberish response" if f_ == 1 else f"Invalid updates"
+                    f"Gibberish response"
+                    if f_ == 1
+                    else f"Invalid updates"
                 )
 
                 # Update best_message of LLM
@@ -296,7 +305,9 @@ class LLMAgent(BaseAgent):
             return True
         return False
 
-    def _check_update_invalid(self, response: str, stimuli: List[List[Tuple[int, int]]]) -> bool:
+    def _check_update_invalid(
+        self, response: str, stimuli: List[List[Tuple[int, int]]]
+    ) -> bool:
         # print(f"checking invalid update: response {len(response)}, stimuli[0] {len(stimuli[0])}")
         if not isinstance(self.stimulus_filter, ICFilter):
             return False
@@ -407,25 +418,34 @@ class LLMAgent(BaseAgent):
             logger.save_log()
 
 
-def rst_plan_ORDINARY(cov_hist: List[int], all_cov_hist: List[int]) -> bool:
+"""Dialogue restarting plans"""
+
+
+def rst_plan_Normal_Tolerance(cov_hist: List[int], all_cov_hist: List[int]) -> bool:
+    # Normal Tolerance
     epsilon = 3
     period = 7
     return len(cov_hist) >= period and cov_hist[-1] - cov_hist[-period] < epsilon
 
 
-def rst_plan_FAST(cov_hist: List[int], all_cov_hist: List[int]) -> bool:
+def rst_plan_Low_Tolerance(cov_hist: List[int], all_cov_hist: List[int]) -> bool:
+    # Low Tolerance
     epsilon = 3
     period = 4
     return len(cov_hist) >= period and cov_hist[-1] - cov_hist[-period] < epsilon
 
 
-def rst_plan_SLOW(cov_hist: List[int], all_cov_hist: List[int]) -> bool:
+def rst_plan_High_Tolerance(cov_hist: List[int], all_cov_hist: List[int]) -> bool:
+    # High Tolerance, for IDADAS and IDAdaNew missed-bin sampling
     epsilon = 3
     period = 10
     return len(cov_hist) >= period and cov_hist[-1] - cov_hist[-period] < epsilon
 
 
-def rst_plan_IDADAR(cov_hist: List[int], all_cov_hist: List[int]) -> bool:
+def rst_plan_Coverage_RateBased_Tolerance(
+    cov_hist: List[int], all_cov_hist: List[int]
+) -> bool:
+    # Coverage Rate-based Tolerance for Ibex decoder bins
     epsilon = 3
     if all_cov_hist[-1] < 300:
         period = 4
@@ -435,6 +455,7 @@ def rst_plan_IDADAR(cov_hist: List[int], all_cov_hist: List[int]) -> bool:
 
 
 def rst_plan_IDAvoidConverge(cov_hist: List[int], all_cov_hist: List[int]) -> bool:
+    # If no new hits (nearly exhausted), FAST restart
     epsilon = 3
     t = 14
     if len(all_cov_hist) < t:
@@ -447,6 +468,7 @@ def rst_plan_IDAvoidConverge(cov_hist: List[int], all_cov_hist: List[int]) -> bo
 
 
 def rst_plan_IDAdaAvoidConverge(cov_hist: List[int], all_cov_hist: List[int]) -> bool:
+    # FAST restart when low coverage rate & when no new hits
     epsilon = 3
     t = 15
     if len(all_cov_hist) < t:

@@ -1,3 +1,7 @@
+# Copyright Zixi Zhang
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
 from llama import Llama
 
 from models.llm_base import *
@@ -45,15 +49,32 @@ class Llama2(BaseLLM):
         ] = self.__resolve_msg_compress_algo(compress_msg_algo)
 
     def __resolve_msg_compress_algo(self, compress_msg_algo) -> Callable:
-        if compress_msg_algo == "best 3":
+        if compress_msg_algo in [
+            "best 3",
+            "Successful Responses",
+            "Successful Difficult Responses",
+        ]:
             return self.__best_3
-        elif compress_msg_algo == "best 2 recent 1":
+        elif compress_msg_algo in [
+            "best 2 recent 1",
+            "Mixed Recent and Successful Responses",
+        ]:
             return self.__best_2_recent_1
-        elif compress_msg_algo == "recent 3":
+        elif compress_msg_algo in ["recent 3", "Recent Responses"]:
             return self.__recent_3
         else:
-            raise TypeError(
-                f"Invalid conversation compression algorithm {compress_msg_algo}."
+            methods = [
+                "recent 3",
+                "best 3",
+                "best 2 recent 1",
+                "Recent Responses",
+                "Mixed Recent and Successful Responses",
+                "Successful Responses",
+                "Successful Difficult Responses",
+            ]
+            raise ValueError(
+                f"Invalid conversation compression algorithm {compress_msg_algo}. \\"
+                f"Please use one of the following methods: {methods}"
             )
 
     def __str__(self):

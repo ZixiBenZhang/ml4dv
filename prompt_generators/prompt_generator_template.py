@@ -1,3 +1,7 @@
+# Copyright Zixi Zhang
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
 import numpy as np
 from prompt_generators.prompt_generator_base import *
 from abc import ABC
@@ -44,27 +48,47 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
             "IDADANEW",
             "ICNEWEST",
         ]
+        method_mapping = {
+            "Pure Random Sampling": "RANDOM",
+            "Coverpoint Type-based Sampling for prefetcher": "NEWEST",
+            "Coverpoint Type-based Sampling for decoder": "IDNEWEST",
+            "Mixed Coverpoint Type-based and Pure Random Sampling for decoder": "IDADANEW",
+            "Coverpoint Type-based Sampling for cpu": "ICNEWEST",
+        }
+        if sampling_missed_bins_method in method_mapping:
+            sampling_missed_bins_method = method_mapping[sampling_missed_bins_method]
         assert sampling_missed_bins_method.upper() in methods, (
-            f"Invalid sampling method {sampling_missed_bins_method}. "
-            f"Please use one of the following methods: {methods}."
+            f"Invalid sampling method {sampling_missed_bins_method}. \\"
+            f"Please use one of the following methods: {methods}. \\"
+            f"Otherwise please specify one of the following method names: {method_mapping.keys()}. "
         )
         if type(sampling_missed_bins_method) is str:
             if sampling_missed_bins_method.upper() == "ORIGINAL":
-                self.sampling_missed_bins_method = self._sample_missed_bins_ORIGINAL
+                self.sampling_missed_bins_method = (
+                    self._sample_missed_bins_ORIGINAL_degraded
+                )
             elif sampling_missed_bins_method.upper() == "NEWEST":
-                self.sampling_missed_bins_method = self._sample_missed_bins_NEWEST
+                self.sampling_missed_bins_method = (
+                    self._sample_missed_bins_Coverpoint_TypeBased_Sampling_prefetcher
+                )
             elif sampling_missed_bins_method.upper() == "RANDOM":
                 self.sampling_missed_bins_method = self._sample_missed_bins_RANDOM
             elif sampling_missed_bins_method.upper() == "IDNEWEST":
-                self.sampling_missed_bins_method = self._sample_missed_bins_IDNEWEST
+                self.sampling_missed_bins_method = (
+                    self._sample_missed_bins_Coverpoint_TypeBased_Sampling_decoder
+                )
             elif sampling_missed_bins_method.upper() == "IDADAS":
                 self.sampling_missed_bins_method = self._sample_missed_bins_IDADAS
             elif sampling_missed_bins_method.upper() == "IDADANEW":
-                self.sampling_missed_bins_method = self._sample_missed_bins_IDAdaNew
+                self.sampling_missed_bins_method = (
+                    self._sample_missed_bins_Mixed_Coverpoint_TypeBased_Random_Sampling_decoder
+                )
             elif sampling_missed_bins_method.upper() == "ICNEWEST":
-                self.sampling_missed_bins_method = self._sample_missed_bins_ICNEWEST
+                self.sampling_missed_bins_method = (
+                    self._sample_missed_bins_Coverpoint_TypeBased_Sampling_cpu
+                )
             else:
-                raise TypeError(
+                raise ValueError(
                     f"Invalid sampling method {sampling_missed_bins_method}. "
                 )
         else:
@@ -156,11 +180,13 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
         self.prev_coverage = cur_coverage
         return iterative_prompt
 
+    """Missed-bin sampling methods"""
+
     @staticmethod
-    def _sample_missed_bins_ORIGINAL(
+    def _sample_missed_bins_ORIGINAL_degraded(
         missed_bins: List[str], coverage_rate: Tuple[int, int]
     ) -> List[str]:
-        # ORIGINAL
+        # ORIGINAL (degraded)
         if len(missed_bins) >= 40:
             missed_bins = np.concatenate(
                 [
@@ -180,10 +206,10 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
         return missed_bins
 
     @staticmethod
-    def _sample_missed_bins_NEWEST(
+    def _sample_missed_bins_Coverpoint_TypeBased_Sampling_prefetcher(
         missed_bins: List[str], coverage_rate: Tuple[int, int]
     ) -> List[str]:
-        # NEWEST
+        # NEWEST: Coverpoint Type-based Sampling for prefetcher bins
         if len(missed_bins) >= 40:
             if coverage_rate[0] / coverage_rate[1] <= 1 / 20:  # easier bins
                 missed_bins = np.concatenate(
@@ -212,7 +238,7 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
     def _sample_missed_bins_RANDOM(
         missed_bins: List[str], coverage_rate: Tuple[int, int]
     ) -> List[str]:
-        # RANDOM
+        # RANDOM: Pure Random Sampling
         if len(missed_bins) >= 40:
             missed_bins = np.random.choice(missed_bins, 7, replace=False)
         elif len(missed_bins) >= 5:
@@ -222,10 +248,10 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
         return missed_bins
 
     @staticmethod
-    def _sample_missed_bins_IDNEWEST(
+    def _sample_missed_bins_Coverpoint_TypeBased_Sampling_decoder(
         missed_bins: List[str], coverage_rate: Tuple[int, int]
     ) -> List[str]:
-        # ID NEWEST
+        # ID NEWEST: Coverpoint Type-based Sampling for Ibex decoder bins
         if len(missed_bins) >= 40:
             if coverage_rate[0] / coverage_rate[1] <= 1 / 20:  # easier bins
                 missed_bins = np.concatenate(
@@ -305,19 +331,22 @@ class TemplatePromptGenerator(BasePromptGenerator, ABC):
 
         return self.cur_sampling_method(missed_bins)
 
-    def _sample_missed_bins_IDAdaNew(
+    def _sample_missed_bins_Mixed_Coverpoint_TypeBased_Random_Sampling_decoder(
         self, missed_bins: List[str], coverage_rate: Tuple[int, int]
     ) -> List[str]:
+        # ID Adaptive Newest: Mixed Pure Random & Coverpoint Type-based Sampling for Ibex decoder bins
         if coverage_rate[0] < 300:
-            return self._sample_missed_bins_IDNEWEST(missed_bins, coverage_rate)
+            return self._sample_missed_bins_Coverpoint_TypeBased_Sampling_decoder(
+                missed_bins, coverage_rate
+            )
         else:
             return self._sample_missed_bins_IDADAS(missed_bins, coverage_rate)
 
     @staticmethod
-    def _sample_missed_bins_ICNEWEST(
+    def _sample_missed_bins_Coverpoint_TypeBased_Sampling_cpu(
         missed_bins: List[str], coverage_rate: Tuple[int, int]
     ) -> List[str]:
-        # IC NEWEST
+        # IC NEWEST: Coverpoint Type-based Sampling for Ibex CPU bins
         if len(missed_bins) >= 40:
             if coverage_rate[0] / coverage_rate[1] <= 1 / 4:  # easier bins
                 missed_bins = np.concatenate(

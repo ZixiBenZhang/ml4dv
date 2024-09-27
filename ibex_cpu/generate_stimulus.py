@@ -1,4 +1,9 @@
 #!/bin/env python3
+# Copyright Zixi Zhang
+# Copyright lowRISC contributors.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
 import csv
 import os
 import sys
@@ -77,7 +82,9 @@ def random_experiment():
             g_coverage.set(coverage)
 
             if ibex_state.last_pc is not None:
-                print(f"DUT state: {ibex_state.last_pc:08x} {ibex_state.last_insn:08x}\n")
+                print(
+                    f"DUT state: {ibex_state.last_pc:08x} {ibex_state.last_insn:08x}\n"
+                )
 
         stimulus.finish = True
         _, final_coverage = stimulus_sender.send_stimulus(stimulus)
@@ -126,7 +133,7 @@ def main():
         stimulus_filter,
         [logger_txt, logger_csv],
         dialog_bound=700,
-        rst_plan=rst_plan_FAST,
+        rst_plan=rst_plan_Low_Tolerance,
     )
     print("Agent successfully built\n")
 
@@ -150,7 +157,9 @@ def main():
             g_coverage.set(coverage)
 
             if ibex_state.last_pc is not None:
-                print(f"DUT state: {ibex_state.last_pc:08x} {ibex_state.last_insn:08x}\n")
+                print(
+                    f"DUT state: {ibex_state.last_pc:08x} {ibex_state.last_insn:08x}\n"
+                )
 
         stimulus.finish = True
         _, final_coverage = stimulus_sender.send_stimulus(stimulus)
@@ -219,7 +228,7 @@ def budget_experiment():
             stimulus_filter,
             [logger_txt, logger_csv],
             dialog_bound=1000,
-            rst_plan=rst_plan_FAST,
+            rst_plan=rst_plan_Low_Tolerance,
             token_budget=BUDGET,
         )
         print("Agent successfully built\n")
@@ -242,7 +251,9 @@ def budget_experiment():
                 g_coverage.set(coverage)
 
                 if ibex_state.last_pc is not None:
-                    print(f"DUT state: {ibex_state.last_pc:08x} {ibex_state.last_insn:08x}\n")
+                    print(
+                        f"DUT state: {ibex_state.last_pc:08x} {ibex_state.last_insn:08x}\n"
+                    )
 
             stimulus.finish = True
             _, final_coverage = stimulus_sender.send_stimulus(stimulus)
@@ -255,13 +266,18 @@ def budget_experiment():
                     agent.total_msg_cnt,
                     BUDGET.init_budget - BUDGET.budget,
                     g_coverage.get_coverage_rate()[0],
-                    str(dict(
-                        filter(lambda p: p[1] != 0, g_coverage.get_coverage_plan().items())
-                    ))
+                    str(
+                        dict(
+                            filter(
+                                lambda p: p[1] != 0,
+                                g_coverage.get_coverage_plan().items(),
+                            )
+                        )
+                    ),
                 ]
             )
             with open(
-                    f"{prefix}{t}_summary.csv", "a+", encoding="UTF8", newline=""
+                f"{prefix}{t}_summary.csv", "a+", encoding="UTF8", newline=""
             ) as f:
                 writer = csv.writer(f)
                 writer.writerow(data[-1])

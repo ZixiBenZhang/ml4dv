@@ -1,4 +1,9 @@
 #!/bin/env python3
+# Copyright Zixi Zhang
+# Copyright lowRISC contributors.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
 import csv
 from datetime import datetime
 import zmq
@@ -120,7 +125,7 @@ def main_llama2():
         stimulus_filter,
         [logger_txt, logger_csv],
         dialog_bound=1000,
-        rst_plan=rst_plan_ORDINARY,
+        rst_plan=rst_plan_Normal_Tolerance,
     )
     print("Agent successfully built\n")
 
@@ -185,7 +190,7 @@ def main():
         stimulus_filter,
         [logger_txt, logger_csv],
         dialog_bound=300,
-        rst_plan=rst_plan_SLOW,
+        rst_plan=rst_plan_High_Tolerance,
     )
     print("Agent successfully built\n")
 
@@ -281,7 +286,7 @@ def budget_experiment():
             stimulus_filter,
             [logger_txt, logger_csv],
             dialog_bound=1000,
-            rst_plan=rst_plan_IDADAR,
+            rst_plan=rst_plan_Coverage_RateBased_Tolerance,
             token_budget=BUDGET,
         )
         print("Agent successfully built\n")

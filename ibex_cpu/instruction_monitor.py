@@ -1,3 +1,8 @@
+# Copyright lowRISC contributors.
+# Copyright Zixi Zhang
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+
 import os
 import sys
 
@@ -21,8 +26,7 @@ class InstructionMonitor:
 
         for instr in Instr:
             self.coverage_db.instructions[instr] = {
-                cov: 0
-                for cov in instr.type().coverpoints()
+                cov: 0 for cov in instr.type().coverpoints()
             }
             self.coverage_db.cross_coverage[instr] = {
                 (other_instr, cov): 0
@@ -43,15 +47,17 @@ class InstructionMonitor:
             except AssertionError:  # Valid RISC-V instruction, but not in instruction.py
                 # self.last_pc = None
                 # self.insn = None
-                print(f">>>>> Valid RISC-V instruction {hex(insn.encoding)}, but not in instruction.py \n")
+                print(
+                    f">>>>> Valid RISC-V instruction {hex(insn.encoding)}, but not in instruction.py \n"
+                )
                 return
 
             for coverpoint in insn.sample_coverage():
                 self.coverage_db.instructions[mnemonic][coverpoint] += 1
 
             if (
-                self.last_insn is not None and
-                (last_insn := Encoding(self.last_insn).typed()) is not None
+                self.last_insn is not None
+                and (last_insn := Encoding(self.last_insn).typed()) is not None
             ):
                 for insn_cov in insn.sample_cross_coverage(last_insn):
                     self.coverage_db.cross_coverage[mnemonic][insn_cov] += 1
